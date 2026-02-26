@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { wayfinder } from '@laravel/vite-plugin-wayfinder';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
@@ -23,5 +24,10 @@ export default defineConfig({
   ],
   esbuild: {
     jsx: 'automatic',
+  },
+  server: {
+    hmr: {
+      host: process.env.VITE_DEV_SERVER_URL ?? 'localhost',
+    },
   },
 });
