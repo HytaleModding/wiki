@@ -16,260 +16,234 @@ import { send } from '@/routes/verification';
 import type { BreadcrumbItem, SharedData } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Profile settings',
-        href: edit().url,
-    },
+  {
+    title: 'Profile settings',
+    href: edit().url,
+  },
 ];
 
 function UserAvatar({
-    src,
-    name,
-    size = 80,
+  src,
+  name,
+  size = 80,
 }: {
-    src?: string | null;
-    name: string;
-    size?: number;
+  src?: string | null;
+  name: string;
+  size?: number;
 }) {
-    const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&size=${size * 2}&background=random`;
-    const [imgSrc, setImgSrc] = useState(src || fallback);
+  const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&size=${size * 2}&background=random`;
+  const [imgSrc, setImgSrc] = useState(src || fallback);
 
-    useEffect(() => {
-        setImgSrc(src || fallback);
-    }, [src]);
+  useEffect(() => {
+    setImgSrc(src || fallback);
+  }, [src]);
 
-    return (
-        <img
-            src={imgSrc}
-            alt={name}
-            width={size}
-            height={size}
-            onError={() => setImgSrc(fallback)}
-            className="rounded-full object-cover"
-            style={{ width: size, height: size }}
-        />
-    );
+  return (
+    <img
+      src={imgSrc}
+      alt={name}
+      width={size}
+      height={size}
+      onError={() => setImgSrc(fallback)}
+      className="rounded-full object-cover"
+      style={{ width: size, height: size }}
+    />
+  );
 }
 
 export default function Profile({
-    mustVerifyEmail,
-    status,
+  mustVerifyEmail,
+  status,
 }: {
-    mustVerifyEmail: boolean;
-    status?: string;
+  mustVerifyEmail: boolean;
+  status?: string;
 }) {
-    const { auth } = usePage<SharedData>().props;
-    const fileInputRef = useRef<HTMLInputElement>(null);
-    const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const { auth } = usePage<SharedData>().props;
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
-    const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                setAvatarPreview(e.target?.result as string);
-            };
-            reader.readAsDataURL(file);
-        }
-    };
+  const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setAvatarPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
-    const triggerFileInput = () => {
-        fileInputRef.current?.click();
-    };
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
+  };
 
-    const handleDeleteAvatar = () => {
-        if (
-            auth.user.avatar &&
-            !auth.user.avatar.includes('ui-avatars.com')
-        ) {
-            router.delete('/settings/profile/avatar', {
-                preserveScroll: true,
-            });
-        }
-    };
+  const handleDeleteAvatar = () => {
+    if (auth.user.avatar && !auth.user.avatar.includes('ui-avatars.com')) {
+      router.delete('/settings/profile/avatar', {
+        preserveScroll: true,
+      });
+    }
+  };
 
-    return (
-        <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Profile settings" />
+  return (
+    <AppLayout breadcrumbs={breadcrumbs}>
+      <Head title="Profile settings" />
 
-            <h1 className="sr-only">Profile Settings</h1>
+      <h1 className="sr-only">Profile Settings</h1>
 
-            <SettingsLayout>
-                <div className="space-y-6">
-                    <Heading
-                        variant="small"
-                        title="Profile information"
-                        description="Update your name and email address"
+      <SettingsLayout>
+        <div className="space-y-6">
+          <Heading
+            variant="small"
+            title="Profile information"
+            description="Update your name and email address"
+          />
+
+          <Form
+            {...ProfileController.update.form()}
+            options={{
+              preserveScroll: true,
+            }}
+            className="space-y-6"
+          >
+            {({ processing, recentlySuccessful, errors }) => {
+              useEffect(() => {
+                if (recentlySuccessful) {
+                  setAvatarPreview(null);
+                }
+              }, [recentlySuccessful]);
+
+              return (
+                <>
+                  <div className="grid gap-4">
+                    <Label>Profile Picture</Label>
+                    <div className="flex items-center gap-4">
+                      <UserAvatar
+                        src={avatarPreview || auth.user.avatar}
+                        name={auth.user.name}
+                        size={80}
+                      />
+                      <div className="flex flex-col gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={triggerFileInput}
+                          className="flex items-center gap-2"
+                        >
+                          <Camera className="h-4 w-4" />
+                          Upload Photo
+                        </Button>
+                        {auth.user.avatar &&
+                          !auth.user.avatar.includes('ui-avatars.com') && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={handleDeleteAvatar}
+                              className="flex items-center gap-2 text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              Remove Photo
+                            </Button>
+                          )}
+                        <p className="text-xs text-muted-foreground">
+                          JPG, PNG, GIF or WebP. Max 2MB.
+                        </p>
+                      </div>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        name="avatar"
+                        accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                        onChange={handleAvatarChange}
+                        className="hidden"
+                      />
+                    </div>
+                    <InputError className="mt-2" message={errors.avatar} />
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="name">Name</Label>
+
+                    <Input
+                      id="name"
+                      className="mt-1 block w-full"
+                      defaultValue={auth.user.name}
+                      name="name"
+                      required
+                      autoComplete="name"
+                      placeholder="Full name"
                     />
 
-                    <Form
-                        {...ProfileController.update.form()}
-                        options={{
-                            preserveScroll: true,
-                        }}
-                        className="space-y-6"
+                    <InputError className="mt-2" message={errors.name} />
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="email">Email address</Label>
+
+                    <Input
+                      id="email"
+                      type="email"
+                      className="mt-1 block w-full"
+                      defaultValue={auth.user.email}
+                      name="email"
+                      required
+                      autoComplete="username"
+                      placeholder="Email address"
+                    />
+
+                    <InputError className="mt-2" message={errors.email} />
+                  </div>
+
+                  {mustVerifyEmail && auth.user.email_verified_at === null && (
+                    <div>
+                      <p className="-mt-4 text-sm text-muted-foreground">
+                        Your email address is unverified.{' '}
+                        <Link
+                          href={send()}
+                          as="button"
+                          className="text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500"
+                        >
+                          Click here to resend the verification email.
+                        </Link>
+                      </p>
+
+                      {status === 'verification-link-sent' && (
+                        <div className="mt-2 text-sm font-medium text-green-600">
+                          A new verification link has been sent to your email
+                          address.
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-4">
+                    <Button
+                      disabled={processing}
+                      data-test="update-profile-button"
                     >
-                        {({ processing, recentlySuccessful, errors }) => {
-                            useEffect(() => {
-                                if (recentlySuccessful) {
-                                    setAvatarPreview(null);
-                                }
-                            }, [recentlySuccessful]);
+                      Save
+                    </Button>
 
-                            return (
-                            <>
-                                <div className="grid gap-4">
-                                    <Label>Profile Picture</Label>
-                                    <div className="flex items-center gap-4">
-                                        <UserAvatar
-                                            src={
-                                                avatarPreview ||
-                                                auth.user.avatar
-                                            }
-                                            name={auth.user.name}
-                                            size={80}
-                                        />
-                                        <div className="flex flex-col gap-2">
-                                            <Button
-                                                type="button"
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={triggerFileInput}
-                                                className="flex items-center gap-2"
-                                            >
-                                                <Camera className="h-4 w-4" />
-                                                Upload Photo
-                                            </Button>
-                                            {auth.user.avatar &&
-                                                !auth.user.avatar.includes(
-                                                    'ui-avatars.com',
-                                                ) && (
-                                                    <Button
-                                                        type="button"
-                                                        variant="outline"
-                                                        size="sm"
-                                                        onClick={
-                                                            handleDeleteAvatar
-                                                        }
-                                                        className="flex items-center gap-2 text-red-600 hover:text-red-700"
-                                                    >
-                                                        <Trash2 className="h-4 w-4" />
-                                                        Remove Photo
-                                                    </Button>
-                                                )}
-                                            <p className="text-xs text-muted-foreground">
-                                                JPG, PNG, GIF or WebP. Max 2MB.
-                                            </p>
-                                        </div>
-                                        <input
-                                            ref={fileInputRef}
-                                            type="file"
-                                            name="avatar"
-                                            accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-                                            onChange={handleAvatarChange}
-                                            className="hidden"
-                                        />
-                                    </div>
-                                    <InputError
-                                        className="mt-2"
-                                        message={errors.avatar}
-                                    />
-                                </div>
+                    <Transition
+                      show={recentlySuccessful}
+                      enter="transition ease-in-out"
+                      enterFrom="opacity-0"
+                      leave="transition ease-in-out"
+                      leaveTo="opacity-0"
+                    >
+                      <p className="text-sm text-neutral-600">Saved</p>
+                    </Transition>
+                  </div>
+                </>
+              );
+            }}
+          </Form>
+        </div>
 
-                                <div className="grid gap-2">
-                                    <Label htmlFor="name">Name</Label>
-
-                                    <Input
-                                        id="name"
-                                        className="mt-1 block w-full"
-                                        defaultValue={auth.user.name}
-                                        name="name"
-                                        required
-                                        autoComplete="name"
-                                        placeholder="Full name"
-                                    />
-
-                                    <InputError
-                                        className="mt-2"
-                                        message={errors.name}
-                                    />
-                                </div>
-
-                                <div className="grid gap-2">
-                                    <Label htmlFor="email">Email address</Label>
-
-                                    <Input
-                                        id="email"
-                                        type="email"
-                                        className="mt-1 block w-full"
-                                        defaultValue={auth.user.email}
-                                        name="email"
-                                        required
-                                        autoComplete="username"
-                                        placeholder="Email address"
-                                    />
-
-                                    <InputError
-                                        className="mt-2"
-                                        message={errors.email}
-                                    />
-                                </div>
-
-                                {mustVerifyEmail &&
-                                    auth.user.email_verified_at === null && (
-                                        <div>
-                                            <p className="-mt-4 text-sm text-muted-foreground">
-                                                Your email address is
-                                                unverified.{' '}
-                                                <Link
-                                                    href={send()}
-                                                    as="button"
-                                                    className="text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500"
-                                                >
-                                                    Click here to resend the
-                                                    verification email.
-                                                </Link>
-                                            </p>
-
-                                            {status ===
-                                                'verification-link-sent' && (
-                                                <div className="mt-2 text-sm font-medium text-green-600">
-                                                    A new verification link has
-                                                    been sent to your email
-                                                    address.
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-
-                                <div className="flex items-center gap-4">
-                                    <Button
-                                        disabled={processing}
-                                        data-test="update-profile-button"
-                                    >
-                                        Save
-                                    </Button>
-
-                                    <Transition
-                                        show={recentlySuccessful}
-                                        enter="transition ease-in-out"
-                                        enterFrom="opacity-0"
-                                        leave="transition ease-in-out"
-                                        leaveTo="opacity-0"
-                                    >
-                                        <p className="text-sm text-neutral-600">
-                                            Saved
-                                        </p>
-                                    </Transition>
-                                </div>
-                            </>
-                        )
-                        }}
-                    </Form>
-                </div>
-
-                <DeleteUser />
-            </SettingsLayout>
-        </AppLayout>
-    );
+        <DeleteUser />
+      </SettingsLayout>
+    </AppLayout>
+  );
 }

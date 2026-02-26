@@ -5,10 +5,22 @@ import { sileo } from 'sileo';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useFlashMessages } from '@/hooks/useFlashMessages';
 import AppLayout from '@/layouts/app-layout';
 
@@ -87,7 +99,9 @@ export default function ManageCollaborators({ mod, canManage }: Props) {
 
   const removeCollaborator = (collaboratorId: number) => {
     if (confirm('Are you sure you want to remove this collaborator?')) {
-      const collaboratorToRemove = mod.collaborators.find(c => c.id === collaboratorId);
+      const collaboratorToRemove = mod.collaborators.find(
+        (c) => c.id === collaboratorId,
+      );
       const collaboratorName = collaboratorToRemove?.name || 'collaborator';
 
       deleteRequest(`/mods/${mod.slug}/collaborators/${collaboratorId}`, {
@@ -108,14 +122,17 @@ export default function ManageCollaborators({ mod, canManage }: Props) {
   };
 
   const updateRole = (collaboratorId: number, newRole: string) => {
-    const collaboratorToUpdate = mod.collaborators.find(c => c.id === collaboratorId);
+    const collaboratorToUpdate = mod.collaborators.find(
+      (c) => c.id === collaboratorId,
+    );
     const collaboratorName = collaboratorToUpdate?.name || 'collaborator';
 
     console.log('Updating role for:', collaboratorId, 'to:', newRole);
     console.log('URL:', `/mods/${mod.slug}/collaborators/${collaboratorId}`);
     console.log('Data:', { role: newRole });
 
-    router.patch(`/mods/${mod.slug}/collaborators/${collaboratorId}`,
+    router.patch(
+      `/mods/${mod.slug}/collaborators/${collaboratorId}`,
       { role: newRole },
       {
         onSuccess: () => {
@@ -131,7 +148,7 @@ export default function ManageCollaborators({ mod, canManage }: Props) {
             description: `Failed to update role. ${JSON.stringify(errors)}`,
           });
         },
-      }
+      },
     );
   };
 
@@ -162,13 +179,13 @@ export default function ManageCollaborators({ mod, canManage }: Props) {
     return (
       <AppLayout>
         <Head title={`Collaborators - ${mod.name}`} />
-        <div className="max-w-2xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6 lg:px-8">
           <Card>
             <CardContent className="py-12 text-center">
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
+              <h3 className="mb-2 text-lg font-medium text-gray-900">
                 Access Denied
               </h3>
-              <p className="text-gray-600 mb-4">
+              <p className="mb-4 text-gray-600">
                 You don't have permission to manage collaborators for this mod.
               </p>
               <Button asChild>
@@ -185,9 +202,9 @@ export default function ManageCollaborators({ mod, canManage }: Props) {
     <AppLayout>
       <Head title={`Manage Collaborators - ${mod.name}`} />
 
-      <div className="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <nav className="text-sm text-gray-600 mb-4">
+          <nav className="mb-4 text-sm text-gray-600">
             <a href={`/mods/${mod.slug}`} className="hover:text-gray-800">
               {mod.name}
             </a>
@@ -196,7 +213,9 @@ export default function ManageCollaborators({ mod, canManage }: Props) {
           </nav>
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Manage Collaborators</h1>
+              <h1 className="text-3xl font-bold text-gray-900">
+                Manage Collaborators
+              </h1>
               <p className="mt-2 text-gray-600">
                 Invite team members and manage their access to this mod
               </p>
@@ -204,7 +223,7 @@ export default function ManageCollaborators({ mod, canManage }: Props) {
             <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
               <DialogTrigger asChild>
                 <Button>
-                  <PlusIcon className="h-4 w-4 mr-2" />
+                  <PlusIcon className="mr-2 h-4 w-4" />
                   Invite Collaborator
                 </Button>
               </DialogTrigger>
@@ -224,7 +243,9 @@ export default function ManageCollaborators({ mod, canManage }: Props) {
                       className={errors.username ? 'border-red-500' : ''}
                     />
                     {errors.username && (
-                      <p className="mt-1 text-sm text-red-600">{errors.username}</p>
+                      <p className="mt-1 text-sm text-red-600">
+                        {errors.username}
+                      </p>
                     )}
                   </div>
 
@@ -232,7 +253,9 @@ export default function ManageCollaborators({ mod, canManage }: Props) {
                     <Label htmlFor="role">Role</Label>
                     <Select
                       value={data.role}
-                      onValueChange={(value) => setData('role', value as 'admin' | 'editor' | 'viewer')}
+                      onValueChange={(value) =>
+                        setData('role', value as 'admin' | 'editor' | 'viewer')
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -241,19 +264,25 @@ export default function ManageCollaborators({ mod, canManage }: Props) {
                         <SelectItem value="admin">
                           <div>
                             <div className="font-medium">Admin</div>
-                            <div className="text-sm text-gray-600">Can manage pages and collaborators</div>
+                            <div className="text-sm text-gray-600">
+                              Can manage pages and collaborators
+                            </div>
                           </div>
                         </SelectItem>
                         <SelectItem value="editor">
                           <div>
                             <div className="font-medium">Editor</div>
-                            <div className="text-sm text-gray-600">Can create and edit pages</div>
+                            <div className="text-sm text-gray-600">
+                              Can create and edit pages
+                            </div>
                           </div>
                         </SelectItem>
                         <SelectItem value="viewer">
                           <div>
                             <div className="font-medium">Viewer</div>
-                            <div className="text-sm text-gray-600">Can only view pages</div>
+                            <div className="text-sm text-gray-600">
+                              Can only view pages
+                            </div>
                           </div>
                         </SelectItem>
                       </SelectContent>
@@ -261,7 +290,11 @@ export default function ManageCollaborators({ mod, canManage }: Props) {
                   </div>
 
                   <div className="flex justify-end space-x-3">
-                    <Button type="button" variant="outline" onClick={() => setShowAddDialog(false)}>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setShowAddDialog(false)}
+                    >
                       Cancel
                     </Button>
                     <Button type="submit" disabled={processing}>
@@ -279,14 +312,14 @@ export default function ManageCollaborators({ mod, canManage }: Props) {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
-                <UsersIcon className="h-5 w-5 mr-2" />
+                <UsersIcon className="mr-2 h-5 w-5" />
                 Owner
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center justify-between p-4 bg-purple-50 rounded-lg">
+              <div className="flex items-center justify-between rounded-lg bg-purple-50 p-4">
                 <div className="flex items-center">
-                  <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100">
                     <span className="text-sm font-medium text-purple-800">
                       {mod.owner.name.charAt(0)}
                     </span>
@@ -295,7 +328,9 @@ export default function ManageCollaborators({ mod, canManage }: Props) {
                     <p className="text-sm font-medium text-gray-900">
                       {mod.owner.name}
                     </p>
-                    <p className="text-sm text-gray-600">@{mod.owner.username}</p>
+                    <p className="text-sm text-gray-600">
+                      @{mod.owner.username}
+                    </p>
                   </div>
                 </div>
                 <Badge className={getRoleColor('owner')}>Owner</Badge>
@@ -308,23 +343,23 @@ export default function ManageCollaborators({ mod, canManage }: Props) {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span className="flex items-center">
-                  <UsersIcon className="h-5 w-5 mr-2" />
+                  <UsersIcon className="mr-2 h-5 w-5" />
                   Collaborators ({mod.collaborators.length})
                 </span>
               </CardTitle>
             </CardHeader>
             <CardContent>
               {mod.collaborators.length === 0 ? (
-                <div className="text-center py-8">
-                  <UsersIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                <div className="py-8 text-center">
+                  <UsersIcon className="mx-auto mb-4 h-12 w-12 text-gray-400" />
+                  <h3 className="mb-2 text-lg font-medium text-gray-900">
                     No collaborators yet
                   </h3>
-                  <p className="text-gray-600 mb-4">
+                  <p className="mb-4 text-gray-600">
                     Invite team members to help build this mod's documentation
                   </p>
                   <Button onClick={() => setShowAddDialog(true)}>
-                    <PlusIcon className="h-4 w-4 mr-2" />
+                    <PlusIcon className="mr-2 h-4 w-4" />
                     Invite First Collaborator
                   </Button>
                 </div>
@@ -333,10 +368,10 @@ export default function ManageCollaborators({ mod, canManage }: Props) {
                   {mod.collaborators.map((collaborator) => (
                     <div
                       key={collaborator.id}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
+                      className="flex items-center justify-between rounded-lg border p-4 hover:bg-gray-50"
                     >
                       <div className="flex items-center">
-                        <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100">
                           <span className="text-sm font-medium text-gray-800">
                             {collaborator.name.charAt(0)}
                           </span>
@@ -346,7 +381,8 @@ export default function ManageCollaborators({ mod, canManage }: Props) {
                             {collaborator.name}
                           </p>
                           <p className="text-sm text-gray-600">
-                            @{collaborator.username} • Joined {formatDate(collaborator.pivot.created_at)}
+                            @{collaborator.username} • Joined{' '}
+                            {formatDate(collaborator.pivot.created_at)}
                           </p>
                         </div>
                       </div>
@@ -354,7 +390,9 @@ export default function ManageCollaborators({ mod, canManage }: Props) {
                       <div className="flex items-center space-x-3">
                         <Select
                           value={collaborator.pivot.role}
-                          onValueChange={(value) => updateRole(collaborator.id, value)}
+                          onValueChange={(value) =>
+                            updateRole(collaborator.id, value)
+                          }
                         >
                           <SelectTrigger className="w-32">
                             <SelectValue />
@@ -370,7 +408,7 @@ export default function ManageCollaborators({ mod, canManage }: Props) {
                           size="sm"
                           variant="outline"
                           onClick={() => removeCollaborator(collaborator.id)}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          className="text-red-600 hover:bg-red-50 hover:text-red-700"
                         >
                           <TrashIcon className="h-4 w-4" />
                         </Button>
@@ -392,9 +430,12 @@ export default function ManageCollaborators({ mod, canManage }: Props) {
                 <div className="flex items-start space-x-3">
                   <Badge className={getRoleColor('admin')}>Admin</Badge>
                   <div>
-                    <p className="text-sm font-medium text-gray-900">Administrator</p>
+                    <p className="text-sm font-medium text-gray-900">
+                      Administrator
+                    </p>
                     <p className="text-sm text-gray-600">
-                      Can create, edit, and delete pages. Can manage collaborators and invite new members.
+                      Can create, edit, and delete pages. Can manage
+                      collaborators and invite new members.
                     </p>
                   </div>
                 </div>
@@ -403,7 +444,8 @@ export default function ManageCollaborators({ mod, canManage }: Props) {
                   <div>
                     <p className="text-sm font-medium text-gray-900">Editor</p>
                     <p className="text-sm text-gray-600">
-                      Can create, edit, and publish pages. Cannot manage collaborators or mod settings.
+                      Can create, edit, and publish pages. Cannot manage
+                      collaborators or mod settings.
                     </p>
                   </div>
                 </div>
@@ -412,7 +454,8 @@ export default function ManageCollaborators({ mod, canManage }: Props) {
                   <div>
                     <p className="text-sm font-medium text-gray-900">Viewer</p>
                     <p className="text-sm text-gray-600">
-                      Can only view private mod content. Cannot edit or create pages.
+                      Can only view private mod content. Cannot edit or create
+                      pages.
                     </p>
                   </div>
                 </div>

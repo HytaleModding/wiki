@@ -53,7 +53,13 @@ interface Props {
   canEdit: boolean;
 }
 
-export default function ShowPage({ mod, page, navigation, userRole, canEdit }: Props) {
+export default function ShowPage({
+  mod,
+  page,
+  navigation,
+  userRole,
+  canEdit,
+}: Props) {
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -69,9 +75,9 @@ export default function ShowPage({ mod, page, navigation, userRole, canEdit }: P
       <div key={navPage.id} className={`ml-${level * 4}`}>
         <a
           href={`/mods/${mod.slug}/pages/${navPage.slug}`}
-          className={`block py-1 px-2 text-sm rounded hover:bg-gray-100 ${
+          className={`block rounded px-2 py-1 text-sm hover:bg-gray-100 ${
             navPage.id === page.id
-              ? 'bg-blue-50 text-blue-700 font-medium'
+              ? 'bg-blue-50 font-medium text-blue-700'
               : 'text-gray-700'
           }`}
         >
@@ -86,13 +92,12 @@ export default function ShowPage({ mod, page, navigation, userRole, canEdit }: P
     ));
   };
 
-
   return (
     <AppLayout>
       <Head title={`${page.title} - ${mod.name}`} />
 
-      <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
           {/* Sidebar Navigation */}
           <div className="lg:col-span-1">
             <Card>
@@ -100,12 +105,10 @@ export default function ShowPage({ mod, page, navigation, userRole, canEdit }: P
                 <CardTitle className="text-lg">{mod.name}</CardTitle>
               </CardHeader>
               <CardContent>
-                <nav className="space-y-1">
-                  {renderNavigation(navigation)}
-                </nav>
+                <nav className="space-y-1">{renderNavigation(navigation)}</nav>
 
                 {canEdit && (
-                  <div className="mt-6 pt-4 border-t">
+                  <div className="mt-6 border-t pt-4">
                     <Button size="sm" className="w-full" asChild>
                       <a href={`/mods/${mod.slug}/pages/create`}>
                         Add New Page
@@ -120,31 +123,35 @@ export default function ShowPage({ mod, page, navigation, userRole, canEdit }: P
           {/* Main Content */}
           <div className="lg:col-span-3">
             {/* Breadcrumbs */}
-            <nav className="text-sm text-gray-600 mb-6">
+            <nav className="mb-6 text-sm text-gray-600">
               <a href={`/mods/${mod.slug}`} className="hover:text-gray-800">
                 {mod.name}
               </a>
-              {page.path && page.path.length > 0 && page.path.map((pathItem, index) => (
-                <span key={pathItem.id}>
-                  <span className="mx-2">›</span>
-                  {index === page.path.length - 1 ? (
-                    <span className="text-gray-900 font-medium">{pathItem.title}</span>
-                  ) : (
-                    <a
-                      href={`/mods/${mod.slug}/pages/${pathItem.slug}`}
-                      className="hover:text-gray-800"
-                    >
-                      {pathItem.title}
-                    </a>
-                  )}
-                </span>
-              ))}
+              {page.path &&
+                page.path.length > 0 &&
+                page.path.map((pathItem, index) => (
+                  <span key={pathItem.id}>
+                    <span className="mx-2">›</span>
+                    {index === page.path.length - 1 ? (
+                      <span className="font-medium text-gray-900">
+                        {pathItem.title}
+                      </span>
+                    ) : (
+                      <a
+                        href={`/mods/${mod.slug}/pages/${pathItem.slug}`}
+                        className="hover:text-gray-800"
+                      >
+                        {pathItem.title}
+                      </a>
+                    )}
+                  </span>
+                ))}
             </nav>
 
             {/* Page Header */}
-            <div className="flex items-start justify-between mb-6">
+            <div className="mb-6 flex items-start justify-between">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                <h1 className="mb-2 text-3xl font-bold text-gray-900">
                   {page.title}
                 </h1>
                 <div className="flex items-center space-x-4 text-sm text-gray-600">
@@ -154,7 +161,10 @@ export default function ShowPage({ mod, page, navigation, userRole, canEdit }: P
                   {!page.published && (
                     <>
                       <span>•</span>
-                      <Badge variant="outline" className="text-yellow-700 bg-yellow-50">
+                      <Badge
+                        variant="outline"
+                        className="bg-yellow-50 text-yellow-700"
+                      >
                         Draft
                       </Badge>
                     </>
@@ -166,7 +176,7 @@ export default function ShowPage({ mod, page, navigation, userRole, canEdit }: P
                 {mod.visibility === 'public' && (
                   <Button variant="outline" size="sm" asChild>
                     <a href={`/docs/${mod.slug}/${page.slug}`} target="_blank">
-                      <EyeIcon className="h-4 w-4 mr-2" />
+                      <EyeIcon className="mr-2 h-4 w-4" />
                       Public View
                     </a>
                   </Button>
@@ -174,7 +184,7 @@ export default function ShowPage({ mod, page, navigation, userRole, canEdit }: P
                 {canEdit && (
                   <Button size="sm" asChild>
                     <a href={`/mods/${mod.slug}/pages/${page.slug}/edit`}>
-                      <PencilIcon className="h-4 w-4 mr-2" />
+                      <PencilIcon className="mr-2 h-4 w-4" />
                       Edit
                     </a>
                   </Button>
@@ -196,7 +206,7 @@ export default function ShowPage({ mod, page, navigation, userRole, canEdit }: P
               <Card className="mt-8">
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <BookOpenIcon className="h-5 w-5 mr-2" />
+                    <BookOpenIcon className="mr-2 h-5 w-5" />
                     Subpages
                   </CardTitle>
                 </CardHeader>
@@ -206,9 +216,9 @@ export default function ShowPage({ mod, page, navigation, userRole, canEdit }: P
                       <a
                         key={child.id}
                         href={`/mods/${mod.slug}/pages/${child.slug}`}
-                        className="block p-4 border rounded-lg hover:shadow-md transition-shadow"
+                        className="block rounded-lg border p-4 transition-shadow hover:shadow-md"
                       >
-                        <h3 className="font-medium text-gray-900 mb-1">
+                        <h3 className="mb-1 font-medium text-gray-900">
                           {child.title}
                         </h3>
                         <p className="text-sm text-gray-600">
@@ -222,7 +232,7 @@ export default function ShowPage({ mod, page, navigation, userRole, canEdit }: P
             )}
 
             {/* Page Footer */}
-            <div className="mt-8 pt-6 border-t text-sm text-gray-600">
+            <div className="mt-8 border-t pt-6 text-sm text-gray-600">
               <div className="flex items-center justify-between">
                 <div>
                   Last updated by {page.updater?.name || page.creator.name}

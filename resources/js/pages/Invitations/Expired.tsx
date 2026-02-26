@@ -1,7 +1,16 @@
 import { Head, Link } from '@inertiajs/react';
-import { ExclamationTriangleIcon, ClockIcon } from '@heroicons/react/24/outline';
+import {
+  ExclamationTriangleIcon,
+  ClockIcon,
+} from '@heroicons/react/24/outline';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 
 interface User {
@@ -47,7 +56,7 @@ export default function ExpiredInvitation({ invitation }: Props) {
     <AppLayout>
       <Head title="Invitation Expired" />
 
-      <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="flex min-h-screen flex-col justify-center bg-gray-50 py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <div className="text-center">
             <ExclamationTriangleIcon className="mx-auto h-12 w-12 text-red-600" />
@@ -67,13 +76,14 @@ export default function ExpiredInvitation({ invitation }: Props) {
                 Unable to Accept Invitation
               </CardTitle>
               <CardDescription>
-                The invitation to collaborate on <strong>{invitation.mod.name}</strong> has expired
+                The invitation to collaborate on{' '}
+                <strong>{invitation.mod.name}</strong> has expired
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="bg-red-50 rounded-lg p-4">
-                <div className="flex items-center text-sm text-red-700 mb-2">
-                  <ClockIcon className="h-4 w-4 mr-2" />
+              <div className="rounded-lg bg-red-50 p-4">
+                <div className="mb-2 flex items-center text-sm text-red-700">
+                  <ClockIcon className="mr-2 h-4 w-4" />
                   Expired on: {formatDate(invitation.expires_at)}
                 </div>
                 <p className="text-sm text-red-600">
@@ -81,32 +91,28 @@ export default function ExpiredInvitation({ invitation }: Props) {
                 </p>
               </div>
 
-              <div className="bg-gray-50 rounded-lg p-4">
-                <h4 className="font-medium text-gray-900 mb-2">What can you do?</h4>
-                <ul className="text-sm text-gray-600 space-y-1">
-                  <li>• Contact {invitation.inviter.name} (@{invitation.inviter.username}) to request a new invitation</li>
+              <div className="rounded-lg bg-gray-50 p-4">
+                <h4 className="mb-2 font-medium text-gray-900">
+                  What can you do?
+                </h4>
+                <ul className="space-y-1 text-sm text-gray-600">
+                  <li>
+                    • Contact {invitation.inviter.name} (@
+                    {invitation.inviter.username}) to request a new invitation
+                  </li>
                   <li>• Check if you have other pending invitations</li>
-                  <li>• Visit the mod page to see if it's publicly accessible</li>
+                  <li>
+                    • Visit the mod page to see if it's publicly accessible
+                  </li>
                 </ul>
               </div>
 
               <div className="space-y-3">
-                <Button
-                  asChild
-                  className="w-full"
-                  size="lg"
-                >
-                  <Link href="/dashboard">
-                    Go to Dashboard
-                  </Link>
+                <Button asChild className="w-full" size="lg">
+                  <Link href="/dashboard">Go to Dashboard</Link>
                 </Button>
 
-                <Button
-                  variant="outline"
-                  asChild
-                  className="w-full"
-                  size="lg"
-                >
+                <Button variant="outline" asChild className="w-full" size="lg">
                   <Link href={`/docs/${invitation.mod.slug}`}>
                     View Mod (if public)
                   </Link>

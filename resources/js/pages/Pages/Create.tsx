@@ -5,7 +5,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
 
 interface Mod {
@@ -43,9 +49,9 @@ export default function CreatePage({ mod, parent }: Props) {
     <AppLayout>
       <Head title={`Create Page - ${mod.name}`} />
 
-      <div className="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <nav className="text-sm text-gray-600 mb-4">
+          <nav className="mb-4 text-sm text-gray-600">
             <a href={`/mods/${mod.slug}`} className="hover:text-gray-800">
               {mod.name}
             </a>
@@ -90,7 +96,9 @@ export default function CreatePage({ mod, parent }: Props) {
                   <Checkbox
                     id="is_index"
                     checked={data.is_index}
-                    onCheckedChange={(checked) => setData('is_index', !!checked)}
+                    onCheckedChange={(checked) =>
+                      setData('is_index', !!checked)
+                    }
                   />
                   <Label htmlFor="is_index" className="text-sm">
                     Index page (home page of the mod)
@@ -101,7 +109,9 @@ export default function CreatePage({ mod, parent }: Props) {
                   <Checkbox
                     id="published"
                     checked={data.published}
-                    onCheckedChange={(checked) => setData('published', !!checked)}
+                    onCheckedChange={(checked) =>
+                      setData('published', !!checked)
+                    }
                   />
                   <Label htmlFor="published" className="text-sm">
                     Published
@@ -147,7 +157,8 @@ For more information, see the other pages in this documentation."
                   <p className="mt-1 text-sm text-red-600">{errors.content}</p>
                 )}
                 <p className="mt-2 text-sm text-gray-600">
-                  Use Markdown syntax to format your content. You can include code blocks, images, links, and more.
+                  Use Markdown syntax to format your content. You can include
+                  code blocks, images, links, and more.
                 </p>
               </div>
             </CardContent>

@@ -6,7 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
 
@@ -58,14 +64,17 @@ export default function EditPage({ mod, page, potentialParents }: Props) {
     <AppLayout>
       <Head title={`Edit ${page.title} - ${mod.name}`} />
 
-      <div className="max-w-6xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <nav className="text-sm text-gray-600 mb-4">
+          <nav className="mb-4 text-sm text-gray-600">
             <a href={`/mods/${mod.slug}`} className="hover:text-gray-800">
               {mod.name}
             </a>
             <span className="mx-2">›</span>
-            <a href={`/mods/${mod.slug}/pages/${page.slug}`} className="hover:text-gray-800">
+            <a
+              href={`/mods/${mod.slug}/pages/${page.slug}`}
+              className="hover:text-gray-800"
+            >
               {page.title}
             </a>
             <span className="mx-2">›</span>
@@ -83,7 +92,7 @@ export default function EditPage({ mod, page, potentialParents }: Props) {
               <CardTitle>Page Details</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <div>
                   <Label htmlFor="title">Page Title *</Label>
                   <Input
@@ -103,13 +112,17 @@ export default function EditPage({ mod, page, potentialParents }: Props) {
                   <Label htmlFor="parent_id">Parent Page</Label>
                   <Select
                     value={data.parent_id || 'none'}
-                    onValueChange={(value) => setData('parent_id', value === 'none' ? '' : value)}
+                    onValueChange={(value) =>
+                      setData('parent_id', value === 'none' ? '' : value)
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="No parent (root page)" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="none">No parent (root page)</SelectItem>
+                      <SelectItem value="none">
+                        No parent (root page)
+                      </SelectItem>
                       {potentialParents.map((parent) => (
                         <SelectItem key={parent.id} value={parent.id}>
                           {parent.title}
@@ -125,7 +138,9 @@ export default function EditPage({ mod, page, potentialParents }: Props) {
                   <Checkbox
                     id="is_index"
                     checked={data.is_index}
-                    onCheckedChange={(checked) => setData('is_index', !!checked)}
+                    onCheckedChange={(checked) =>
+                      setData('is_index', !!checked)
+                    }
                   />
                   <Label htmlFor="is_index" className="text-sm">
                     Index page (home page of the mod)
@@ -136,7 +151,9 @@ export default function EditPage({ mod, page, potentialParents }: Props) {
                   <Checkbox
                     id="published"
                     checked={data.published}
-                    onCheckedChange={(checked) => setData('published', !!checked)}
+                    onCheckedChange={(checked) =>
+                      setData('published', !!checked)
+                    }
                   />
                   <Label htmlFor="published" className="text-sm">
                     Published
@@ -146,7 +163,7 @@ export default function EditPage({ mod, page, potentialParents }: Props) {
             </CardContent>
           </Card>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {/* Editor */}
             <Card>
               <CardHeader>
@@ -186,10 +203,13 @@ echo 'Hello World'
                     className={`font-mono text-sm ${errors.content ? 'border-red-500' : ''}`}
                   />
                   {errors.content && (
-                    <p className="mt-1 text-sm text-red-600">{errors.content}</p>
+                    <p className="mt-1 text-sm text-red-600">
+                      {errors.content}
+                    </p>
                   )}
                   <p className="mt-2 text-sm text-gray-600">
-                    Use Markdown syntax to format your content. Supports headers, lists, code blocks, links, and more.
+                    Use Markdown syntax to format your content. Supports
+                    headers, lists, code blocks, links, and more.
                   </p>
                 </div>
               </CardContent>
@@ -202,7 +222,7 @@ echo 'Hello World'
                   <CardTitle>Live Preview</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="border rounded-md p-4  min-h-[400px]">
+                  <div className="min-h-[400px] rounded-md border p-4">
                     <MarkdownRenderer
                       content={data.content || 'Nothing to preview yet...'}
                     />
@@ -221,7 +241,11 @@ echo 'Hello World'
                 type="button"
                 variant="destructive"
                 onClick={() => {
-                  if (confirm('Are you sure you want to delete this page? This action cannot be undone.')) {
+                  if (
+                    confirm(
+                      'Are you sure you want to delete this page? This action cannot be undone.',
+                    )
+                  ) {
                     router.delete(`/mods/${mod.slug}/pages/${page.slug}`);
                   }
                 }}

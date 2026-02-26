@@ -8,64 +8,78 @@ import typescript from 'typescript-eslint';
 
 /** @type {import('eslint').Linter.Config[]} */
 export default [
-    js.configs.recommended,
-    reactHooks.configs.flat.recommended,
-    ...typescript.configs.recommended,
-    {
-        ...react.configs.flat.recommended,
-        ...react.configs.flat['jsx-runtime'], // Required for React 17+
-        languageOptions: {
-            globals: {
-                ...globals.browser,
-            },
-        },
-        rules: {
-            'react/react-in-jsx-scope': 'off',
-            'react/prop-types': 'off',
-            'react/no-unescaped-entities': 'off',
-        },
-        settings: {
-            react: {
-                version: 'detect',
-            },
-        },
+  js.configs.recommended,
+  reactHooks.configs.flat.recommended,
+  ...typescript.configs.recommended,
+  {
+    ...react.configs.flat.recommended,
+    ...react.configs.flat['jsx-runtime'], // Required for React 17+
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+      },
     },
-    {
-        ...importPlugin.flatConfigs.recommended,
-        settings: {
-            'import/resolver': {
-                typescript: true,
-                node: true,
-            },
-        },
-        rules: {
-            'import/order': [
-                'error',
-                {
-                    groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
-                    alphabetize: {
-                        order: 'asc',
-                        caseInsensitive: true,
-                    },
-                },
-            ],
-        },
+    rules: {
+      'react/react-in-jsx-scope': 'off',
+      'react/prop-types': 'off',
+      'react/no-unescaped-entities': 'off',
     },
-    {
-        ...importPlugin.flatConfigs.typescript,
-        files: ['**/*.{ts,tsx}'],
-        rules: {
-            '@typescript-eslint/consistent-type-imports': [
-                'error',
-                {
-                    prefer: 'type-imports',
-                    fixStyle: 'separate-type-imports',
-                },
-            ],
+    settings: {
+      react: {
+        version: 'detect',
+      },
+    },
+  },
+  {
+    ...importPlugin.flatConfigs.recommended,
+    settings: {
+      'import/resolver': {
+        typescript: true,
+        node: true,
+      },
+    },
+    rules: {
+      'import/order': [
+        'error',
+        {
+          groups: [
+            'builtin',
+            'external',
+            'internal',
+            'parent',
+            'sibling',
+            'index',
+          ],
+          alphabetize: {
+            order: 'asc',
+            caseInsensitive: true,
+          },
         },
+      ],
     },
-    {
-        ignores: ['vendor', 'node_modules', 'public', 'bootstrap/ssr', 'tailwind.config.js', 'vite.config.ts'],
+  },
+  {
+    ...importPlugin.flatConfigs.typescript,
+    files: ['**/*.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        {
+          prefer: 'type-imports',
+          fixStyle: 'separate-type-imports',
+        },
+      ],
     },
-    prettier, // Turn off all rules that might conflict with Prettier
+  },
+  {
+    ignores: [
+      'vendor',
+      'node_modules',
+      'public',
+      'bootstrap/ssr',
+      'tailwind.config.js',
+      'vite.config.ts',
+    ],
+  },
+  prettier, // Turn off all rules that might conflict with Prettier
 ];

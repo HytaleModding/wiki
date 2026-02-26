@@ -10,13 +10,13 @@ interface MarkdownRendererProps {
 }
 
 marked.use(
-    markedHighlight({
-        langPrefix: 'hljs language-',
-        highlight(code: string, lang: string) {
-            const language = hljs.getLanguage(lang) ? lang : 'plaintext';
-            return hljs.highlight(code, { language }).value;
-        },
-    }),
+  markedHighlight({
+    langPrefix: 'hljs language-',
+    highlight(code: string, lang: string) {
+      const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+      return hljs.highlight(code, { language }).value;
+    },
+  }),
 );
 
 marked.setOptions({
@@ -24,7 +24,10 @@ marked.setOptions({
   breaks: true,
 });
 
-export default function MarkdownRenderer({ content, className = '' }: MarkdownRendererProps) {
+export default function MarkdownRenderer({
+  content,
+  className = '',
+}: MarkdownRendererProps) {
   const [htmlContent, setHtmlContent] = useState('');
 
   useEffect(() => {
@@ -33,7 +36,7 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
 
   return (
     <div
-      className={`prose prose-slate dark:prose-invert max-w-none ${className}`}
+      className={`prose max-w-none prose-slate dark:prose-invert ${className}`}
       dangerouslySetInnerHTML={{ __html: htmlContent }}
     />
   );

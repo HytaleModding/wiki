@@ -1,4 +1,8 @@
-import { BookOpenIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
+import {
+  BookOpenIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+} from '@heroicons/react/24/outline';
 import { Head } from '@inertiajs/react';
 
 import MarkdownRenderer from '@/components/MarkdownRenderer';
@@ -60,17 +64,17 @@ export default function PublicPage({ mod, page, navigation }: Props) {
       <div key={navPage.id} className={`ml-${level * 3}`}>
         <a
           href={`/docs/${mod.slug}/${navPage.slug}`}
-          className={`flex items-center py-2 px-3 text-sm rounded-md transition-colors group ${
+          className={`group flex items-center rounded-md px-3 py-2 text-sm transition-colors ${
             navPage.id === page.id
-              ? 'bg-accent text-accent-foreground font-medium'
-              : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+              ? 'bg-accent font-medium text-accent-foreground'
+              : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
           }`}
         >
-          <BookOpenIcon className="h-4 w-4 mr-2 shrink-0" />
+          <BookOpenIcon className="mr-2 h-4 w-4 shrink-0" />
           <span className="truncate">{navPage.title}</span>
         </a>
         {navPage.children && navPage.children.length > 0 && (
-          <div className="ml-3 border-l border-border/50 pl-3 mt-1">
+          <div className="mt-1 ml-3 border-l border-border/50 pl-3">
             {renderNavigation(navPage.children, level + 1)}
           </div>
         )}
@@ -81,7 +85,7 @@ export default function PublicPage({ mod, page, navigation }: Props) {
   // Find previous and next pages for navigation
   const flattenPages = (pages: NavigationPage[]): NavigationPage[] => {
     const result: NavigationPage[] = [];
-    pages.forEach(p => {
+    pages.forEach((p) => {
       result.push(p);
       if (p.children) {
         result.push(...flattenPages(p.children));
@@ -91,19 +95,24 @@ export default function PublicPage({ mod, page, navigation }: Props) {
   };
 
   const allPages = flattenPages(navigation);
-  const currentIndex = allPages.findIndex(p => p.id === page.id);
+  const currentIndex = allPages.findIndex((p) => p.id === page.id);
   const prevPage = currentIndex > 0 ? allPages[currentIndex - 1] : null;
-  const nextPage = currentIndex < allPages.length - 1 ? allPages[currentIndex + 1] : null;
+  const nextPage =
+    currentIndex < allPages.length - 1 ? allPages[currentIndex + 1] : null;
 
   const breadcrumbs = [
-    { title: page.title, href: `/docs/${mod.slug}/${page.slug}` }
+    { title: page.title, href: `/docs/${mod.slug}/${page.slug}` },
   ];
 
   return (
-    <PublicLayout modName={mod.name} modSlug={mod.slug} breadcrumbs={breadcrumbs}>
+    <PublicLayout
+      modName={mod.name}
+      modSlug={mod.slug}
+      breadcrumbs={breadcrumbs}
+    >
       <Head title={`${page.title} - ${mod.name} Documentation`} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
         <div className="lg:col-span-1">
           <div className="sticky top-6 space-y-6">
             <Card>
@@ -111,16 +120,17 @@ export default function PublicPage({ mod, page, navigation }: Props) {
                 <CardTitle className="text-lg">
                   <a
                     href={`/docs/${mod.slug}`}
-                    className="hover:text-primary transition-colors"
+                    className="transition-colors hover:text-primary"
                   >
                     {mod.name}
                   </a>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <p className="text-sm text-muted-foreground">{mod.description}</p>
+                <p className="text-sm text-muted-foreground">
+                  {mod.description}
+                </p>
                 <div className="flex items-center space-x-2">
-
                   <span className="text-sm text-muted-foreground">
                     by {mod.owner.name}
                   </span>
@@ -135,9 +145,11 @@ export default function PublicPage({ mod, page, navigation }: Props) {
               </CardHeader>
               <CardContent>
                 {navigation.length === 0 ? (
-                  <div className="text-center py-4">
-                    <BookOpenIcon className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                    <p className="text-sm text-muted-foreground">No pages available</p>
+                  <div className="py-4 text-center">
+                    <BookOpenIcon className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">
+                      No pages available
+                    </p>
                   </div>
                 ) : (
                   <nav className="space-y-1">
@@ -158,16 +170,14 @@ export default function PublicPage({ mod, page, navigation }: Props) {
                 <CardTitle className="text-2xl">{page.title}</CardTitle>
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                   <span>Last updated {formatDate(page.updated_at)}</span>
-                  {!page.published && (
-                    <Badge variant="outline">Draft</Badge>
-                  )}
+                  {!page.published && <Badge variant="outline">Draft</Badge>}
                 </div>
               </div>
             </CardHeader>
 
             {/* Page Content */}
             <CardContent className="p-8">
-              <div className="prose prose-gray max-w-none dark:prose-invert">
+              <div className="prose max-w-none prose-gray dark:prose-invert">
                 <MarkdownRenderer
                   content={page.content || 'This page is empty.'}
                 />
@@ -179,10 +189,15 @@ export default function PublicPage({ mod, page, navigation }: Props) {
               <div className="flex items-center justify-between">
                 {prevPage ? (
                   <Button variant="outline" asChild>
-                    <a href={`/docs/${mod.slug}/${prevPage.slug}`} className="flex items-center">
-                      <ChevronLeftIcon className="h-4 w-4 mr-2" />
+                    <a
+                      href={`/docs/${mod.slug}/${prevPage.slug}`}
+                      className="flex items-center"
+                    >
+                      <ChevronLeftIcon className="mr-2 h-4 w-4" />
                       <div className="text-left">
-                        <div className="text-xs text-muted-foreground">Previous</div>
+                        <div className="text-xs text-muted-foreground">
+                          Previous
+                        </div>
                         <div className="font-medium">{prevPage.title}</div>
                       </div>
                     </a>
@@ -193,12 +208,17 @@ export default function PublicPage({ mod, page, navigation }: Props) {
 
                 {nextPage ? (
                   <Button variant="outline" asChild>
-                    <a href={`/docs/${mod.slug}/${nextPage.slug}`} className="flex items-center">
+                    <a
+                      href={`/docs/${mod.slug}/${nextPage.slug}`}
+                      className="flex items-center"
+                    >
                       <div className="text-right">
-                        <div className="text-xs text-muted-foreground">Next</div>
+                        <div className="text-xs text-muted-foreground">
+                          Next
+                        </div>
                         <div className="font-medium">{nextPage.title}</div>
                       </div>
-                      <ChevronRightIcon className="h-4 w-4 ml-2" />
+                      <ChevronRightIcon className="ml-2 h-4 w-4" />
                     </a>
                   </Button>
                 ) : (
@@ -217,13 +237,16 @@ export default function PublicPage({ mod, page, navigation }: Props) {
               <CardContent>
                 <div className="grid gap-4 md:grid-cols-2">
                   {page.children.map((child) => (
-                    <Card key={child.id} className="hover:shadow-md transition-shadow">
+                    <Card
+                      key={child.id}
+                      className="transition-shadow hover:shadow-md"
+                    >
                       <CardContent className="p-4">
                         <a
                           href={`/docs/${mod.slug}/${child.slug}`}
-                          className="block group"
+                          className="group block"
                         >
-                          <h4 className="font-medium text-foreground group-hover:text-primary mb-2">
+                          <h4 className="mb-2 font-medium text-foreground group-hover:text-primary">
                             {child.title}
                           </h4>
                           <p className="text-sm text-muted-foreground">

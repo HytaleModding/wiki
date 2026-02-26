@@ -35,7 +35,9 @@ interface Props {
 }
 
 export default function FilesIndex({ mod, files, canEdit }: Props) {
-  const { data, setData, post, processing } = useForm<{ files: globalThis.File[] }>({
+  const { data, setData, post, processing } = useForm<{
+    files: globalThis.File[];
+  }>({
     files: [],
   });
 
@@ -47,7 +49,9 @@ export default function FilesIndex({ mod, files, canEdit }: Props) {
       forceFormData: true,
       onSuccess: () => {
         setData('files', []);
-        const input = document.getElementById('file-upload') as HTMLInputElement;
+        const input = document.getElementById(
+          'file-upload',
+        ) as HTMLInputElement;
         if (input) input.value = '';
       },
     });
@@ -57,7 +61,7 @@ export default function FilesIndex({ mod, files, canEdit }: Props) {
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     if (bytes === 0) return '0 Bytes';
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
-    return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+    return Math.round((bytes / Math.pow(1024, i)) * 100) / 100 + ' ' + sizes[i];
   };
 
   const formatDate = (date: string) => {
@@ -75,8 +79,11 @@ export default function FilesIndex({ mod, files, canEdit }: Props) {
       fetch(`/mods/${mod.slug}/files/${fileId}`, {
         method: 'DELETE',
         headers: {
-          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-        }
+          'X-CSRF-TOKEN':
+            document
+              .querySelector('meta[name="csrf-token"]')
+              ?.getAttribute('content') || '',
+        },
       }).then(() => {
         window.location.reload();
       });
@@ -96,9 +103,9 @@ export default function FilesIndex({ mod, files, canEdit }: Props) {
     <AppLayout>
       <Head title={`Files - ${mod.name}`} />
 
-      <div className="max-w-6xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <nav className="text-sm text-gray-600 mb-4">
+          <nav className="mb-4 text-sm text-gray-600">
             <a href={`/mods/${mod.slug}`} className="hover:text-gray-800">
               {mod.name}
             </a>
@@ -107,7 +114,9 @@ export default function FilesIndex({ mod, files, canEdit }: Props) {
           </nav>
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">File Management</h1>
+              <h1 className="text-3xl font-bold text-gray-900">
+                File Management
+              </h1>
               <p className="mt-2 text-gray-600">
                 Upload and manage files for your mod documentation
               </p>
@@ -122,7 +131,7 @@ export default function FilesIndex({ mod, files, canEdit }: Props) {
           <Card className="mb-8">
             <CardHeader>
               <CardTitle className="flex items-center">
-                <UploadIcon className="h-5 w-5 mr-2" />
+                <UploadIcon className="mr-2 h-5 w-5" />
                 Upload Files
               </CardTitle>
             </CardHeader>
@@ -134,15 +143,21 @@ export default function FilesIndex({ mod, files, canEdit }: Props) {
                     id="file-upload"
                     type="file"
                     multiple
-                    onChange={(e) => setData('files', Array.from(e.target.files ?? []))}
+                    onChange={(e) =>
+                      setData('files', Array.from(e.target.files ?? []))
+                    }
                     className="mt-1"
                   />
-                  <p className="text-sm text-gray-600 mt-1">
-                    Maximum file size: 10MB. Supported formats: Images, PDFs, Archives, Documents
+                  <p className="mt-1 text-sm text-gray-600">
+                    Maximum file size: 10MB. Supported formats: Images, PDFs,
+                    Archives, Documents
                   </p>
                 </div>
-                <Button type="submit" disabled={!data.files.length || processing}>
-                  <UploadIcon className="h-4 w-4 mr-2" />
+                <Button
+                  type="submit"
+                  disabled={!data.files.length || processing}
+                >
+                  <UploadIcon className="mr-2 h-4 w-4" />
                   {processing ? 'Uploading...' : 'Upload Files'}
                 </Button>
               </form>
@@ -156,30 +171,40 @@ export default function FilesIndex({ mod, files, canEdit }: Props) {
           </CardHeader>
           <CardContent>
             {files.length === 0 ? (
-              <div className="text-center py-12">
-                <FileIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
+              <div className="py-12 text-center">
+                <FileIcon className="mx-auto mb-4 h-12 w-12 text-gray-400" />
+                <h3 className="mb-2 text-lg font-medium text-gray-900">
                   No files uploaded
                 </h3>
-                <p className="text-gray-600 mb-4">
-                  Upload files to include images, documents, and other assets in your documentation
+                <p className="mb-4 text-gray-600">
+                  Upload files to include images, documents, and other assets in
+                  your documentation
                 </p>
                 {canEdit && (
-                  <Button onClick={() => document.getElementById('file-upload')?.click()}>
-                    <PlusIcon className="h-4 w-4 mr-2" />
+                  <Button
+                    onClick={() =>
+                      document.getElementById('file-upload')?.click()
+                    }
+                  >
+                    <PlusIcon className="mr-2 h-4 w-4" />
                     Upload First File
                   </Button>
                 )}
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {files.map((file) => (
-                  <div key={file.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                    <div className="flex items-start justify-between mb-3">
+                  <div
+                    key={file.id}
+                    className="rounded-lg border p-4 transition-shadow hover:shadow-md"
+                  >
+                    <div className="mb-3 flex items-start justify-between">
                       <div className="flex items-center">
-                        <span className="text-2xl mr-3">{getFileIcon(file.mime_type)}</span>
+                        <span className="mr-3 text-2xl">
+                          {getFileIcon(file.mime_type)}
+                        </span>
                         <div className="min-w-0 flex-1">
-                          <p className="text-sm font-medium text-gray-900 truncate">
+                          <p className="truncate text-sm font-medium text-gray-900">
                             {file.original_name}
                           </p>
                           <p className="text-xs text-gray-500">
@@ -189,7 +214,9 @@ export default function FilesIndex({ mod, files, canEdit }: Props) {
                       </div>
                       <div className="flex items-center space-x-1">
                         <Button size="sm" variant="ghost" asChild>
-                          <a href={`/mods/${mod.slug}/files/${file.id}/download`}>
+                          <a
+                            href={`/mods/${mod.slug}/files/${file.id}/download`}
+                          >
                             <DownloadIcon className="h-3 w-3" />
                           </a>
                         </Button>
@@ -211,14 +238,14 @@ export default function FilesIndex({ mod, files, canEdit }: Props) {
                         <img
                           src={file.url}
                           alt={file.original_name}
-                          className="w-full h-32 object-cover rounded"
+                          className="h-32 w-full rounded object-cover"
                         />
                       </div>
                     )}
 
-                    <div className="text-xs text-gray-500 space-y-1">
+                    <div className="space-y-1 text-xs text-gray-500">
                       <p>Uploaded {formatDate(file.created_at)}</p>
-                      <p className="font-mono bg-gray-100 px-2 py-1 rounded text-xs">
+                      <p className="rounded bg-gray-100 px-2 py-1 font-mono text-xs">
                         {file.url}
                       </p>
                     </div>

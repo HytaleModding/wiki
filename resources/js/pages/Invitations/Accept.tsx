@@ -1,8 +1,18 @@
-import { CheckCircleIcon, ClockIcon, UserGroupIcon } from '@heroicons/react/24/outline';
+import {
+  CheckCircleIcon,
+  ClockIcon,
+  UserGroupIcon,
+} from '@heroicons/react/24/outline';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { useFlashMessages } from '@/hooks/useFlashMessages';
 import AppLayout from '@/layouts/app-layout';
 
@@ -82,7 +92,7 @@ export default function AcceptInvitation({ invitation }: Props) {
     <AppLayout>
       <Head title={`Invitation to ${invitation.mod.name}`} />
 
-      <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="flex min-h-screen flex-col justify-center bg-gray-50 py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <div className="text-center">
             <UserGroupIcon className="mx-auto h-12 w-12 text-blue-600" />
@@ -106,11 +116,14 @@ export default function AcceptInvitation({ invitation }: Props) {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="bg-blue-50 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-medium text-gray-700">Your Role:</span>
+              <div className="rounded-lg bg-blue-50 p-4">
+                <div className="mb-3 flex items-center justify-between">
+                  <span className="text-sm font-medium text-gray-700">
+                    Your Role:
+                  </span>
                   <Badge className={getRoleColor(invitation.role)}>
-                    {invitation.role.charAt(0).toUpperCase() + invitation.role.slice(1)}
+                    {invitation.role.charAt(0).toUpperCase() +
+                      invitation.role.slice(1)}
                   </Badge>
                 </div>
                 <p className="text-sm text-gray-600">
@@ -118,14 +131,15 @@ export default function AcceptInvitation({ invitation }: Props) {
                 </p>
               </div>
 
-              <div className="bg-gray-50 rounded-lg p-4">
-                <div className="flex items-center text-sm text-gray-600 mb-2">
-                  <ClockIcon className="h-4 w-4 mr-2" />
+              <div className="rounded-lg bg-gray-50 p-4">
+                <div className="mb-2 flex items-center text-sm text-gray-600">
+                  <ClockIcon className="mr-2 h-4 w-4" />
                   Invitation expires: {formatDate(invitation.expires_at)}
                 </div>
                 <div className="flex items-center text-sm text-gray-600">
-                  <CheckCircleIcon className="h-4 w-4 mr-2" />
-                  Invited by: {invitation.inviter.name} (@{invitation.inviter.username})
+                  <CheckCircleIcon className="mr-2 h-4 w-4" />
+                  Invited by: {invitation.inviter.name} (@
+                  {invitation.inviter.username})
                 </div>
               </div>
 
@@ -139,21 +153,15 @@ export default function AcceptInvitation({ invitation }: Props) {
                   {processing ? 'Accepting...' : 'Accept Invitation'}
                 </Button>
 
-                <Button
-                  variant="outline"
-                  asChild
-                  className="w-full"
-                  size="lg"
-                >
-                  <Link href="/dashboard">
-                    Maybe Later
-                  </Link>
+                <Button variant="outline" asChild className="w-full" size="lg">
+                  <Link href="/dashboard">Maybe Later</Link>
                 </Button>
               </div>
 
               <div className="text-center">
                 <p className="text-xs text-gray-500">
-                  By accepting, you'll become a collaborator on {invitation.mod.name} with {invitation.role} permissions.
+                  By accepting, you'll become a collaborator on{' '}
+                  {invitation.mod.name} with {invitation.role} permissions.
                 </p>
               </div>
             </CardContent>

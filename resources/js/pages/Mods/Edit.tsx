@@ -3,7 +3,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
 
@@ -35,26 +41,33 @@ export default function EditMod({ mod }: Props) {
   };
 
   const deleteMod = () => {
-    if (confirm('Are you sure you want to delete this mod? This will permanently delete all pages, files, and collaborator access. This action cannot be undone.')) {
+    if (
+      confirm(
+        'Are you sure you want to delete this mod? This will permanently delete all pages, files, and collaborator access. This action cannot be undone.',
+      )
+    ) {
       // Handle delete
       fetch(`/mods/${mod.slug}`, {
         method: 'DELETE',
         headers: {
-          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-        }
+          'X-CSRF-TOKEN':
+            document
+              .querySelector('meta[name="csrf-token"]')
+              ?.getAttribute('content') || '',
+        },
       }).then(() => {
         window.location.href = '/mods';
       });
     }
   };
 
-    return (
+  return (
     <AppLayout>
       <Head title={`Edit ${mod.name}`} />
 
-      <div className="max-w-2xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <nav className="text-sm text-gray-600 mb-4">
+          <nav className="mb-4 text-sm text-gray-600">
             <a href={`/mods/${mod.slug}`} className="hover:text-gray-800">
               {mod.name}
             </a>
@@ -103,7 +116,9 @@ export default function EditMod({ mod }: Props) {
                     className={errors.description ? 'border-red-500' : ''}
                   />
                   {errors.description && (
-                    <p className="mt-1 text-sm text-red-600">{errors.description}</p>
+                    <p className="mt-1 text-sm text-red-600">
+                      {errors.description}
+                    </p>
                   )}
                 </div>
 
@@ -113,32 +128,42 @@ export default function EditMod({ mod }: Props) {
                     value={data.visibility}
                     onValueChange={(value) => setData('visibility', value)}
                   >
-                    <SelectTrigger className={errors.visibility ? 'border-red-500' : ''}>
+                    <SelectTrigger
+                      className={errors.visibility ? 'border-red-500' : ''}
+                    >
                       <SelectValue placeholder="Choose visibility" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="public">
                         <div>
                           <div className="font-medium">Public</div>
-                          <div className="text-sm text-gray-600">Anyone can view this mod</div>
+                          <div className="text-sm text-gray-600">
+                            Anyone can view this mod
+                          </div>
                         </div>
                       </SelectItem>
                       <SelectItem value="unlisted">
                         <div>
                           <div className="font-medium">Unlisted</div>
-                          <div className="text-sm text-gray-600">Only people with the link can view</div>
+                          <div className="text-sm text-gray-600">
+                            Only people with the link can view
+                          </div>
                         </div>
                       </SelectItem>
                       <SelectItem value="private">
                         <div>
                           <div className="font-medium">Private</div>
-                          <div className="text-sm text-gray-600">Only you and collaborators can view</div>
+                          <div className="text-sm text-gray-600">
+                            Only you and collaborators can view
+                          </div>
                         </div>
                       </SelectItem>
                     </SelectContent>
                   </Select>
                   {errors.visibility && (
-                    <p className="mt-1 text-sm text-red-600">{errors.visibility}</p>
+                    <p className="mt-1 text-sm text-red-600">
+                      {errors.visibility}
+                    </p>
                   )}
                 </div>
 
@@ -148,26 +173,34 @@ export default function EditMod({ mod }: Props) {
                     value={data.storage_driver}
                     onValueChange={(value) => setData('storage_driver', value)}
                   >
-                    <SelectTrigger className={errors.storage_driver ? 'border-red-500' : ''}>
+                    <SelectTrigger
+                      className={errors.storage_driver ? 'border-red-500' : ''}
+                    >
                       <SelectValue placeholder="Choose storage option" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="local">
                         <div>
                           <div className="font-medium">Local Storage</div>
-                          <div className="text-sm text-gray-600">Store files on this server</div>
+                          <div className="text-sm text-gray-600">
+                            Store files on this server
+                          </div>
                         </div>
                       </SelectItem>
                       <SelectItem value="s3">
                         <div>
                           <div className="font-medium">S3 Storage</div>
-                          <div className="text-sm text-gray-600">Store files in Amazon S3 (or compatible)</div>
+                          <div className="text-sm text-gray-600">
+                            Store files in Amazon S3 (or compatible)
+                          </div>
                         </div>
                       </SelectItem>
                     </SelectContent>
                   </Select>
                   {errors.storage_driver && (
-                    <p className="mt-1 text-sm text-red-600">{errors.storage_driver}</p>
+                    <p className="mt-1 text-sm text-red-600">
+                      {errors.storage_driver}
+                    </p>
                   )}
                   <p className="mt-1 text-sm text-gray-600">
                     Warning: Changing storage will not migrate existing files
@@ -193,9 +226,12 @@ export default function EditMod({ mod }: Props) {
             <CardContent>
               <div className="space-y-4">
                 <div>
-                  <h3 className="text-lg font-medium text-gray-900">Delete Mod</h3>
+                  <h3 className="text-lg font-medium text-gray-900">
+                    Delete Mod
+                  </h3>
                   <p className="text-sm text-gray-600">
-                    Permanently delete this mod and all its content. This action cannot be undone.
+                    Permanently delete this mod and all its content. This action
+                    cannot be undone.
                   </p>
                 </div>
                 <Button variant="destructive" onClick={deleteMod}>

@@ -1,7 +1,13 @@
 import { Head, Link } from '@inertiajs/react';
 import { UserIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 
 interface User {
@@ -34,12 +40,16 @@ interface Props {
   wrongUser: boolean;
 }
 
-export default function LoginRequired({ invitation, needsLogin, wrongUser }: Props) {
+export default function LoginRequired({
+  invitation,
+  needsLogin,
+  wrongUser,
+}: Props) {
   return (
     <AppLayout>
       <Head title="Login Required" />
 
-      <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="flex min-h-screen flex-col justify-center bg-gray-50 py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <div className="text-center">
             <UserIcon className="mx-auto h-12 w-12 text-blue-600" />
@@ -49,8 +59,7 @@ export default function LoginRequired({ invitation, needsLogin, wrongUser }: Pro
             <p className="mt-2 text-center text-sm text-gray-600">
               {needsLogin
                 ? 'Please log in to accept this invitation'
-                : 'This invitation is for a different user'
-              }
+                : 'This invitation is for a different user'}
             </p>
           </div>
         </div>
@@ -67,45 +76,57 @@ export default function LoginRequired({ invitation, needsLogin, wrongUser }: Pro
             </CardHeader>
             <CardContent className="space-y-6">
               {needsLogin ? (
-                <div className="bg-blue-50 rounded-lg p-4">
+                <div className="rounded-lg bg-blue-50 p-4">
                   <p className="text-sm text-blue-700">
-                    This invitation is for <strong>{invitation.user.email}</strong>.
-                    Please log in with this account to accept the invitation.
+                    This invitation is for{' '}
+                    <strong>{invitation.user.email}</strong>. Please log in with
+                    this account to accept the invitation.
                   </p>
                 </div>
               ) : (
-                <div className="bg-yellow-50 rounded-lg p-4">
+                <div className="rounded-lg bg-yellow-50 p-4">
                   <div className="flex items-start">
-                    <ExclamationTriangleIcon className="h-5 w-5 text-yellow-600 mr-2 mt-0.5" />
+                    <ExclamationTriangleIcon className="mt-0.5 mr-2 h-5 w-5 text-yellow-600" />
                     <div>
-                      <p className="text-sm text-yellow-800 font-medium">Account Mismatch</p>
-                      <p className="text-sm text-yellow-700 mt-1">
-                        This invitation is for <strong>{invitation.user.email}</strong>,
-                        but you're logged in as a different user.
+                      <p className="text-sm font-medium text-yellow-800">
+                        Account Mismatch
+                      </p>
+                      <p className="mt-1 text-sm text-yellow-700">
+                        This invitation is for{' '}
+                        <strong>{invitation.user.email}</strong>, but you're
+                        logged in as a different user.
                       </p>
                     </div>
                   </div>
                 </div>
               )}
 
-              <div className="bg-gray-50 rounded-lg p-4">
-                <h4 className="font-medium text-gray-900 mb-2">Invitation Details:</h4>
-                <ul className="text-sm text-gray-600 space-y-1">
-                  <li>• <strong>Mod:</strong> {invitation.mod.name}</li>
-                  <li>• <strong>Role:</strong> {invitation.role.charAt(0).toUpperCase() + invitation.role.slice(1)}</li>
-                  <li>• <strong>Invited by:</strong> {invitation.inviter.name}</li>
+              <div className="rounded-lg bg-gray-50 p-4">
+                <h4 className="mb-2 font-medium text-gray-900">
+                  Invitation Details:
+                </h4>
+                <ul className="space-y-1 text-sm text-gray-600">
+                  <li>
+                    • <strong>Mod:</strong> {invitation.mod.name}
+                  </li>
+                  <li>
+                    • <strong>Role:</strong>{' '}
+                    {invitation.role.charAt(0).toUpperCase() +
+                      invitation.role.slice(1)}
+                  </li>
+                  <li>
+                    • <strong>Invited by:</strong> {invitation.inviter.name}
+                  </li>
                 </ul>
               </div>
 
               <div className="space-y-3">
                 {needsLogin ? (
                   <>
-                    <Button
-                      asChild
-                      className="w-full"
-                      size="lg"
-                    >
-                      <Link href={`/login?intended=/invitations/${invitation.token}`}>
+                    <Button asChild className="w-full" size="lg">
+                      <Link
+                        href={`/login?intended=/invitations/${invitation.token}`}
+                      >
                         Login to Accept
                       </Link>
                     </Button>
@@ -123,11 +144,7 @@ export default function LoginRequired({ invitation, needsLogin, wrongUser }: Pro
                   </>
                 ) : (
                   <>
-                    <Button
-                      asChild
-                      className="w-full"
-                      size="lg"
-                    >
+                    <Button asChild className="w-full" size="lg">
                       <Link href="/logout" method="post">
                         Logout and Login as {invitation.user.email}
                       </Link>
@@ -139,9 +156,7 @@ export default function LoginRequired({ invitation, needsLogin, wrongUser }: Pro
                       className="w-full"
                       size="lg"
                     >
-                      <Link href="/dashboard">
-                        Go to Dashboard
-                      </Link>
+                      <Link href="/dashboard">Go to Dashboard</Link>
                     </Button>
                   </>
                 )}
@@ -149,7 +164,8 @@ export default function LoginRequired({ invitation, needsLogin, wrongUser }: Pro
 
               <div className="text-center">
                 <p className="text-xs text-gray-500">
-                  If you believe this is an error, please contact {invitation.inviter.name}.
+                  If you believe this is an error, please contact{' '}
+                  {invitation.inviter.name}.
                 </p>
               </div>
             </CardContent>

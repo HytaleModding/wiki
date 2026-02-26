@@ -53,10 +53,12 @@ export default function PublicMod({ mod }: Props) {
       <div key={page.id} className={`ml-${level * 3}`}>
         <a
           href={`/docs/${mod.slug}/${page.slug}`}
-          className="flex items-center py-2 px-3 text-sm rounded-md hover:bg-accent transition-colors group"
+          className="group flex items-center rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent"
         >
-          <BookOpenIcon className="h-4 w-4 text-muted-foreground mr-2 group-hover:text-foreground" />
-          <span className="text-foreground group-hover:text-accent-foreground">{page.title}</span>
+          <BookOpenIcon className="mr-2 h-4 w-4 text-muted-foreground group-hover:text-foreground" />
+          <span className="text-foreground group-hover:text-accent-foreground">
+            {page.title}
+          </span>
           {!page.published && (
             <Badge variant="outline" className="ml-2 text-xs">
               Draft
@@ -76,7 +78,7 @@ export default function PublicMod({ mod }: Props) {
     <PublicLayout modName={mod.name} modSlug={mod.slug}>
       <Head title={`${mod.name} Documentation`} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
         <div className="lg:col-span-1">
           <div className="sticky top-6 space-y-6">
             <Card>
@@ -84,7 +86,9 @@ export default function PublicMod({ mod }: Props) {
                 <CardTitle className="text-lg">About</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <p className="text-sm text-muted-foreground">{mod.description}</p>
+                <p className="text-sm text-muted-foreground">
+                  {mod.description}
+                </p>
                 <div className="flex items-center space-x-2">
                   <Avatar className="h-6 w-6">
                     <AvatarFallback className="text-xs">
@@ -105,9 +109,11 @@ export default function PublicMod({ mod }: Props) {
               </CardHeader>
               <CardContent>
                 {mod.root_pages.length === 0 ? (
-                  <div className="text-center py-8">
-                    <BookOpenIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-sm text-muted-foreground">No pages available yet.</p>
+                  <div className="py-8 text-center">
+                    <BookOpenIcon className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">
+                      No pages available yet.
+                    </p>
                   </div>
                 ) : (
                   <nav className="space-y-1">
@@ -126,16 +132,16 @@ export default function PublicMod({ mod }: Props) {
               <CardHeader>
                 <div className="flex items-center space-x-2">
                   <BookOpenIcon className="h-5 w-5 text-primary" />
-                  <CardTitle className="text-xl">{mod.index_page.title}</CardTitle>
+                  <CardTitle className="text-xl">
+                    {mod.index_page.title}
+                  </CardTitle>
                 </div>
                 <p className="text-sm text-muted-foreground">
                   Last updated {formatDate(mod.index_page.updated_at)}
                 </p>
               </CardHeader>
-              <CardContent className="prose prose-gray max-w-none dark:prose-invert">
-                <MarkdownRenderer
-                  content={mod.index_page.content || ''}
-                />
+              <CardContent className="prose max-w-none prose-gray dark:prose-invert">
+                <MarkdownRenderer content={mod.index_page.content || ''} />
               </CardContent>
             </Card>
           ) : (
@@ -145,25 +151,31 @@ export default function PublicMod({ mod }: Props) {
                 <p className="text-muted-foreground">{mod.description}</p>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-12">
-                  <BookOpenIcon className="h-16 w-16 text-muted-foreground mx-auto mb-6" />
-                  <h3 className="text-lg font-semibold mb-2">
+                <div className="py-12 text-center">
+                  <BookOpenIcon className="mx-auto mb-6 h-16 w-16 text-muted-foreground" />
+                  <h3 className="mb-2 text-lg font-semibold">
                     Explore the Documentation
                   </h3>
-                  <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-                    Browse through the navigation on the left to explore the available documentation pages.
+                  <p className="mx-auto mb-8 max-w-md text-muted-foreground">
+                    Browse through the navigation on the left to explore the
+                    available documentation pages.
                   </p>
                   {mod.root_pages.length > 0 && (
-                    <div className="grid gap-4 max-w-2xl mx-auto">
-                      <h4 className="font-semibold text-left mb-4">Featured Pages</h4>
+                    <div className="mx-auto grid max-w-2xl gap-4">
+                      <h4 className="mb-4 text-left font-semibold">
+                        Featured Pages
+                      </h4>
                       {mod.root_pages.slice(0, 3).map((page) => (
-                        <Card key={page.id} className="text-left hover:shadow-md transition-shadow">
+                        <Card
+                          key={page.id}
+                          className="text-left transition-shadow hover:shadow-md"
+                        >
                           <CardContent className="p-4">
                             <a
                               href={`/docs/${mod.slug}/${page.slug}`}
-                              className="block group"
+                              className="group block"
                             >
-                              <h5 className="font-medium text-foreground group-hover:text-primary mb-2">
+                              <h5 className="mb-2 font-medium text-foreground group-hover:text-primary">
                                 {page.title}
                               </h5>
                               <p className="text-sm text-muted-foreground">
