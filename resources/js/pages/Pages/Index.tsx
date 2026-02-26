@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
+import { getMarkdownPreview } from '@/utils/markdown';
 
 interface User {
   id: number;
@@ -71,7 +72,7 @@ export default function PagesIndex({ mod, pages, userRole, canEdit }: Props) {
                   )}
                 </CardTitle>
                 <CardDescription className="mt-1">
-                  {page.content ? page.content.substring(0, 150) + '...' : 'No content yet'}
+                  {page.content ? getMarkdownPreview(page.content, 150) : 'No content yet'}
                 </CardDescription>
               </div>
               <div className="flex items-center space-x-2">

@@ -1,8 +1,10 @@
-import { Head } from '@inertiajs/react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { BookOpenIcon } from '@heroicons/react/24/outline';
+import { Head } from '@inertiajs/react';
+
 import MarkdownRenderer from '@/components/MarkdownRenderer';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { getMarkdownPreview } from '@/utils/markdown';
 
 interface User {
   id: number;
@@ -95,7 +97,6 @@ export default function PublicMod({ mod }: Props) {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Sidebar Navigation */}
           <div className="lg:col-span-1">
             <Card className="sticky top-8">
               <CardHeader>
@@ -161,7 +162,7 @@ export default function PublicMod({ mod }: Props) {
                               {page.title}
                             </h4>
                             <p className="text-sm text-blue-700">
-                              {page.content?.substring(0, 100)}...
+                              {getMarkdownPreview(page.content || '', 100)}
                             </p>
                           </a>
                         ))}

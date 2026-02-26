@@ -69,7 +69,7 @@ class File extends Model
             return Storage::disk('s3')->url($this->path);
         }
 
-        return Storage::disk('local')->url($this->path);
+        return Storage::disk('public')->url($this->path);
     }
 
     /**
@@ -121,7 +121,7 @@ class File extends Model
             if ($file->storage_driver === 's3') {
                 Storage::disk('s3')->delete($file->path);
             } else {
-                Storage::disk('local')->delete($file->path);
+                Storage::disk('public')->delete($file->path);
             }
         });
     }

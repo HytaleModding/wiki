@@ -1,8 +1,9 @@
-import { Head } from '@inertiajs/react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { BookOpenIcon } from '@heroicons/react/24/outline';
+import { Head } from '@inertiajs/react';
+
+import { Badge } from '@/components/ui/badge';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
+import { getMarkdownPreview } from '@/utils/markdown';
 
 interface User {
   id: number;
@@ -150,7 +151,7 @@ export default function PublicPage({ mod, page, navigation }: Props) {
                           {child.title}
                         </h4>
                         <p className="text-sm text-gray-600">
-                          {child.content?.substring(0, 150)}...
+                          {getMarkdownPreview(child.content || '', 150)}
                         </p>
                       </a>
                     ))}

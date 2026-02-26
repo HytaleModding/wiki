@@ -1,7 +1,3 @@
-import { Head } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import {
   BookOpenIcon,
   PlusIcon,
@@ -10,7 +6,12 @@ import {
   EyeIcon,
   PencilIcon,
 } from '@heroicons/react/24/outline';
+import { Head } from '@inertiajs/react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
+import MarkdownRenderer from '@/components/MarkdownRenderer';
 
 interface Page {
   id: string;
@@ -206,11 +207,9 @@ export default function ShowMod({ mod, userRole, canEdit, canManage }: Props) {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="prose prose-sm max-w-none">
-                    <div className="text-gray-600">
-                      {mod.index_page.content?.substring(0, 300)}...
-                    </div>
-                  </div>
+                  <MarkdownRenderer
+                    content={mod.index_page.content || ''}
+                  />
                   <div className="mt-4 flex items-center justify-between">
                     <span className="text-sm text-gray-500">
                       Updated {formatDate(mod.index_page.updated_at)}

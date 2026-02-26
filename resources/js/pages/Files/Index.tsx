@@ -1,5 +1,6 @@
-import { PlusIcon, UploadIcon, TrashIcon, DownloadIcon, FileIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { Head, useForm } from '@inertiajs/react';
+import { DownloadIcon, UploadIcon, FileIcon } from 'lucide-react';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -10,12 +11,15 @@ import AppLayout from '@/layouts/app-layout';
 
 interface File {
   id: string;
-  name: string;
   original_name: string;
   size: number;
   mime_type: string;
   url: string;
   created_at: string;
+  uploader?: {
+    id: number;
+    name: string;
+  };
 }
 
 interface Mod {

@@ -26,19 +26,38 @@ class FileController extends Controller
         }
 
         $files = $mod->files()
-            ->with(['uploader', 'page'])
+            ->with(['uploader'])
             ->latest()
-            ->paginate(20);
+            ->get()
+            ->map(function ($file) {
+                return [
+                    'id' => $file->id,
+                    'original_name' => $file->original_name,
+                    'size' => $file->size,
+                    'mime_type' => $file->mime_type,
+                    'url' => $file->url,
+                    'created_at' => $file->created_at->toISOString(),
+                    'uploader' => $file->uploader ? [
+                        'id' => $file->uploader->id,
+                        'name' => $file->uploader->name,
+                    ] : null,
+                ];
+            });
 
         return Inertia::render('Files/Index', [
-            'mod' => $mod->load(['owner']),
+            'mod' => [
+                'id' => $mod->id,
+                'name' => $mod->name,
+                'slug' => $mod->slug,
+                'storage_driver' => $mod->storage_driver,
+            ],
             'files' => $files,
             'canEdit' => $user && $mod->userCan($user, 'edit'),
         ]);
     }
 
     /**
-     * Upload a new file.
+     * Upload new files.
      */
     public function store(Request $request, Mod $mod)
     {
@@ -49,11 +68,12 @@ class FileController extends Controller
         }
 
         $request->validate([
-            'file' => 'required|file|max:10240', // 10MB max
+            'files' => 'required|array|min:1',
+            'files.*' => 'file|max:10240|mimes:jpeg,png,gif,webp,pdf,txt,md,doc,docx,zip,rar', // 10MB max
             'page_id' => 'nullable|uuid|exists:pages,id',
         ]);
 
-        $uploadedFile = $request->file('file');
+        $uploadedFiles = $request->file('files');
         $pageId = $request->get('page_id');
 
         if ($pageId) {
@@ -63,44 +83,56 @@ class FileController extends Controller
             }
         }
 
-        $originalName = $uploadedFile->getClientOriginalName();
-        $extension = $uploadedFile->getClientOriginalExtension();
-        $filename = Str::uuid() . '.' . $extension;
+        $uploadedFileData = [];
 
-        $path = "mods/{$mod->id}/files/{$filename}";
+        foreach ($uploadedFiles as $uploadedFile) {
+            $originalName = $uploadedFile->getClientOriginalName();
+            $extension = $uploadedFile->getClientOriginalExtension();
+            $filename = Str::uuid() . '.' . $extension;
 
-        $disk = $mod->storage_driver;
-        $uploadedFile->storeAs("mods/{$mod->id}/files", $filename, $disk);
+            $path = "mods/{$mod->id}/files/{$filename}";
 
-        $file = File::create([
-            'mod_id' => $mod->id,
-            'page_id' => $pageId,
-            'original_name' => $originalName,
-            'filename' => $filename,
-            'path' => $path,
-            'mime_type' => $uploadedFile->getMimeType(),
-            'size' => $uploadedFile->getSize(),
-            'storage_driver' => $disk,
-            'uploaded_by' => $user->id,
-        ]);
+            // Use public disk for local storage, s3 for S3 storage
+            $disk = $mod->storage_driver === 's3' ? 's3' : 'public';
+            $uploadedFile->storeAs("mods/{$mod->id}/files", $filename, $disk);
 
-        if ($disk === 's3') {
-            $url = Storage::disk('s3')->url($path);
-        } else {
-            $url = Storage::disk('local')->url($path);
+            $file = File::create([
+                'mod_id' => $mod->id,
+                'page_id' => $pageId,
+                'original_name' => $originalName,
+                'filename' => $filename,
+                'path' => $path,
+                'mime_type' => $uploadedFile->getMimeType(),
+                'size' => $uploadedFile->getSize(),
+                'storage_driver' => $mod->storage_driver, // Keep original driver name
+                'uploaded_by' => $user->id,
+            ]);
+
+            if ($mod->storage_driver === 's3') {
+                $url = Storage::disk('s3')->url($path);
+            } else {
+                $url = Storage::disk('public')->url($path);
+            }
+
+            $file->update(['url' => $url]);
+
+            $uploadedFileData[] = [
+                'id' => $file->id,
+                'original_name' => $file->original_name,
+                'size' => $file->human_size,
+                'url' => $file->url,
+            ];
         }
-
-        $file->update(['url' => $url]);
 
         if ($request->expectsJson()) {
             return response()->json([
                 'success' => true,
-                'file' => $file->load('uploader'),
-                'message' => 'File uploaded successfully!'
+                'files' => $uploadedFileData,
+                'message' => count($uploadedFiles) . ' file(s) uploaded successfully!'
             ]);
         }
 
-        return redirect()->back()->with('success', 'File uploaded successfully!');
+        return redirect()->back()->with('success', count($uploadedFiles) . ' file(s) uploaded successfully!');
     }
 
     /**
@@ -142,7 +174,7 @@ class FileController extends Controller
             abort(403);
         }
 
-        $disk = $file->storage_driver;
+        $disk = $file->storage_driver === 's3' ? 's3' : 'public';
 
         if (!Storage::disk($disk)->exists($file->path)) {
             abort(404, 'File not found on storage.');
@@ -207,7 +239,7 @@ class FileController extends Controller
         $filename = Str::uuid() . '.' . $extension;
 
         $path = "mods/{$mod->id}/files/{$filename}";
-        $disk = $mod->storage_driver;
+        $disk = $mod->storage_driver === 's3' ? 's3' : 'public';
         $uploadedFile->storeAs("mods/{$mod->id}/files", $filename, $disk);
 
         $file = File::create([
@@ -217,14 +249,14 @@ class FileController extends Controller
             'path' => $path,
             'mime_type' => $uploadedFile->getMimeType(),
             'size' => $uploadedFile->getSize(),
-            'storage_driver' => $disk,
+            'storage_driver' => $mod->storage_driver,
             'uploaded_by' => $user->id,
         ]);
 
-        if ($disk === 's3') {
+        if ($mod->storage_driver === 's3') {
             $url = Storage::disk('s3')->url($path);
         } else {
-            $url = Storage::disk('local')->url($path);
+            $url = Storage::disk('public')->url($path);
         }
 
         $file->update(['url' => $url]);

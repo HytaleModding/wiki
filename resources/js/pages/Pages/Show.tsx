@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { PencilIcon, EyeIcon, BookOpenIcon } from '@heroicons/react/24/outline';
 import AppLayout from '@/layouts/app-layout';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
+import { getMarkdownPreview } from '@/utils/markdown';
 
 interface User {
   id: number;
@@ -85,29 +86,6 @@ export default function ShowPage({ mod, page, navigation, userRole, canEdit }: P
     ));
   };
 
-  // Simple markdown to HTML conversion (basic implementation)
-  const renderMarkdown = (content: string) => {
-    let html = content
-      // Headers
-      .replace(/^### (.*$)/gim, '<h3 class="text-lg font-semibold mt-6 mb-3">$1</h3>')
-      .replace(/^## (.*$)/gim, '<h2 class="text-xl font-semibold mt-8 mb-4">$1</h2>')
-      .replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold mt-8 mb-6">$1</h1>')
-      // Bold and italic
-      .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
-      .replace(/\*(.*)\*/gim, '<em>$1</em>')
-      // Links
-      .replace(/\[([^\]]+)\]\(([^)]+)\)/gim, '<a href="$2" class="text-blue-600 hover:underline">$1</a>')
-      // Code blocks
-      .replace(/```([^`]+)```/gim, '<pre class="bg-gray-100 p-4 rounded-md overflow-x-auto my-4"><code>$1</code></pre>')
-      // Inline code
-      .replace(/`([^`]+)`/gim, '<code class="bg-gray-100 px-1 py-0.5 rounded text-sm">$1</code>')
-      // Lists
-      .replace(/^\- (.*$)/gim, '<li class="ml-4">$1</li>')
-      // Paragraphs (simple)
-      .replace(/\n\n/gim, '</p><p class="mb-4">');
-
-    return `<div class="prose prose-sm max-w-none"><p class="mb-4">${html}</p></div>`;
-  };
 
   return (
     <AppLayout>
@@ -234,7 +212,7 @@ export default function ShowPage({ mod, page, navigation, userRole, canEdit }: P
                           {child.title}
                         </h3>
                         <p className="text-sm text-gray-600">
-                          {child.content?.substring(0, 150)}...
+                          {getMarkdownPreview(child.content || '', 150)}
                         </p>
                       </a>
                     ))}

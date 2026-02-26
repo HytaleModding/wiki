@@ -1,14 +1,14 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, router } from '@inertiajs/react';
+import { useState } from 'react';
+import MarkdownRenderer from '@/components/MarkdownRenderer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
-import MarkdownRenderer from '@/components/MarkdownRenderer';
-import { useState } from 'react';
 
 interface Mod {
   id: string;
@@ -102,14 +102,14 @@ export default function EditPage({ mod, page, potentialParents }: Props) {
                 <div>
                   <Label htmlFor="parent_id">Parent Page</Label>
                   <Select
-                    value={data.parent_id}
-                    onValueChange={(value) => setData('parent_id', value)}
+                    value={data.parent_id || 'none'}
+                    onValueChange={(value) => setData('parent_id', value === 'none' ? '' : value)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="No parent (root page)" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">No parent (root page)</SelectItem>
+                      <SelectItem value="none">No parent (root page)</SelectItem>
                       {potentialParents.map((parent) => (
                         <SelectItem key={parent.id} value={parent.id}>
                           {parent.title}
@@ -202,7 +202,7 @@ echo 'Hello World'
                   <CardTitle>Live Preview</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="border rounded-md p-4 bg-white min-h-[400px]">
+                  <div className="border rounded-md p-4  min-h-[400px]">
                     <MarkdownRenderer
                       content={data.content || 'Nothing to preview yet...'}
                     />
@@ -217,25 +217,16 @@ echo 'Hello World'
               <Button type="button" variant="outline" asChild>
                 <a href={`/mods/${mod.slug}/pages/${page.slug}`}>Cancel</a>
               </Button>
-              <Button type="button" variant="destructive" asChild>
-                <a href={`/mods/${mod.slug}/pages/${page.slug}`}
-                   onClick={(e) => {
-                     e.preventDefault();
-                     if (confirm('Are you sure you want to delete this page? This action cannot be undone.')) {
-                       // Handle delete
-                       fetch(`/mods/${mod.slug}/pages/${page.slug}`, {
-                         method: 'DELETE',
-                         headers: {
-                           'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                         }
-                       }).then(() => {
-                         window.location.href = `/mods/${mod.slug}`;
-                       });
-                     }
-                   }}
-                >
-                  Delete Page
-                </a>
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={() => {
+                  if (confirm('Are you sure you want to delete this page? This action cannot be undone.')) {
+                    router.delete(`/mods/${mod.slug}/pages/${page.slug}`);
+                  }
+                }}
+              >
+                Delete Page
               </Button>
             </div>
             <div className="flex space-x-3">
@@ -243,8 +234,10 @@ echo 'Hello World'
                 type="button"
                 variant="outline"
                 onClick={() => {
-                  setData('published', false);
-                  patch(`/mods/${mod.slug}/pages/${page.slug}`);
+                  router.patch(`/mods/${mod.slug}/pages/${page.slug}`, {
+                    ...data,
+                    published: false,
+                  });
                 }}
                 disabled={processing}
               >
