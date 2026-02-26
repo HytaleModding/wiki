@@ -7,16 +7,18 @@ import {
   PencilIcon,
 } from '@heroicons/react/24/outline';
 import { Head } from '@inertiajs/react';
+import MarkdownRenderer from '@/components/MarkdownRenderer';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useFlashMessages } from '@/hooks/useFlashMessages';
 import AppLayout from '@/layouts/app-layout';
-import MarkdownRenderer from '@/components/MarkdownRenderer';
 
 interface Page {
   id: string;
   title: string;
   slug: string;
+  content?: string;
   published: boolean;
   updated_at: string;
   children?: Page[];
@@ -56,6 +58,8 @@ interface Props {
 }
 
 export default function ShowMod({ mod, userRole, canEdit, canManage }: Props) {
+  useFlashMessages();
+
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString('en-US', {
       year: 'numeric',

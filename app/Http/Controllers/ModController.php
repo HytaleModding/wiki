@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\CollaboratorInvitation;
 use App\Models\Mod;
+use App\Models\ModInvitation;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 
@@ -198,7 +201,6 @@ class ModController extends Controller
 
         return Inertia::render('Mods/ManageCollaborators', [
             'mod' => $mod,
-            'userRole' => $mod->getUserRole($user),
             'canManage' => true,
         ]);
     }
@@ -229,12 +231,34 @@ class ModController extends Controller
             return back()->withErrors(['username' => 'Owner cannot be added as collaborator.']);
         }
 
-        $mod->collaborators()->attach($collaborator->id, [
-            'role' => $validated['role'],
-            'invited_by' => $user->id,
-        ]);
+        $existingInvitation = ModInvitation::where('mod_id', $mod->id)
+            ->where('user_id', $collaborator->id)
+            ->whereNull('accepted_at')
+            ->where('expires_at', '>', now())
+            ->first();
 
-        return back()->with('success', 'Collaborator added successfully!');
+        if ($existingInvitation) {
+            return back()->withErrors(['username' => 'User already has a pending invitation.']);
+        }
+
+        $invitation = ModInvitation::createInvitation($mod, $collaborator, $user, $validated['role']);
+
+        $inviteUrl = route('invitations.show', ['token' => $invitation->token]);
+
+        try {
+            Mail::to($collaborator->email)->send(new CollaboratorInvitation(
+                collaborator: $collaborator,
+                invitedBy: $user,
+                mod: $mod,
+                role: $validated['role'],
+                inviteUrl: $inviteUrl
+            ));
+
+            return back()->with('success', "Invitation sent to {$collaborator->name}!");
+        } catch (\Exception $e) {
+            $invitation->delete();
+            return back()->withErrors(['email' => 'Failed to send invitation email. Please try again.']);
+        }
     }
 
     /**
@@ -328,5 +352,74 @@ class ModController extends Controller
                 ] : null,
             ]),
         ]);
+    }
+
+    /**
+     * Show invitation acceptance page.
+     */
+    public function showInvitation(string $token)
+    {
+        $invitation = ModInvitation::with(['mod', 'user', 'inviter'])
+            ->where('token', $token)
+            ->firstOrFail();
+
+        if ($invitation->isExpired()) {
+            return Inertia::render('Invitations/Expired', [
+                'invitation' => $invitation,
+            ]);
+        }
+
+        if ($invitation->isAccepted()) {
+            return redirect()->route('mods.show', $invitation->mod->slug)
+                ->with('success', 'You are already a collaborator on this mod!');
+        }
+
+        $user = Auth::user();
+        if (!$user || $user->id !== $invitation->user_id) {
+            return Inertia::render('Invitations/Login', [
+                'invitation' => $invitation,
+                'needsLogin' => !$user,
+                'wrongUser' => $user && $user->id !== $invitation->user_id,
+            ]);
+        }
+
+        return Inertia::render('Invitations/Accept', [
+            'invitation' => $invitation,
+        ]);
+    }
+
+    /**
+     * Accept an invitation.
+     */
+    public function acceptInvitation(string $token)
+    {
+        $user = Auth::user();
+
+        $invitation = ModInvitation::with(['mod', 'user'])
+            ->where('token', $token)
+            ->firstOrFail();
+
+        if (!$user || $user->id !== $invitation->user_id) {
+            return redirect()->route('login')
+                ->with('error', 'Please login to accept this invitation.');
+        }
+
+        if ($invitation->isExpired()) {
+            return redirect()->route('invitations.show', $token)
+                ->with('error', 'This invitation has expired.');
+        }
+
+        if ($invitation->isAccepted()) {
+            return redirect()->route('mods.show', $invitation->mod->slug)
+                ->with('success', 'You are already a collaborator on this mod!');
+        }
+
+        if ($invitation->accept()) {
+            return redirect()->route('mods.show', $invitation->mod->slug)
+                ->with('success', "Welcome to {$invitation->mod->name}! You are now a {$invitation->role}.");
+        }
+
+        return redirect()->route('invitations.show', $token)
+            ->with('error', 'Failed to accept invitation. Please try again.');
     }
 }

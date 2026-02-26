@@ -1,6 +1,7 @@
 import { PlusIcon, UsersIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, router } from '@inertiajs/react';
 import { useState } from 'react';
+import { sileo } from 'sileo';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useFlashMessages } from '@/hooks/useFlashMessages';
 import AppLayout from '@/layouts/app-layout';
 
 interface User {
@@ -37,11 +39,11 @@ interface Mod {
 
 interface Props {
   mod: Mod;
-  userRole: string;
   canManage: boolean;
 }
 
-export default function ManageCollaborators({ mod, userRole, canManage }: Props) {
+export default function ManageCollaborators({ mod, canManage }: Props) {
+  useFlashMessages();
   const [showAddDialog, setShowAddDialog] = useState(false);
 
   const { data, setData, post, processing, errors, reset } = useForm({
@@ -49,42 +51,88 @@ export default function ManageCollaborators({ mod, userRole, canManage }: Props)
     role: 'viewer' as 'admin' | 'editor' | 'viewer',
   });
 
+  const { delete: deleteRequest } = useForm();
+
   const addCollaborator = (e: React.FormEvent) => {
     e.preventDefault();
     post(`/mods/${mod.slug}/collaborators`, {
       onSuccess: () => {
         reset();
         setShowAddDialog(false);
+        sileo.success({
+          title: 'Invitation Sent!',
+          description: `Invitation has been sent to ${data.username}`,
+        });
+      },
+      onError: (errors) => {
+        if (errors.email) {
+          sileo.error({
+            title: 'Email Failed',
+            description: errors.email,
+          });
+        } else if (errors.username) {
+          sileo.error({
+            title: 'Invalid User',
+            description: errors.username,
+          });
+        } else {
+          sileo.error({
+            title: 'Error',
+            description: 'Failed to send invitation. Please try again.',
+          });
+        }
       },
     });
   };
 
   const removeCollaborator = (collaboratorId: number) => {
     if (confirm('Are you sure you want to remove this collaborator?')) {
-      // Using Inertia delete method
-      window.location.href = `/mods/${mod.slug}/collaborators/${collaboratorId}`;
-      fetch(`/mods/${mod.slug}/collaborators/${collaboratorId}`, {
-        method: 'DELETE',
-        headers: {
-          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-        }
-      }).then(() => {
-        window.location.reload();
+      const collaboratorToRemove = mod.collaborators.find(c => c.id === collaboratorId);
+      const collaboratorName = collaboratorToRemove?.name || 'collaborator';
+
+      deleteRequest(`/mods/${mod.slug}/collaborators/${collaboratorId}`, {
+        onSuccess: () => {
+          sileo.success({
+            title: 'Collaborator Removed',
+            description: `${collaboratorName} has been removed from the mod`,
+          });
+        },
+        onError: () => {
+          sileo.error({
+            title: 'Error',
+            description: 'Failed to remove collaborator. Please try again.',
+          });
+        },
       });
     }
   };
 
   const updateRole = (collaboratorId: number, newRole: string) => {
-    fetch(`/mods/${mod.slug}/collaborators/${collaboratorId}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-      },
-      body: JSON.stringify({ role: newRole }),
-    }).then(() => {
-      window.location.reload();
-    });
+    const collaboratorToUpdate = mod.collaborators.find(c => c.id === collaboratorId);
+    const collaboratorName = collaboratorToUpdate?.name || 'collaborator';
+
+    console.log('Updating role for:', collaboratorId, 'to:', newRole);
+    console.log('URL:', `/mods/${mod.slug}/collaborators/${collaboratorId}`);
+    console.log('Data:', { role: newRole });
+
+    router.patch(`/mods/${mod.slug}/collaborators/${collaboratorId}`,
+      { role: newRole },
+      {
+        onSuccess: () => {
+          sileo.success({
+            title: 'Role Updated',
+            description: `${collaboratorName}'s role has been updated to ${newRole}`,
+          });
+        },
+        onError: (errors) => {
+          console.error('Update role errors:', errors);
+          sileo.error({
+            title: 'Error',
+            description: `Failed to update role. ${JSON.stringify(errors)}`,
+          });
+        },
+      }
+    );
   };
 
   const getRoleColor = (role: string) => {
