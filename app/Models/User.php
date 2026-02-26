@@ -39,6 +39,15 @@ class User extends Authenticatable
     ];
 
     /**
+     * The accessors to append to the model's array form.
+     *
+     * @var list<string>
+     */
+    protected $appends = [
+        'avatar',
+    ];
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -94,5 +103,16 @@ class User extends Authenticatable
         $requiredRoleIndex = array_search($role, $roleHierarchy);
 
         return $userRoleIndex >= $requiredRoleIndex;
+    }
+
+    /**
+     * Get the user's avatar URL with fallback to UI Avatars API.
+     */
+    protected function avatar(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            get: fn () => $this->avatar_url ?:
+                'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&background=random'
+        );
     }
 }

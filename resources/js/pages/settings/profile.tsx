@@ -1,5 +1,7 @@
 import { Transition } from '@headlessui/react';
-import { Form, Head, Link, usePage } from '@inertiajs/react';
+import { Form, Head, Link, usePage, router } from '@inertiajs/react';
+import { Camera, Trash2 } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import DeleteUser from '@/components/delete-user';
 import Heading from '@/components/heading';
@@ -20,6 +22,35 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
+function UserAvatar({
+    src,
+    name,
+    size = 80,
+}: {
+    src?: string | null;
+    name: string;
+    size?: number;
+}) {
+    const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&size=${size * 2}&background=random`;
+    const [imgSrc, setImgSrc] = useState(src || fallback);
+
+    useEffect(() => {
+        setImgSrc(src || fallback);
+    }, [src]);
+
+    return (
+        <img
+            src={imgSrc}
+            alt={name}
+            width={size}
+            height={size}
+            onError={() => setImgSrc(fallback)}
+            className="rounded-full object-cover"
+            style={{ width: size, height: size }}
+        />
+    );
+}
+
 export default function Profile({
     mustVerifyEmail,
     status,
@@ -28,6 +59,34 @@ export default function Profile({
     status?: string;
 }) {
     const { auth } = usePage<SharedData>().props;
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+
+    const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                setAvatarPreview(e.target?.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const triggerFileInput = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleDeleteAvatar = () => {
+        if (
+            auth.user.avatar &&
+            !auth.user.avatar.includes('ui-avatars.com')
+        ) {
+            router.delete('/settings/profile/avatar', {
+                preserveScroll: true,
+            });
+        }
+    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -50,8 +109,73 @@ export default function Profile({
                         }}
                         className="space-y-6"
                     >
-                        {({ processing, recentlySuccessful, errors }) => (
+                        {({ processing, recentlySuccessful, errors }) => {
+                            useEffect(() => {
+                                if (recentlySuccessful) {
+                                    setAvatarPreview(null);
+                                }
+                            }, [recentlySuccessful]);
+
+                            return (
                             <>
+                                <div className="grid gap-4">
+                                    <Label>Profile Picture</Label>
+                                    <div className="flex items-center gap-4">
+                                        <UserAvatar
+                                            src={
+                                                avatarPreview ||
+                                                auth.user.avatar
+                                            }
+                                            name={auth.user.name}
+                                            size={80}
+                                        />
+                                        <div className="flex flex-col gap-2">
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={triggerFileInput}
+                                                className="flex items-center gap-2"
+                                            >
+                                                <Camera className="h-4 w-4" />
+                                                Upload Photo
+                                            </Button>
+                                            {auth.user.avatar &&
+                                                !auth.user.avatar.includes(
+                                                    'ui-avatars.com',
+                                                ) && (
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={
+                                                            handleDeleteAvatar
+                                                        }
+                                                        className="flex items-center gap-2 text-red-600 hover:text-red-700"
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                        Remove Photo
+                                                    </Button>
+                                                )}
+                                            <p className="text-xs text-muted-foreground">
+                                                JPG, PNG, GIF or WebP. Max 2MB.
+                                            </p>
+                                        </div>
+                                        <input
+                                            ref={fileInputRef}
+                                            type="file"
+                                            name="avatar"
+                                            accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                                            onChange={handleAvatarChange}
+                                            className="hidden"
+                                        />
+                                    </div>
+                                    <InputError
+                                        className="mt-2"
+                                        message={errors.avatar}
+                                    />
+                                </div>
+
                                 <div className="grid gap-2">
                                     <Label htmlFor="name">Name</Label>
 
@@ -139,7 +263,8 @@ export default function Profile({
                                     </Transition>
                                 </div>
                             </>
-                        )}
+                        )
+                        }}
                     </Form>
                 </div>
 
