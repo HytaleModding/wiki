@@ -28,16 +28,16 @@ export default function Dashboard({ stats }: Props) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
-            <div className="flex h-full flex-1 flex-col gap-6 p-6">
+            <div className="flex flex-col gap-6">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight">Welcome back!</h1>
-                        <p className="text-muted-foreground">
+                        <h1 className="text-3xl font-bold tracking-tight">Welcome back!</h1>
+                        <p className="text-muted-foreground mt-2">
                             Manage your mod documentation and collaborate with others.
                         </p>
                     </div>
-                    <Button asChild>
-                        <a href="/mods/create">
+                    <Button asChild size="lg">
+                        <a href="/mods/create" className="shadow-md">
                             <Plus className="h-4 w-4 mr-2" />
                             New Mod
                         </a>

@@ -63,7 +63,6 @@ class FileController extends Controller
     public function store(Request $request, Mod $mod)
     {
         $user = Auth::user();
-        Log::debug("got the thing");
 
         if (!$mod->userCan($user, 'edit')) {
             abort(403);
@@ -93,7 +92,6 @@ class FileController extends Controller
 
             $path = "mods/{$mod->id}/files/{$filename}";
 
-            // Use public disk for local storage, s3 for S3 storage
             $disk = $mod->storage_driver === 's3' ? 's3' : 'public';
             $uploadedFile->storeAs("mods/{$mod->id}/files", $filename, $disk);
 

@@ -32,23 +32,18 @@ Route::get('dashboard', function () {
     ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-// Public documentation routes
 Route::get('/docs/{mod:slug}', [ModController::class, 'publicShow'])->name('public.mod');
 Route::get('/docs/{mod:slug}/{page:slug}', [PageController::class, 'publicShow'])->name('public.page');
 
-// Authenticated mod management routes
 Route::middleware(['auth', 'verified'])->group(function () {
-    // Mod routes
     Route::resource('mods', ModController::class)->except(['show']);
     Route::get('mods/{mod:slug}', [ModController::class, 'show'])->name('mods.show');
 
-    // Mod collaborator management
     Route::get('mods/{mod:slug}/collaborators', [ModController::class, 'manageCollaborators'])->name('mods.collaborators.index');
     Route::post('mods/{mod:slug}/collaborators', [ModController::class, 'addCollaborator'])->name('mods.collaborators.store');
     Route::delete('mods/{mod:slug}/collaborators/{collaborator}', [ModController::class, 'removeCollaborator'])->name('mods.collaborators.destroy');
     Route::patch('mods/{mod:slug}/collaborators/{collaborator}', [ModController::class, 'updateCollaboratorRole'])->name('mods.collaborators.update');
 
-    // Page routes
     Route::get('mods/{mod:slug}/pages', [PageController::class, 'index'])->name('pages.index');
     Route::get('mods/{mod:slug}/pages/create', [PageController::class, 'create'])->name('pages.create');
     Route::post('mods/{mod:slug}/pages', [PageController::class, 'store'])->name('pages.store');
@@ -57,21 +52,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('mods/{mod:slug}/pages/{page:slug}', [PageController::class, 'update'])->name('pages.update');
     Route::delete('mods/{mod:slug}/pages/{page:slug}', [PageController::class, 'destroy'])->name('pages.destroy');
 
-    // Page utilities
     Route::post('mods/{mod:slug}/pages/reorder', [PageController::class, 'updateOrder'])->name('pages.reorder');
     Route::post('mods/{mod:slug}/pages/{page:slug}/autosave', [PageController::class, 'autoSave'])->name('pages.autosave');
     Route::get('mods/{mod:slug}/pages/search', [PageController::class, 'search'])->name('pages.search');
 
-    // File routes
     Route::get('mods/{mod:slug}/files', [FileController::class, 'index'])->name('files.index');
     Route::post('mods/{mod:slug}/files', [FileController::class, 'store'])->name('files.store');
     Route::get('mods/{mod:slug}/files/{file}', [FileController::class, 'show'])->name('files.show');
     Route::delete('mods/{mod:slug}/files/{file}', [FileController::class, 'destroy'])->name('files.destroy');
     Route::get('mods/{mod:slug}/files/{file}/download', [FileController::class, 'download'])->name('files.download');
 
-    // File utilities
     Route::post('mods/{mod:slug}/files/quick-upload', [FileController::class, 'quickUpload'])->name('files.quick-upload');
     Route::get('mods/{mod:slug}/pages/{page:slug}/files', [FileController::class, 'getPageFiles'])->name('files.page');
 });
+
+Route::get('invitations/{token}', [ModController::class, 'showInvitation'])->name('invitations.show');
+Route::post('invitations/{token}/accept', [ModController::class, 'acceptInvitation'])->name('invitations.accept')->middleware('auth');
 
 require __DIR__.'/settings.php';

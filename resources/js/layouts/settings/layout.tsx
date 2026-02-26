@@ -43,16 +43,16 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
     }
 
     return (
-        <div className="px-4 py-6">
+        <div className="space-y-6">
             <Heading
                 title="Settings"
                 description="Manage your profile and account settings"
             />
 
             <div className="flex flex-col lg:flex-row lg:space-x-12">
-                <aside className="w-full max-w-xl lg:w-48">
+                <aside className="w-full lg:w-56">
                     <nav
-                        className="flex flex-col space-y-1 space-x-0"
+                        className="flex flex-col space-y-2 p-4 lg:p-0 bg-muted/50 lg:bg-transparent rounded-lg lg:rounded-none"
                         aria-label="Settings"
                     >
                         {sidebarNavItems.map((item, index) => (
@@ -62,12 +62,12 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
                                 variant="ghost"
                                 asChild
                                 className={cn('w-full justify-start', {
-                                    'bg-muted': isCurrentUrl(item.href),
+                                    'bg-accent text-accent-foreground': isCurrentUrl(item.href),
                                 })}
                             >
                                 <Link href={item.href}>
                                     {item.icon && (
-                                        <item.icon className="h-4 w-4" />
+                                        <item.icon className="h-4 w-4 mr-2" />
                                     )}
                                     {item.title}
                                 </Link>

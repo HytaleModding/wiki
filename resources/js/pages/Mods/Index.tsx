@@ -1,8 +1,9 @@
+import { PlusIcon, BookOpenIcon, UsersIcon, EyeIcon } from '@heroicons/react/24/outline';
 import { Head } from '@inertiajs/react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { PlusIcon, BookOpenIcon, UsersIcon, EyeIcon } from '@heroicons/react/24/outline';
+import { useFlashMessages } from '@/hooks/useFlashMessages';
 import AppLayout from '@/layouts/app-layout';
 
 interface Mod {
@@ -22,6 +23,8 @@ interface Props {
 }
 
 export default function ModsIndex({ ownedMods, collaborativeMods }: Props) {
+  useFlashMessages();
+
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -45,19 +48,19 @@ export default function ModsIndex({ ownedMods, collaborativeMods }: Props) {
 
   return (
     <AppLayout>
-      <Head title="My Mods" />
+      <Head title="Your Mods" />
 
-      <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <div className="mb-8 flex items-center justify-between">
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">My Mods</h1>
-            <p className="mt-2 text-gray-600">
-              Manage your documentation spaces and collaborations
+            <h1 className="text-3xl font-bold tracking-tight">Your Mods</h1>
+            <p className="text-muted-foreground mt-2">
+              Manage your mod documentation and collaborate with others.
             </p>
           </div>
-          <Button asChild>
+          <Button asChild size="lg" className="shadow-md">
             <a href="/mods/create">
-              <PlusIcon className="h-4 w-4 mr-2" />
+              <PlusIcon className="w-4 h-4 mr-2" />
               Create New Mod
             </a>
           </Button>
