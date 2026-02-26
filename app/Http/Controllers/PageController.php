@@ -322,7 +322,7 @@ class PageController extends Controller
             ]);
         }
 
-        return response()->json(['success' => true]);
+        return redirect()->back()->with('success', 'Page order updated successfully!');
     }
 
     /**
