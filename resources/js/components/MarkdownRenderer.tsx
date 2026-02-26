@@ -13,20 +13,18 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
     marked.setOptions({
       gfm: true,
       breaks: true,
-      smartLists: true,
-      smartypants: true,
     });
 
 
     Promise.resolve(marked.parse(content)).then((parsed) => {
       setHtmlContent(parsed);
+      console.log(parsed);
     });
   }, [content]);
 
   return (
     <div
-      className={`
-        ${className}`}
+      className={`prose prose-slate dark:prose-invert max-w-none ${className}`}
       dangerouslySetInnerHTML={{ __html: htmlContent }}
     />
   );
