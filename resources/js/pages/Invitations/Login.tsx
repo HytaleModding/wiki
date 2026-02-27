@@ -1,5 +1,5 @@
-import { Head, Link } from '@inertiajs/react';
 import { UserIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { Head, Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -43,7 +43,6 @@ interface Props {
 export default function LoginRequired({
   invitation,
   needsLogin,
-  wrongUser,
 }: Props) {
   return (
     <AppLayout>

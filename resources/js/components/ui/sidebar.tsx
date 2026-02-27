@@ -397,6 +397,7 @@ function SidebarGroupLabel({
   const Comp = asChild ? Slot : "div"
 
   return (
+    // @ts-expect-error shadcn-ui types are wrong
     <Comp
       data-slot="sidebar-group-label"
       data-sidebar="group-label"
@@ -418,6 +419,7 @@ function SidebarGroupAction({
   const Comp = asChild ? Slot : "button"
 
   return (
+    // @ts-expect-error shadcn-ui types are wrong
     <Comp
       data-slot="sidebar-group-action"
       data-sidebar="group-action"
@@ -508,6 +510,7 @@ function SidebarMenuButton({
   const { isMobile, state } = useSidebar()
 
   const button = (
+    // @ts-expect-error shadcn-ui types are wrong
     <Comp
       data-slot="sidebar-menu-button"
       data-sidebar="menu-button"
@@ -553,6 +556,7 @@ function SidebarMenuAction({
   const Comp = asChild ? Slot : "button"
 
   return (
+    // @ts-expect-error shadcn-ui types are wrong
     <Comp
       data-slot="sidebar-menu-action"
       data-sidebar="menu-action"
@@ -676,6 +680,7 @@ function SidebarMenuSubButton({
   const Comp = asChild ? Slot : "a"
 
   return (
+    // @ts-expect-error shadcn-ui types are wrong
     <Comp
       data-slot="sidebar-menu-sub-button"
       data-sidebar="menu-sub-button"

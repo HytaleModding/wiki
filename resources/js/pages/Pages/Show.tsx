@@ -1,10 +1,10 @@
+import { PencilIcon, EyeIcon, BookOpenIcon } from '@heroicons/react/24/outline';
 import { Head } from '@inertiajs/react';
+import MarkdownRenderer from '@/components/MarkdownRenderer';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { PencilIcon, EyeIcon, BookOpenIcon } from '@heroicons/react/24/outline';
 import AppLayout from '@/layouts/app-layout';
-import MarkdownRenderer from '@/components/MarkdownRenderer';
 import { getMarkdownPreview } from '@/utils/markdown';
 
 interface User {
@@ -57,7 +57,6 @@ export default function ShowPage({
   mod,
   page,
   navigation,
-  userRole,
   canEdit,
 }: Props) {
   const formatDate = (date: string) => {

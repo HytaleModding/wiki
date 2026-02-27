@@ -47,6 +47,7 @@ function Button({
   const Comp = asChild ? Slot : "button"
 
   return (
+    // @ts-expect-error shadcn-ui types are wrong
     <Comp
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}

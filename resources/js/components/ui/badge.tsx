@@ -35,6 +35,7 @@ function Badge({
   const Comp = asChild ? Slot : "span"
 
   return (
+    // @ts-expect-error shadcn-ui types are wrong
     <Comp
       data-slot="badge"
       className={cn(badgeVariants({ variant }), className)}

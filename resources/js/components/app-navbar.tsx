@@ -1,10 +1,8 @@
 import { Link, usePage } from '@inertiajs/react';
 import {
   BookOpen,
-  FileText,
   LayoutGrid,
   Menu,
-  Plus,
   Search,
   Settings,
   LogOut,
@@ -40,14 +38,13 @@ import { cn } from '@/lib/utils';
 import { dashboard } from '@/routes';
 import { index as modsIndex } from '@/routes/mods';
 import type { SharedData } from '@/types';
-import HytaleModdingLogo from './hytale-modding-logo';
 import { mainNavItems } from '@/utils/navigation-items';
+import HytaleModdingLogo from './hytale-modding-logo';
 
 export default function AppNavbar() {
   const { isCurrentUrl } = useCurrentUrl();
   const { auth } = usePage<SharedData>().props;
   const getInitials = useInitials();
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (

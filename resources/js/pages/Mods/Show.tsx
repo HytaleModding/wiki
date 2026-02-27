@@ -8,10 +8,10 @@ import {
 } from '@heroicons/react/24/outline';
 import { Head } from '@inertiajs/react';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useFlashMessages } from '@/hooks/useFlashMessages';
 import AppLayout from '@/layouts/app-layout';
 

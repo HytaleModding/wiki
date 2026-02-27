@@ -26,7 +26,6 @@ interface Props {
   mod: Mod;
 }
 
-// @ts-ignore
 export default function EditMod({ mod }: Props) {
   const { data, setData, patch, processing, errors } = useForm({
     name: mod.name,
@@ -126,7 +125,9 @@ export default function EditMod({ mod }: Props) {
                   <Label htmlFor="visibility">Visibility *</Label>
                   <Select
                     value={data.visibility}
-                    onValueChange={(value) => setData('visibility', value)}
+                    onValueChange={(value: 'public' | 'unlisted' | 'private') =>
+                      setData('visibility', value)
+                    }
                   >
                     <SelectTrigger
                       className={errors.visibility ? 'border-red-500' : ''}
@@ -171,7 +172,9 @@ export default function EditMod({ mod }: Props) {
                   <Label htmlFor="storage_driver">File Storage *</Label>
                   <Select
                     value={data.storage_driver}
-                    onValueChange={(value) => setData('storage_driver', value)}
+                    onValueChange={(value: 'local' | 's3') =>
+                      setData('storage_driver', value)
+                    }
                   >
                     <SelectTrigger
                       className={errors.storage_driver ? 'border-red-500' : ''}

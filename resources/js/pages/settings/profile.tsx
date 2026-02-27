@@ -1,7 +1,7 @@
 import { Transition } from '@headlessui/react';
 import { Form, Head, Link, usePage, router } from '@inertiajs/react';
 import { Camera, Trash2 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import DeleteUser from '@/components/delete-user';
 import Heading from '@/components/heading';
@@ -32,19 +32,16 @@ function UserAvatar({
   size?: number;
 }) {
   const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&size=${size * 2}&background=random`;
-  const [imgSrc, setImgSrc] = useState(src || fallback);
-
-  useEffect(() => {
-    setImgSrc(src || fallback);
-  }, [src]);
 
   return (
     <img
-      src={imgSrc}
+      src={src ?? fallback}
       alt={name}
       width={size}
       height={size}
-      onError={() => setImgSrc(fallback)}
+      onError={(e) => {
+        (e.currentTarget as HTMLImageElement).src = fallback;
+      }}
       className="rounded-full object-cover"
       style={{ width: size, height: size }}
     />
@@ -65,9 +62,12 @@ export default function Profile({
   const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      console.log('changing avatar');
+
       const reader = new FileReader();
       reader.onload = (e) => {
         setAvatarPreview(e.target?.result as string);
+        console.log('avatar preview updated: ', e.target?.result);
       };
       reader.readAsDataURL(file);
     }
@@ -107,11 +107,9 @@ export default function Profile({
             className="space-y-6"
           >
             {({ processing, recentlySuccessful, errors }) => {
-              useEffect(() => {
-                if (recentlySuccessful) {
-                  setAvatarPreview(null);
-                }
-              }, [recentlySuccessful]);
+              if (recentlySuccessful) {
+                setAvatarPreview(null);
+              }
 
               return (
                 <>
@@ -119,7 +117,7 @@ export default function Profile({
                     <Label>Profile Picture</Label>
                     <div className="flex items-center gap-4">
                       <UserAvatar
-                        src={avatarPreview || auth.user.avatar}
+                        src={avatarPreview ?? auth.user.avatar}
                         name={auth.user.name}
                         size={80}
                       />

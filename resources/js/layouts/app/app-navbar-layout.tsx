@@ -1,6 +1,6 @@
 import { Toaster } from 'sileo';
-import AppNavbar from '@/components/app-navbar';
 import AppFooter from '@/components/app-footer';
+import AppNavbar from '@/components/app-navbar';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import type { AppLayoutProps } from '@/types';
 

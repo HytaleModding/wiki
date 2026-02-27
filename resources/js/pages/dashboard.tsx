@@ -1,17 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import AppLayout from '@/layouts/app-layout';
-import { dashboard } from '@/routes';
-import type { BreadcrumbItem, DashboardStats, SharedData } from '@/types';
+import { usePage } from '@inertiajs/react';
 import {
   BookOpen,
   Plus,
@@ -24,9 +12,21 @@ import {
   UserPlus,
   EyeIcon,
 } from 'lucide-react';
-import { StatCard } from '@/components/dashboard/stat-card';
+import { useState } from 'react';
 import { QuickActionButton } from '@/components/dashboard/quick-action-button';
-import { usePage } from '@inertiajs/react';
+import { StatCard } from '@/components/dashboard/stat-card';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import AppLayout from '@/layouts/app-layout';
+import { dashboard } from '@/routes';
+import type { BreadcrumbItem, DashboardStats, SharedData } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -51,10 +51,6 @@ export default function Dashboard({ stats }: Props) {
   const totalMods = stats.ownedModsCount + stats.collaborativeModsCount;
   const avgPagesPerMod =
     totalMods > 0 ? Math.round(stats.totalPagesCount / totalMods) : 0;
-  const engagementRate =
-    stats.totalPagesCount > 0
-      ? Math.round((stats.publicViewsCount / stats.totalPagesCount) * 10) / 10
-      : 0;
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>

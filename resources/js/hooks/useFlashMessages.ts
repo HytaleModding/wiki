@@ -9,11 +9,16 @@ interface FlashMessages {
   warning?: string;
 }
 
+interface PageProps {
+  flash?: FlashMessages;
+  [key: string]: unknown;
+}
+
 export function useFlashMessages() {
-  const { props } = usePage();
+  const { props } = usePage<PageProps>();
 
   useEffect(() => {
-    const flash = (props as any).flash as FlashMessages | undefined;
+    const flash = props.flash;
 
     if (flash?.success) {
       sileo.success({
