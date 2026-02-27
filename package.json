@@ -9,6 +9,7 @@
     "format": "prettier --write resources/",
     "format:check": "prettier --check resources/",
     "lint": "eslint . --fix",
+    "lint:check": "eslint .",
     "types": "tsc --noEmit"
   },
   "devDependencies": {
