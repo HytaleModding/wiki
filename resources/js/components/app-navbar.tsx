@@ -41,14 +41,7 @@ import { dashboard } from '@/routes';
 import { index as modsIndex } from '@/routes/mods';
 import type { SharedData } from '@/types';
 import HytaleModdingLogo from './hytale-modding-logo';
-
-const mainNavItems = [
-  {
-    title: 'Dashboard',
-    href: dashboard().url,
-    icon: LayoutGrid,
-  },
-];
+import { mainNavItems } from '@/utils/navigation-items';
 
 export default function AppNavbar() {
   const { isCurrentUrl } = useCurrentUrl();
@@ -58,7 +51,7 @@ export default function AppNavbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
       <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
         {/* Logo */}
         <div className="flex items-center space-x-4">
@@ -67,14 +60,14 @@ export default function AppNavbar() {
             className="flex items-center space-x-2 transition-opacity hover:opacity-80"
           >
             <HytaleModdingLogo variant="icon" size="md" />
-            <span className="bg-clip-text text-xl font-bold text-transparent text-white">
+            <span className="bg-clip-text text-xl font-bold text-white">
               HytaleModding
             </span>
           </Link>
         </div>
 
         {/* Desktop Navigation */}
-        <div className="hidden items-center space-x-6 md:flex">
+        <div className="hidden flex-1 items-center justify-end md:flex">
           <NavigationMenu>
             <NavigationMenuList className="flex space-x-1">
               {mainNavItems.map((item, index) => (
@@ -89,7 +82,7 @@ export default function AppNavbar() {
                         : 'text-muted-foreground',
                     )}
                   >
-                    <item.icon className="h-4 w-4" />
+                    {item.icon && <item.icon className="h-4 w-4" />}
                     <span>{item.title}</span>
                   </Link>
                 </NavigationMenuItem>
@@ -98,33 +91,8 @@ export default function AppNavbar() {
           </NavigationMenu>
         </div>
 
-        {/* Search & Actions */}
-        <div className="flex items-center space-x-4">
-          {/* Search */}
-          <div className="relative hidden sm:flex">
-            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
-            <Input
-              placeholder="Search documentation..."
-              className="w-64 border-0 bg-muted/50 pr-4 pl-10 focus:bg-background"
-            />
-          </div>
-
-          <Button
-            variant="ghost"
-            size="icon"
-            className="sm:hidden"
-            onClick={() => setIsSearchOpen(!isSearchOpen)}
-          >
-            <Search className="h-4 w-4" />
-          </Button>
-
-          <Button asChild size="sm" className="hidden sm:flex">
-            <Link href="/mods/create">
-              <Plus className="h-4 w-4" />
-              New Mod
-            </Link>
-          </Button>
-
+        {/* Actions */}
+        <div className="ml-8 flex items-center space-x-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-9 w-9 rounded-full">
@@ -133,7 +101,7 @@ export default function AppNavbar() {
                     src={auth.user?.avatar ?? ''}
                     alt={auth.user?.name ?? ''}
                   />
-                  <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-xs text-white">
+                  <AvatarFallback className="bg-linear-to-br from-blue-500 to-purple-600 text-xs text-white">
                     {getInitials(auth.user?.name ?? '')}
                   </AvatarFallback>
                 </Avatar>
@@ -146,7 +114,7 @@ export default function AppNavbar() {
                     src={auth.user?.avatar ?? ''}
                     alt={auth.user?.name ?? ''}
                   />
-                  <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-xs text-white">
+                  <AvatarFallback className="bg-linear-to-br from-blue-500 to-purple-600 text-xs text-white">
                     {getInitials(auth.user?.name ?? '')}
                   </AvatarFallback>
                 </Avatar>
@@ -246,23 +214,13 @@ export default function AppNavbar() {
                       )}
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
-                      <item.icon className="h-5 w-5" />
+                      {item.icon && <item.icon className="h-5 w-5" />}
                       <span>{item.title}</span>
                     </Link>
                   ))}
                 </div>
 
                 <div className="border-t pt-6">
-                  <Button asChild className="mb-4 w-full justify-start">
-                    <Link
-                      href="/mods/create"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      <Plus className="mr-2 h-4 w-4" />
-                      Create New Mod
-                    </Link>
-                  </Button>
-
                   <div className="flex flex-col space-y-2">
                     <Button
                       asChild
@@ -301,20 +259,6 @@ export default function AppNavbar() {
           </Sheet>
         </div>
       </div>
-
-      {/* Mobile Search Expanded */}
-      {isSearchOpen && (
-        <div className="border-t bg-background p-4 sm:hidden">
-          <div className="relative">
-            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
-            <Input
-              placeholder="Search documentation..."
-              className="pr-4 pl-10"
-              autoFocus
-            />
-          </div>
-        </div>
-      )}
     </nav>
   );
 }

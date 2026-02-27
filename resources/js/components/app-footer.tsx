@@ -4,7 +4,7 @@ import HytaleModdingLogo from './hytale-modding-logo';
 
 export default function AppFooter() {
   return (
-    <footer className="mt-12 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <footer className="mt-12 border-t bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
       <div className="container mx-auto max-w-7xl px-4 py-8">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
           <div className="col-span-1 md:col-span-2">

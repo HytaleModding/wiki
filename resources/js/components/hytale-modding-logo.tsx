@@ -1,7 +1,7 @@
 interface HytaleModdingLogoProps {
   className?: string;
   size?: 'sm' | 'md' | 'lg';
-  variant?: 'icon' | 'banner';
+  variant?: 'icon' | 'banner' | 'auto';
 }
 
 export default function HytaleModdingLogo({
