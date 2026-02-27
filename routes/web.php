@@ -28,6 +28,9 @@ Route::get('dashboard', function () {
             $query->latest()->limit(5);
         }])->get()->pluck('pages')->flatten()
     )->sortByDesc('created_at')->take(5);
+    $latestMods = $user->ownedMods()->latest()->limit(5)->get()->merge(
+        $user->mods()->latest()->limit(5)->get()
+    )->sortByDesc('created_at')->take(5);
 
     return Inertia::render('dashboard', [
         'stats' => [
@@ -36,6 +39,7 @@ Route::get('dashboard', function () {
             'totalPagesCount' => $totalPagesCount,
             'publicViewsCount' => 0,
             'latestPages' => $latestPages,
+            'latestMods' => $latestMods
         ],
     ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
