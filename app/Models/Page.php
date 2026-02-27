@@ -81,8 +81,8 @@ class Page extends Model
     public function publishedChildren()
     {
         return $this->hasMany(Page::class, 'parent_id')
-                    ->where('published', true)
-                    ->orderBy('order_index');
+            ->where('published', true)
+            ->orderBy('order_index');
     }
 
     /**

@@ -119,7 +119,7 @@ class ModTest extends TestCase
         // Add collaborator
         $mod->collaborators()->attach($collaborator->id, [
             'role' => 'editor',
-            'invited_by' => $owner->id
+            'invited_by' => $owner->id,
         ]);
 
         $this->actingAs($collaborator);
@@ -158,7 +158,7 @@ class ModTest extends TestCase
         $this->actingAs($user);
 
         $response = $this->patch(route('mods.update', $mod), [
-            'name' => 'Updated Name'
+            'name' => 'Updated Name',
         ]);
 
         $response->assertForbidden();

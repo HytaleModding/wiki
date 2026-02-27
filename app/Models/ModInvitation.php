@@ -64,7 +64,7 @@ class ModInvitation extends Model
                 'invited_by' => $this->invited_by,
                 'created_at' => now(),
                 'updated_at' => now(),
-            ]
+            ],
         ]);
 
         $this->update(['accepted_at' => now()]);

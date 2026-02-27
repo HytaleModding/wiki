@@ -8,7 +8,6 @@ use App\Models\ModInvitation;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
@@ -35,7 +34,7 @@ class ModCollaboratorTest extends TestCase
 
         $mod->collaborators()->attach($admin->id, [
             'role' => 'admin',
-            'invited_by' => $owner->id
+            'invited_by' => $owner->id,
         ]);
 
         $this->actingAs($admin);
@@ -52,7 +51,7 @@ class ModCollaboratorTest extends TestCase
 
         $mod->collaborators()->attach($editor->id, [
             'role' => 'editor',
-            'invited_by' => $owner->id
+            'invited_by' => $owner->id,
         ]);
 
         $this->actingAs($editor);
@@ -147,7 +146,7 @@ class ModCollaboratorTest extends TestCase
 
         $mod->collaborators()->attach($collaborator->id, [
             'role' => 'editor',
-            'invited_by' => $owner->id
+            'invited_by' => $owner->id,
         ]);
 
         $this->actingAs($owner);
@@ -183,7 +182,7 @@ class ModCollaboratorTest extends TestCase
 
         $mod->collaborators()->attach($collaborator->id, [
             'role' => 'viewer',
-            'invited_by' => $owner->id
+            'invited_by' => $owner->id,
         ]);
 
         $this->actingAs($owner);
@@ -210,11 +209,11 @@ class ModCollaboratorTest extends TestCase
 
         $mod->collaborators()->attach($admin->id, [
             'role' => 'admin',
-            'invited_by' => $owner->id
+            'invited_by' => $owner->id,
         ]);
         $mod->collaborators()->attach($editor->id, [
             'role' => 'editor',
-            'invited_by' => $owner->id
+            'invited_by' => $owner->id,
         ]);
 
         $this->actingAs($admin);
@@ -241,11 +240,11 @@ class ModCollaboratorTest extends TestCase
 
         $mod->collaborators()->attach($editor->id, [
             'role' => 'editor',
-            'invited_by' => $owner->id
+            'invited_by' => $owner->id,
         ]);
         $mod->collaborators()->attach($viewer->id, [
             'role' => 'viewer',
-            'invited_by' => $owner->id
+            'invited_by' => $owner->id,
         ]);
 
         $this->actingAs($editor);
@@ -265,7 +264,7 @@ class ModCollaboratorTest extends TestCase
 
         $mod->collaborators()->attach($collaborator->id, [
             'role' => 'editor',
-            'invited_by' => $owner->id
+            'invited_by' => $owner->id,
         ]);
 
         $this->actingAs($owner);
@@ -289,11 +288,11 @@ class ModCollaboratorTest extends TestCase
 
         $mod->collaborators()->attach($admin->id, [
             'role' => 'admin',
-            'invited_by' => $owner->id
+            'invited_by' => $owner->id,
         ]);
         $mod->collaborators()->attach($editor->id, [
             'role' => 'editor',
-            'invited_by' => $owner->id
+            'invited_by' => $owner->id,
         ]);
 
         $this->actingAs($admin);
@@ -311,11 +310,11 @@ class ModCollaboratorTest extends TestCase
 
         $mod->collaborators()->attach($admin1->id, [
             'role' => 'admin',
-            'invited_by' => $owner->id
+            'invited_by' => $owner->id,
         ]);
         $mod->collaborators()->attach($admin2->id, [
             'role' => 'admin',
-            'invited_by' => $owner->id
+            'invited_by' => $owner->id,
         ]);
 
         $this->actingAs($admin1);
@@ -332,7 +331,7 @@ class ModCollaboratorTest extends TestCase
 
         $mod->collaborators()->attach($collaborator->id, [
             'role' => 'editor',
-            'invited_by' => $owner->id
+            'invited_by' => $owner->id,
         ]);
 
         $this->actingAs($collaborator);
@@ -398,7 +397,6 @@ class ModCollaboratorTest extends TestCase
         ]);
 
     }
-
 
     public function test_guest_cannot_accept_invitation()
     {

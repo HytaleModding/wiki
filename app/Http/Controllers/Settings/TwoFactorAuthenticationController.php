@@ -10,7 +10,6 @@ use Laravel\Fortify\Features;
 
 class TwoFactorAuthenticationController extends Controller
 {
-
     /**
      * Show the user's two-factor authentication settings page.
      */

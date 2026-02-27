@@ -75,8 +75,8 @@ class User extends Authenticatable
     public function mods()
     {
         return $this->belongsToMany(Mod::class, 'mod_users')
-                    ->withPivot('role')
-                    ->withTimestamps();
+            ->withPivot('role')
+            ->withTimestamps();
     }
 
     /**
@@ -90,7 +90,7 @@ class User extends Authenticatable
 
         $userMod = $this->mods()->where('mod_id', $mod->id)->first();
 
-        if (!$userMod) {
+        if (! $userMod) {
             return false;
         }
 
@@ -112,7 +112,7 @@ class User extends Authenticatable
     {
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(
             get: fn () => $this->avatar_url ?:
-                'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&background=random'
+                'https://ui-avatars.com/api/?name='.urlencode($this->name).'&background=random'
         );
     }
 }

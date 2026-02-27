@@ -11,7 +11,6 @@ use Inertia\Inertia;
 
 class PageController extends Controller
 {
-
     /**
      * Display pages for a specific mod.
      */
@@ -19,7 +18,7 @@ class PageController extends Controller
     {
         $user = Auth::user();
 
-        if (!$user || !$mod->canBeAccessedBy($user)) {
+        if (! $user || ! $mod->canBeAccessedBy($user)) {
             abort(403);
         }
 
@@ -44,7 +43,7 @@ class PageController extends Controller
     {
         $user = Auth::user();
 
-        if (!$mod->userCan($user, 'edit')) {
+        if (! $mod->userCan($user, 'edit')) {
             abort(403);
         }
 
@@ -64,7 +63,7 @@ class PageController extends Controller
     {
         $user = Auth::user();
 
-        if (!$mod->userCan($user, 'edit')) {
+        if (! $mod->userCan($user, 'edit')) {
             abort(403);
         }
 
@@ -88,7 +87,7 @@ class PageController extends Controller
         $counter = 1;
 
         while (Page::where('mod_id', $mod->id)->where('slug', $slug)->exists()) {
-            $slug = $originalSlug . '-' . $counter;
+            $slug = $originalSlug.'-'.$counter;
             $counter++;
         }
 
@@ -124,29 +123,29 @@ class PageController extends Controller
         }
 
         if ($mod->visibility === 'private') {
-            if (!$user || !$mod->canBeAccessedBy($user)) {
+            if (! $user || ! $mod->canBeAccessedBy($user)) {
                 abort(403);
             }
         }
 
-        $page->load(['creator', 'updater', 'children' => function($query) {
+        $page->load(['creator', 'updater', 'children' => function ($query) {
             $query->where('published', true)->orderBy('order_index');
         }]);
 
         $navigation = $mod->pages()
             ->whereNull('parent_id')
             ->where('published', true)
-            ->with(['children' => function($query) {
+            ->with(['children' => function ($query) {
                 $query->where('published', true)->orderBy('order_index');
             }])
             ->orderBy('order_index')
             ->get()
-            ->map(function($navPage) {
+            ->map(function ($navPage) {
                 return [
                     'id' => $navPage->id,
                     'title' => $navPage->title,
                     'slug' => $navPage->slug,
-                    'children' => $navPage->children->map(function($child) {
+                    'children' => $navPage->children->map(function ($child) {
                         return [
                             'id' => $child->id,
                             'title' => $child->title,
@@ -171,7 +170,7 @@ class PageController extends Controller
             'mod' => $mod->load(['owner']),
             'page' => array_merge($page->toArray(), [
                 'path' => $path,
-                'children' => $page->children->map(function($child) {
+                'children' => $page->children->map(function ($child) {
                     return [
                         'id' => $child->id,
                         'title' => $child->title,
@@ -197,7 +196,7 @@ class PageController extends Controller
             abort(404);
         }
 
-        if (!$mod->userCan($user, 'edit')) {
+        if (! $mod->userCan($user, 'edit')) {
             abort(403);
         }
 
@@ -226,7 +225,7 @@ class PageController extends Controller
             abort(404);
         }
 
-        if (!$mod->userCan($user, 'edit')) {
+        if (! $mod->userCan($user, 'edit')) {
             abort(403);
         }
 
@@ -251,7 +250,7 @@ class PageController extends Controller
             $counter = 1;
 
             while (Page::where('mod_id', $mod->id)->where('slug', $slug)->where('id', '!=', $page->id)->exists()) {
-                $slug = $originalSlug . '-' . $counter;
+                $slug = $originalSlug.'-'.$counter;
                 $counter++;
             }
 
@@ -280,7 +279,7 @@ class PageController extends Controller
             abort(404);
         }
 
-        if (!$mod->userCan($user, 'edit')) {
+        if (! $mod->userCan($user, 'edit')) {
             abort(403);
         }
 
@@ -297,7 +296,7 @@ class PageController extends Controller
     {
         $user = Auth::user();
 
-        if (!$mod->userCan($user, 'edit')) {
+        if (! $mod->userCan($user, 'edit')) {
             abort(403);
         }
 
@@ -336,7 +335,7 @@ class PageController extends Controller
             abort(404);
         }
 
-        if (!$mod->userCan($user, 'edit')) {
+        if (! $mod->userCan($user, 'edit')) {
             abort(403);
         }
 
@@ -359,7 +358,7 @@ class PageController extends Controller
     {
         $user = Auth::user();
 
-        if (!$mod->canBeAccessedBy($user)) {
+        if (! $mod->canBeAccessedBy($user)) {
             abort(403);
         }
 
@@ -372,7 +371,7 @@ class PageController extends Controller
         $pages = $mod->pages()
             ->where(function ($q) use ($query) {
                 $q->where('title', 'ilike', "%{$query}%")
-                  ->orWhere('content', 'ilike', "%{$query}%");
+                    ->orWhere('content', 'ilike', "%{$query}%");
             })
             ->where('published', true)
             ->select(['id', 'title', 'slug', 'updated_at'])
@@ -395,28 +394,28 @@ class PageController extends Controller
             abort(404, 'Documentation not found');
         }
 
-        if (!$page->published) {
+        if (! $page->published) {
             abort(404, 'Page not found');
         }
 
-        $page->load(['children' => function($query) {
+        $page->load(['children' => function ($query) {
             $query->where('published', true)->orderBy('order_index');
         }]);
 
         $navigation = $mod->pages()
             ->whereNull('parent_id')
             ->where('published', true)
-            ->with(['children' => function($query) {
+            ->with(['children' => function ($query) {
                 $query->where('published', true)->orderBy('order_index');
             }])
             ->orderBy('order_index')
             ->get()
-            ->map(function($navPage) {
+            ->map(function ($navPage) {
                 return [
                     'id' => $navPage->id,
                     'title' => $navPage->title,
                     'slug' => $navPage->slug,
-                    'children' => $navPage->children->map(function($child) {
+                    'children' => $navPage->children->map(function ($child) {
                         return [
                             'id' => $child->id,
                             'title' => $child->title,
@@ -435,7 +434,7 @@ class PageController extends Controller
                 'content' => $page->content,
                 'published' => $page->published,
                 'updated_at' => $page->updated_at,
-                'children' => $page->children->map(function($child) {
+                'children' => $page->children->map(function ($child) {
                     return [
                         'id' => $child->id,
                         'title' => $child->title,

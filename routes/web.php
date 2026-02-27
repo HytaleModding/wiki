@@ -39,7 +39,7 @@ Route::get('dashboard', function () {
             'totalPagesCount' => $totalPagesCount,
             'publicViewsCount' => 0,
             'latestPages' => $latestPages,
-            'latestMods' => $latestMods
+            'latestMods' => $latestMods,
         ],
     ]);
 })->middleware(['auth', 'verified'])->name('dashboard');

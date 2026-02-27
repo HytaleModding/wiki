@@ -36,15 +36,15 @@ class ProfileController extends Controller
         $validated = $request->validated();
 
         if ($request->hasFile('avatar')) {
-            if ($user->avatar_url && !str_contains($user->avatar_url, 'ui-avatars.com')) {
+            if ($user->avatar_url && ! str_contains($user->avatar_url, 'ui-avatars.com')) {
                 $oldPath = str_replace('/storage/', '', parse_url($user->avatar_url, PHP_URL_PATH));
                 Storage::disk('public')->delete($oldPath);
             }
 
             $avatarFile = $request->file('avatar');
-            $filename = 'avatars/' . Str::uuid() . '.' . $avatarFile->getClientOriginalExtension();
+            $filename = 'avatars/'.Str::uuid().'.'.$avatarFile->getClientOriginalExtension();
             $path = $avatarFile->storeAs('', $filename, 'public');
-            $validated['avatar_url'] = asset('storage/' . $path);
+            $validated['avatar_url'] = asset('storage/'.$path);
         }
 
         unset($validated['avatar']);
@@ -67,7 +67,7 @@ class ProfileController extends Controller
     {
         $user = $request->user();
 
-        if ($user->avatar_url && !str_contains($user->avatar_url, 'ui-avatars.com')) {
+        if ($user->avatar_url && ! str_contains($user->avatar_url, 'ui-avatars.com')) {
             $oldPath = str_replace('/storage/', '', parse_url($user->avatar_url, PHP_URL_PATH));
             Storage::disk('public')->delete($oldPath);
         }

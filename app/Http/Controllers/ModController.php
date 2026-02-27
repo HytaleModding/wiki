@@ -14,7 +14,6 @@ use Inertia\Inertia;
 
 class ModController extends Controller
 {
-
     /**
      * Display a listing of user's mods.
      */
@@ -22,7 +21,7 @@ class ModController extends Controller
     {
         $user = Auth::user();
 
-        if (!$user) {
+        if (! $user) {
             return redirect()->route('login');
         }
 
@@ -69,7 +68,7 @@ class ModController extends Controller
         $counter = 1;
 
         while (Mod::where('slug', $slug)->exists()) {
-            $slug = $originalSlug . '-' . $counter;
+            $slug = $originalSlug.'-'.$counter;
             $counter++;
         }
 
@@ -93,7 +92,7 @@ class ModController extends Controller
     {
         $user = Auth::user();
 
-        if ($mod->visibility === 'private' && !$mod->canBeAccessedBy($user)) {
+        if ($mod->visibility === 'private' && ! $mod->canBeAccessedBy($user)) {
             abort(403);
         }
 
@@ -103,7 +102,7 @@ class ModController extends Controller
             'rootPages' => function ($query) {
                 $query->published()->with('publishedChildren');
             },
-            'indexPage'
+            'indexPage',
         ]);
 
         $userRole = $user ? $mod->getUserRole($user) : null;
@@ -123,7 +122,7 @@ class ModController extends Controller
     {
         $user = Auth::user();
 
-        if (!$mod->userCan($user, 'manage_settings')) {
+        if (! $mod->userCan($user, 'manage_settings')) {
             abort(403);
         }
 
@@ -139,7 +138,7 @@ class ModController extends Controller
     {
         $user = Auth::user();
 
-        if (!$mod->userCan($user, 'manage_settings')) {
+        if (! $mod->userCan($user, 'manage_settings')) {
             abort(403);
         }
 
@@ -156,7 +155,7 @@ class ModController extends Controller
             $counter = 1;
 
             while (Mod::where('slug', $slug)->where('id', '!=', $mod->id)->exists()) {
-                $slug = $originalSlug . '-' . $counter;
+                $slug = $originalSlug.'-'.$counter;
                 $counter++;
             }
 
@@ -193,7 +192,7 @@ class ModController extends Controller
     {
         $user = Auth::user();
 
-        if (!$mod->userCan($user, 'manage_collaborators')) {
+        if (! $mod->userCan($user, 'manage_collaborators')) {
             abort(403);
         }
 
@@ -212,7 +211,7 @@ class ModController extends Controller
     {
         $user = Auth::user();
 
-        if (!$mod->userCan($user, 'manage_collaborators')) {
+        if (! $mod->userCan($user, 'manage_collaborators')) {
             abort(403);
         }
 
@@ -225,7 +224,7 @@ class ModController extends Controller
             ->orWhere('email', $validated['username'])
             ->first();
 
-        if (!$collaborator) {
+        if (! $collaborator) {
             return back()->withErrors(['email' => 'User not found.']);
         }
 
@@ -250,7 +249,7 @@ class ModController extends Controller
         // Add collaborator directly to mod_users table
         $mod->collaborators()->attach($collaborator->id, [
             'role' => $validated['role'],
-            'invited_by' => $user->id
+            'invited_by' => $user->id,
         ]);
 
         // Also create and send invitation email
@@ -268,7 +267,7 @@ class ModController extends Controller
 
             return back()->with('success', "Invitation sent to {$collaborator->name}!");
         } catch (\Exception $e) {
-            return back()->with('success', "Collaborator added successfully! (Email notification failed to send)");
+            return back()->with('success', 'Collaborator added successfully! (Email notification failed to send)');
         }
     }
 
@@ -282,10 +281,11 @@ class ModController extends Controller
         // Allow users to remove themselves
         if ($user->id === $collaborator->id) {
             $mod->collaborators()->detach($collaborator->id);
+
             return back()->with('success', 'You have left the mod successfully!');
         }
 
-        if (!$mod->userCan($user, 'manage_collaborators')) {
+        if (! $mod->userCan($user, 'manage_collaborators')) {
             abort(403);
         }
 
@@ -309,7 +309,7 @@ class ModController extends Controller
     {
         $user = Auth::user();
 
-        if (!$mod->userCan($user, 'manage_collaborators')) {
+        if (! $mod->userCan($user, 'manage_collaborators')) {
             abort(403);
         }
 
@@ -326,7 +326,7 @@ class ModController extends Controller
         }
 
         $mod->collaborators()->updateExistingPivot($collaborator->id, [
-            'role' => $validated['role']
+            'role' => $validated['role'],
         ]);
 
         return back()->with('success', 'Collaborator role updated successfully!');
@@ -345,7 +345,7 @@ class ModController extends Controller
         $rootPages = $mod->pages()
             ->whereNull('parent_id')
             ->where('published', true)
-            ->with(['children' => function($query) {
+            ->with(['children' => function ($query) {
                 $query->where('published', true)->orderBy('order_index');
             }])
             ->orderBy('order_index')
@@ -358,7 +358,7 @@ class ModController extends Controller
 
         return Inertia::render('Public/Mod', [
             'mod' => array_merge($mod->toArray(), [
-                'root_pages' => $rootPages->map(function($page) {
+                'root_pages' => $rootPages->map(function ($page) {
                     return [
                         'id' => $page->id,
                         'title' => $page->title,
@@ -366,7 +366,7 @@ class ModController extends Controller
                         'content' => substr($page->content ?? '', 0, 200),
                         'published' => $page->published,
                         'updated_at' => $page->updated_at,
-                        'children' => $page->children->map(function($child) {
+                        'children' => $page->children->map(function ($child) {
                             return [
                                 'id' => $child->id,
                                 'title' => $child->title,
@@ -408,10 +408,10 @@ class ModController extends Controller
         }
 
         $user = Auth::user();
-        if (!$user || $user->id !== $invitation->user_id) {
+        if (! $user || $user->id !== $invitation->user_id) {
             return Inertia::render('Invitations/Login', [
                 'invitation' => $invitation,
-                'needsLogin' => !$user,
+                'needsLogin' => ! $user,
                 'wrongUser' => $user && $user->id !== $invitation->user_id,
             ]);
         }
@@ -432,7 +432,7 @@ class ModController extends Controller
             ->where('token', $token)
             ->firstOrFail();
 
-        if (!$user || $user->id !== $invitation->user_id) {
+        if (! $user || $user->id !== $invitation->user_id) {
             return redirect()->route('login')
                 ->with('error', 'Please login to accept this invitation.');
         }

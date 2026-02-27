@@ -56,8 +56,8 @@ class Mod extends Model
     public function collaborators()
     {
         return $this->belongsToMany(User::class, 'mod_users')
-                    ->withPivot('role', 'invited_by')
-                    ->withTimestamps();
+            ->withPivot('role', 'invited_by')
+            ->withTimestamps();
     }
 
     /**
@@ -109,7 +109,7 @@ class Mod extends Model
             return true;
         }
 
-        if (!$user) {
+        if (! $user) {
             return false;
         }
 
@@ -130,6 +130,7 @@ class Mod extends Model
         }
 
         $collaborator = $this->collaborators()->where('user_id', $user->id)->first();
+
         return $collaborator?->pivot->role;
     }
 
@@ -140,7 +141,7 @@ class Mod extends Model
     {
         $role = $this->getUserRole($user);
 
-        if (!$role) {
+        if (! $role) {
             return false;
         }
 

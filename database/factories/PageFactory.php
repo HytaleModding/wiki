@@ -44,7 +44,7 @@ class PageFactory extends Factory
     {
         $sections = [];
 
-        $sections[] = "## Introduction\n\n" . fake()->paragraph();
+        $sections[] = "## Introduction\n\n".fake()->paragraph();
 
         for ($i = 0; $i < fake()->numberBetween(2, 5); $i++) {
             $sectionTitle = fake()->sentence(3, false);
@@ -79,7 +79,7 @@ class PageFactory extends Factory
             'php' => "<?php\n\nclass Example {\n  public function hello() {\n    return 'Hello, world!';\n  }\n}",
             'python' => "def example():\n    print('Hello, world!')\n    return True",
             'bash' => "#!/bin/bash\necho 'Hello, world!'\nexit 0",
-            'json' => '{\n  "name": "example",\n  "version": "1.0.0",\n  "description": "An example"\n}'
+            'json' => '{\n  "name": "example",\n  "version": "1.0.0",\n  "description": "An example"\n}',
         ];
 
         return "```{$lang}\n{$codeExamples[$lang]}\n```";
@@ -92,8 +92,9 @@ class PageFactory extends Factory
     {
         $items = [];
         for ($i = 0; $i < fake()->numberBetween(3, 7); $i++) {
-            $items[] = "- " . fake()->sentence();
+            $items[] = '- '.fake()->sentence();
         }
+
         return implode("\n", $items);
     }
 

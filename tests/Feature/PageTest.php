@@ -7,7 +7,6 @@ use App\Models\Page;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
 
 class PageTest extends TestCase
@@ -33,7 +32,7 @@ class PageTest extends TestCase
 
         $mod->collaborators()->attach($collaborator->id, [
             'role' => 'editor',
-            'invited_by' => $owner->id
+            'invited_by' => $owner->id,
         ]);
 
         $this->actingAs($collaborator);
@@ -70,9 +69,9 @@ class PageTest extends TestCase
         $response = $this->post(route('pages.store', $mod), $pageData);
 
         if ($response->status() === 422) {
-            $this->fail('Validation failed: ' . json_encode($response->json()));
+            $this->fail('Validation failed: '.json_encode($response->json()));
         } elseif ($response->status() !== 302) {
-            $this->fail('Expected redirect (302) but got status: ' . $response->status());
+            $this->fail('Expected redirect (302) but got status: '.$response->status());
         }
 
         $page = Page::where('title', 'Test Page')->first();
@@ -92,7 +91,7 @@ class PageTest extends TestCase
 
         $mod->collaborators()->attach($editor->id, [
             'role' => 'editor',
-            'invited_by' => $owner->id
+            'invited_by' => $owner->id,
         ]);
 
         $this->actingAs($editor);
@@ -104,7 +103,6 @@ class PageTest extends TestCase
             'is_index' => false,
             'published' => true,
         ];
-
 
         $response = $this->post(route('pages.store', $mod), $pageData);
 
@@ -121,7 +119,7 @@ class PageTest extends TestCase
 
         $mod->collaborators()->attach($viewer->id, [
             'role' => 'viewer',
-            'invited_by' => $owner->id
+            'invited_by' => $owner->id,
         ]);
 
         $this->actingAs($viewer);
@@ -225,7 +223,7 @@ class PageTest extends TestCase
 
         $mod->collaborators()->attach($editor->id, [
             'role' => 'editor',
-            'invited_by' => $owner->id
+            'invited_by' => $owner->id,
         ]);
 
         $this->actingAs($editor);
@@ -252,7 +250,7 @@ class PageTest extends TestCase
 
         $mod->collaborators()->attach($viewer->id, [
             'role' => 'viewer',
-            'invited_by' => $owner->id
+            'invited_by' => $owner->id,
         ]);
 
         $this->actingAs($viewer);
@@ -286,7 +284,7 @@ class PageTest extends TestCase
 
         $mod->collaborators()->attach($editor->id, [
             'role' => 'editor',
-            'invited_by' => $owner->id
+            'invited_by' => $owner->id,
         ]);
 
         $this->actingAs($editor);
@@ -328,7 +326,7 @@ class PageTest extends TestCase
             'pages' => [
                 ['id' => $page2->id, 'parent_id' => null, 'order_index' => 1],
                 ['id' => $page1->id, 'parent_id' => null, 'order_index' => 2],
-            ]
+            ],
         ]);
 
         $response->assertRedirect();
@@ -352,6 +350,7 @@ class PageTest extends TestCase
 
         $response->assertOk();
     }
+
     public function test_page_slug_is_generated_from_title()
     {
         $user = User::factory()->create();

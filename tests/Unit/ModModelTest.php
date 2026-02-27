@@ -215,7 +215,7 @@ class ModModelTest extends TestCase
 
     public function test_route_key_name_is_slug()
     {
-        $mod = new Mod();
+        $mod = new Mod;
         $this->assertEquals('slug', $mod->getRouteKeyName());
     }
 

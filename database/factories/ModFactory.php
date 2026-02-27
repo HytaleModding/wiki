@@ -18,7 +18,7 @@ class ModFactory extends Factory
      */
     public function definition(): array
     {
-        $name = fake()->unique()->words(2, true) . ' Mod';
+        $name = fake()->unique()->words(2, true).' Mod';
 
         return [
             'name' => $name,

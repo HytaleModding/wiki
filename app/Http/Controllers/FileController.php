@@ -7,14 +7,12 @@ use App\Models\Mod;
 use App\Models\Page;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class FileController extends Controller
 {
-
     /**
      * Display files for a mod.
      */
@@ -22,7 +20,7 @@ class FileController extends Controller
     {
         $user = Auth::user();
 
-        if (!$mod->canBeAccessedBy($user)) {
+        if (! $mod->canBeAccessedBy($user)) {
             abort(403);
         }
 
@@ -64,7 +62,7 @@ class FileController extends Controller
     {
         $user = Auth::user();
 
-        if (!$mod->userCan($user, 'edit')) {
+        if (! $mod->userCan($user, 'edit')) {
             abort(403);
         }
         $request->validate([
@@ -88,7 +86,7 @@ class FileController extends Controller
         foreach ($uploadedFiles as $uploadedFile) {
             $originalName = $uploadedFile->getClientOriginalName();
             $extension = $uploadedFile->getClientOriginalExtension();
-            $filename = Str::uuid() . '.' . $extension;
+            $filename = Str::uuid().'.'.$extension;
 
             $path = "mods/{$mod->id}/files/{$filename}";
 
@@ -103,7 +101,7 @@ class FileController extends Controller
                 'path' => $path,
                 'mime_type' => $uploadedFile->getMimeType(),
                 'size' => $uploadedFile->getSize(),
-                'storage_driver' => "local", // hard coded local for now
+                'storage_driver' => 'local', // hard coded local for now
                 'uploaded_by' => $user->id,
             ]);
             $url = Storage::disk('public')->url($path);
@@ -122,11 +120,11 @@ class FileController extends Controller
             return response()->json([
                 'success' => true,
                 'files' => $uploadedFileData,
-                'message' => count($uploadedFiles) . ' file(s) uploaded successfully!'
+                'message' => count($uploadedFiles).' file(s) uploaded successfully!',
             ]);
         }
 
-        return redirect()->back()->with('success', count($uploadedFiles) . ' file(s) uploaded successfully!');
+        return redirect()->back()->with('success', count($uploadedFiles).' file(s) uploaded successfully!');
     }
 
     /**
@@ -140,7 +138,7 @@ class FileController extends Controller
             abort(404);
         }
 
-        if (!$mod->canBeAccessedBy($user)) {
+        if (! $mod->canBeAccessedBy($user)) {
             abort(403);
         }
 
@@ -164,13 +162,13 @@ class FileController extends Controller
             abort(404);
         }
 
-        if (!$mod->canBeAccessedBy($user)) {
+        if (! $mod->canBeAccessedBy($user)) {
             abort(403);
         }
 
         $disk = 'public';
 
-        if (!Storage::disk($disk)->exists($file->path)) {
+        if (! Storage::disk($disk)->exists($file->path)) {
             abort(404, 'File not found on storage.');
         }
 
@@ -188,7 +186,7 @@ class FileController extends Controller
             abort(404);
         }
 
-        if (!$mod->userCan($user, 'edit')) {
+        if (! $mod->userCan($user, 'edit')) {
             abort(403);
         }
 
@@ -208,7 +206,7 @@ class FileController extends Controller
     {
         $user = Auth::user();
 
-        if (!$mod->userCan($user, 'edit')) {
+        if (! $mod->userCan($user, 'edit')) {
             abort(403);
         }
 
@@ -221,16 +219,16 @@ class FileController extends Controller
         $allowedMimes = [
             'image/jpeg', 'image/png', 'image/gif', 'image/webp',
             'application/pdf', 'text/plain', 'text/markdown',
-            'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         ];
 
-        if (!in_array($uploadedFile->getMimeType(), $allowedMimes)) {
+        if (! in_array($uploadedFile->getMimeType(), $allowedMimes)) {
             return response()->json(['error' => 'File type not allowed.'], 422);
         }
 
         $originalName = $uploadedFile->getClientOriginalName();
         $extension = $uploadedFile->getClientOriginalExtension();
-        $filename = Str::uuid() . '.' . $extension;
+        $filename = Str::uuid().'.'.$extension;
 
         $path = "mods/{$mod->id}/files/{$filename}";
         $disk = 'public';
@@ -260,7 +258,7 @@ class FileController extends Controller
                 'size' => $file->human_size,
                 'is_image' => $file->isImage(),
             ],
-            'message' => 'File uploaded successfully!'
+            'message' => 'File uploaded successfully!',
         ]);
     }
 
@@ -275,7 +273,7 @@ class FileController extends Controller
             abort(404);
         }
 
-        if (!$mod->canBeAccessedBy($user)) {
+        if (! $mod->canBeAccessedBy($user)) {
             abort(403);
         }
 
