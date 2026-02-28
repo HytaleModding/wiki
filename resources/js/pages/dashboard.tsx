@@ -257,17 +257,6 @@ export default function Dashboard({ stats }: Props) {
                   label="New Mod"
                   description="Start a new project"
                   href="/dashboard/mods/create"
-                  variant="primary"
-                />
-                <QuickActionButton
-                  icon={UserPlus}
-                  label="Invite Collaborator"
-                  description="Add team members"
-                  href={
-                    (totalMods ?? 0) > 0
-                      ? '/dashboard/mods'
-                      : '/dashboard/mods/create'
-                  }
                   variant="success"
                 />
                 <QuickActionButton
@@ -277,12 +266,6 @@ export default function Dashboard({ stats }: Props) {
                   href="/dashboard/mods"
                 />
                 <QuickActionButton
-                  icon={BookOpen}
-                  label="Documentation"
-                  description="Read the docs"
-                  href="/docs"
-                />
-                <QuickActionButton
                   icon={Settings}
                   label="Settings"
                   description="Manage your account"
@@ -290,7 +273,7 @@ export default function Dashboard({ stats }: Props) {
                 />
                 <QuickActionButton
                   icon={HelpCircle}
-                  label="Help & Support"
+                  label="Help & Support (WIP)"
                   description="Get assistance"
                   href="/help"
                 />
