@@ -44,8 +44,8 @@ Route::get('dashboard', function () {
     ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::get('/{mod:slug}', [ModController::class, 'publicShow'])->name('public.mod');
-Route::get('/{mod:slug}/{page:slug}', [PageController::class, 'publicShow'])->name('public.page');
+Route::get('/mod/{mod:slug}', [ModController::class, 'publicShow'])->name('public.mod');
+Route::get('/mod/{mod:slug}/{page:slug}', [PageController::class, 'publicShow'])->name('public.page');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('dashboard/mods', ModController::class)->except(['show']);
