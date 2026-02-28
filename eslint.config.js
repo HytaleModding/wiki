@@ -1,4 +1,8 @@
+import path from 'path';
+import process from 'process';
+import { includeIgnoreFile } from '@eslint/compat';
 import js from '@eslint/js';
+import { defineConfig } from 'eslint/config';
 import prettier from 'eslint-config-prettier/flat';
 import importPlugin from 'eslint-plugin-import';
 import react from 'eslint-plugin-react';
@@ -7,7 +11,11 @@ import globals from 'globals';
 import typescript from 'typescript-eslint';
 
 /** @type {import('eslint').Linter.Config[]} */
-export default [
+export default defineConfig([
+  includeIgnoreFile(
+    path.join(process.cwd(), '.gitignore'),
+    'Imported .gitignore patterns',
+  ),
   js.configs.recommended,
   reactHooks.configs.flat.recommended,
   ...typescript.configs.recommended,
@@ -82,4 +90,4 @@ export default [
     ],
   },
   prettier, // Turn off all rules that might conflict with Prettier
-];
+]);
