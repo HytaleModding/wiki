@@ -32,8 +32,9 @@ jobs:
       - name: Format Frontend
         run: bun run format:check
 
-      - name: Generate Wayfinder types
-        run: php artisan wayfinder:generate
+        # if we don't build the site, the lint and types checks fail because of missing generated files
+      - name: Build the site
+        run: bun run build
 
       - name: Lint Frontend
         run: bun run lint:check
