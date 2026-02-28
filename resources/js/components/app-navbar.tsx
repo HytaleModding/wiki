@@ -143,19 +143,6 @@ export default function AppNavbar() {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <a
-                  href="https://github.com/HytaleModding"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center"
-                >
-                  <Github className="mr-2 h-4 w-4" />
-                  GitHub
-                  <ExternalLink className="ml-auto h-3 w-3" />
-                </a>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
                 <Link
                   href="/logout"
                   method="post"

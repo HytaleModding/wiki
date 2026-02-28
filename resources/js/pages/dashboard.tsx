@@ -106,7 +106,6 @@ export default function Dashboard({ stats }: Props) {
           </div>
         </div>
 
-        {/* Stats Grid */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <StatCard
             title="Total Mods"
@@ -138,9 +137,7 @@ export default function Dashboard({ stats }: Props) {
           />
         </div>
 
-        {/* Main Content Grid */}
         <div className="grid gap-6 lg:grid-cols-3">
-          {/* Recent Activity - Takes 2 columns */}
           <div className="lg:col-span-2">
             <Card className="border-border/50">
               <CardHeader>
@@ -244,7 +241,6 @@ export default function Dashboard({ stats }: Props) {
             </Card>
           </div>
 
-          {/* Quick Actions Sidebar - Takes 1 column */}
           <div className="space-y-6">
             <Card className="border-border/50">
               <CardHeader>
@@ -280,7 +276,6 @@ export default function Dashboard({ stats }: Props) {
               </CardContent>
             </Card>
 
-            {/* Stats Summary Card */}
             <Card className="border-border/50 bg-linear-to-br from-primary/5 to-purple-500/5">
               <CardHeader>
                 <CardTitle className="text-base">Your Stats</CardTitle>
