@@ -53,12 +53,7 @@ interface Props {
   canEdit: boolean;
 }
 
-export default function ShowPage({
-  mod,
-  page,
-  navigation,
-  canEdit,
-}: Props) {
+export default function ShowPage({ mod, page, navigation, canEdit }: Props) {
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -109,7 +104,7 @@ export default function ShowPage({
                 {canEdit && (
                   <div className="mt-6 border-t pt-4">
                     <Button size="sm" className="w-full" asChild>
-                      <a href={`/dashboard/mods//${mod.slug}/pages/create`}>
+                      <a href={`/dashboard/mods/${mod.slug}/pages/create`}>
                         Add New Page
                       </a>
                     </Button>
@@ -123,7 +118,10 @@ export default function ShowPage({
           <div className="lg:col-span-3">
             {/* Breadcrumbs */}
             <nav className="mb-6 text-sm text-gray-600">
-              <a href={`/dashboard/mods//${mod.slug}`} className="hover:text-gray-800">
+              <a
+                href={`/dashboard/mods/${mod.slug}`}
+                className="hover:text-gray-800"
+              >
                 {mod.name}
               </a>
               {page.path &&
@@ -137,7 +135,7 @@ export default function ShowPage({
                       </span>
                     ) : (
                       <a
-                        href={`/dashboard/mods//${mod.slug}/pages/${pathItem.slug}`}
+                        href={`/dashboard/mods/${mod.slug}/pages/${pathItem.slug}`}
                         className="hover:text-gray-800"
                       >
                         {pathItem.title}
@@ -182,7 +180,9 @@ export default function ShowPage({
                 )}
                 {canEdit && (
                   <Button size="sm" asChild>
-                    <a href={`/dashboard/mods//${mod.slug}/pages/${page.slug}/edit`}>
+                    <a
+                      href={`/dashboard/mods/${mod.slug}/pages/${page.slug}/edit`}
+                    >
                       <PencilIcon className="mr-2 h-4 w-4" />
                       Edit
                     </a>
@@ -214,7 +214,7 @@ export default function ShowPage({
                     {page.children.map((child) => (
                       <a
                         key={child.id}
-                        href={`/dashboard/mods//${mod.slug}/pages/${child.slug}`}
+                        href={`/dashboard/mods/${mod.slug}/pages/${child.slug}`}
                         className="block rounded-lg border p-4 transition-shadow hover:shadow-md"
                       >
                         <h3 className="mb-1 font-medium text-gray-900">
@@ -239,7 +239,7 @@ export default function ShowPage({
                 </div>
                 {canEdit && (
                   <a
-                    href={`/dashboard/mods//${mod.slug}/pages/${page.slug}/edit`}
+                    href={`/dashboard/mods/${mod.slug}/pages/${page.slug}/edit`}
                     className="text-blue-600 hover:text-blue-800"
                   >
                     Improve this page

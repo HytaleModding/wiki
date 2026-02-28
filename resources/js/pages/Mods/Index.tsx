@@ -109,7 +109,7 @@ export default function ModsIndex({ ownedMods, collaborativeMods }: Props) {
                     <div className="flex items-start justify-between">
                       <CardTitle className="text-lg">
                         <a
-                          href={`/dashboard/mods//${mod.slug}`}
+                          href={`/dashboard/mods/${mod.slug}`}
                           className="text-blue-600 hover:text-blue-800"
                         >
                           {mod.name}
@@ -160,7 +160,7 @@ export default function ModsIndex({ ownedMods, collaborativeMods }: Props) {
                     <div className="flex items-start justify-between">
                       <CardTitle className="text-lg">
                         <a
-                          href={`/dashboard/mods//${mod.slug}`}
+                          href={`/dashboard/mods/${mod.slug}`}
                           className="text-blue-600 hover:text-blue-800"
                         >
                           {mod.name}

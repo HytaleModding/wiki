@@ -57,7 +57,7 @@ export default function EditPage({ mod, page, potentialParents }: Props) {
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    patch(`/dashboard/mods//${mod.slug}/pages/${page.slug}`);
+    patch(`/dashboard/mods/${mod.slug}/pages/${page.slug}`);
   };
 
   return (
@@ -67,12 +67,15 @@ export default function EditPage({ mod, page, potentialParents }: Props) {
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="mb-8">
           <nav className="mb-4 text-sm text-gray-600">
-            <a href={`/dashboard/mods//${mod.slug}`} className="hover:text-gray-800">
+            <a
+              href={`/dashboard/mods/${mod.slug}`}
+              className="hover:text-gray-800"
+            >
               {mod.name}
             </a>
             <span className="mx-2">›</span>
             <a
-              href={`/dashboard/mods//${mod.slug}/pages/${page.slug}`}
+              href={`/dashboard/mods/${mod.slug}/pages/${page.slug}`}
               className="hover:text-gray-800"
             >
               {page.title}
@@ -222,7 +225,7 @@ echo 'Hello World'
                   <CardTitle>Live Preview</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="min-h-[400px] rounded-md border p-4">
+                  <div className="min-h-100 rounded-md border p-4">
                     <MarkdownRenderer
                       content={data.content || 'Nothing to preview yet...'}
                     />
@@ -235,7 +238,9 @@ echo 'Hello World'
           <div className="flex items-center justify-between pt-4">
             <div className="flex space-x-3">
               <Button type="button" variant="outline" asChild>
-                <a href={`/dashboard/mods//${mod.slug}/pages/${page.slug}`}>Cancel</a>
+                <a href={`/dashboard/mods/${mod.slug}/pages/${page.slug}`}>
+                  Cancel
+                </a>
               </Button>
               <Button
                 type="button"
@@ -246,7 +251,9 @@ echo 'Hello World'
                       'Are you sure you want to delete this page? This action cannot be undone.',
                     )
                   ) {
-                    router.delete(`/dashboard/mods//${mod.slug}/pages/${page.slug}`);
+                    router.delete(
+                      `/dashboard/mods/${mod.slug}/pages/${page.slug}`,
+                    );
                   }
                 }}
               >
@@ -258,10 +265,13 @@ echo 'Hello World'
                 type="button"
                 variant="outline"
                 onClick={() => {
-                  router.patch(`/dashboard/mods//${mod.slug}/pages/${page.slug}`, {
-                    ...data,
-                    published: false,
-                  });
+                  router.patch(
+                    `/dashboard/mods/${mod.slug}/pages/${page.slug}`,
+                    {
+                      ...data,
+                      published: false,
+                    },
+                  );
                 }}
                 disabled={processing}
               >

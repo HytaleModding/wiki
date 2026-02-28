@@ -27,30 +27,24 @@ export default function Welcome({
             <h1 className="text-4xl font-bold text-[#1b1b18] dark:text-[#EDEDEC]">
               Welcome to HytaleModding Wiki
             </h1>
-            <p className="text-xl text-[#706f6c] dark:text-[#A1A09A] max-w-md">
+            <p className="max-w-md text-xl text-[#706f6c] dark:text-[#A1A09A]">
               This page is under development
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md justify-center items-center">
+          <div className="flex w-full max-w-md flex-col items-center justify-center gap-4 sm:flex-row">
             {auth.user ? (
               <Button asChild className="w-full sm:w-auto" size="lg">
-                <Link href={dashboard()}>
-                  Go to Dashboard
-                </Link>
+                <Link href={dashboard()}>Go to Dashboard</Link>
               </Button>
             ) : (
               <>
                 <Button asChild className="w-full sm:w-auto" size="lg">
-                  <Link href={login()}>
-                    Log In
-                  </Link>
+                  <Link href={login()}>Log In</Link>
                 </Button>
                 {canRegister && (
                   <Button asChild className="w-full sm:w-auto" size="lg">
-                    <Link href={register()}>
-                      Register
-                    </Link>
+                    <Link href={register()}>Register</Link>
                   </Button>
                 )}
               </>

@@ -104,20 +104,23 @@ export default function ManageCollaborators({ mod, canManage }: Props) {
       );
       const collaboratorName = collaboratorToRemove?.name || 'collaborator';
 
-      deleteRequest(`/dashboard/mods/${mod.slug}/collaborators/${collaboratorId}`, {
-        onSuccess: () => {
-          sileo.success({
-            title: 'Collaborator Removed',
-            description: `${collaboratorName} has been removed from the mod`,
-          });
+      deleteRequest(
+        `/dashboard/mods/${mod.slug}/collaborators/${collaboratorId}`,
+        {
+          onSuccess: () => {
+            sileo.success({
+              title: 'Collaborator Removed',
+              description: `${collaboratorName} has been removed from the mod`,
+            });
+          },
+          onError: () => {
+            sileo.error({
+              title: 'Error',
+              description: 'Failed to remove collaborator. Please try again.',
+            });
+          },
         },
-        onError: () => {
-          sileo.error({
-            title: 'Error',
-            description: 'Failed to remove collaborator. Please try again.',
-          });
-        },
-      });
+      );
     }
   };
 
@@ -128,7 +131,10 @@ export default function ManageCollaborators({ mod, canManage }: Props) {
     const collaboratorName = collaboratorToUpdate?.name || 'collaborator';
 
     console.log('Updating role for:', collaboratorId, 'to:', newRole);
-    console.log('URL:', `/dashboard/mods//${mod.slug}/collaborators/${collaboratorId}`);
+    console.log(
+      'URL:',
+      `/dashboard/mods/${mod.slug}/collaborators/${collaboratorId}`,
+    );
     console.log('Data:', { role: newRole });
 
     router.patch(
@@ -205,7 +211,10 @@ export default function ManageCollaborators({ mod, canManage }: Props) {
       <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="mb-8">
           <nav className="mb-4 text-sm text-gray-600">
-            <a href={`/dashboard/mods/${mod.slug}`} className="hover:text-gray-800">
+            <a
+              href={`/dashboard/mods/${mod.slug}`}
+              className="hover:text-gray-800"
+            >
               {mod.name}
             </a>
             <span className="mx-2">›</span>

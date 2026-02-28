@@ -45,7 +45,7 @@ export default function FilesIndex({ mod, files, canEdit }: Props) {
     e.preventDefault();
     if (!data.files.length) return;
 
-    post(`/dashboard/mods//${mod.slug}/files`, {
+    post(`/dashboard/mods/${mod.slug}/files`, {
       forceFormData: true,
       onSuccess: () => {
         setData('files', []);
@@ -76,7 +76,7 @@ export default function FilesIndex({ mod, files, canEdit }: Props) {
 
   const deleteFile = (fileId: string) => {
     if (confirm('Are you sure you want to delete this file?')) {
-      fetch(`/dashboard/mods//${mod.slug}/files/${fileId}`, {
+      fetch(`/dashboard/mods/${mod.slug}/files/${fileId}`, {
         method: 'DELETE',
         headers: {
           'X-CSRF-TOKEN':
@@ -106,7 +106,10 @@ export default function FilesIndex({ mod, files, canEdit }: Props) {
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="mb-8">
           <nav className="mb-4 text-sm text-gray-600">
-            <a href={`/dashboard/mods//${mod.slug}`} className="hover:text-gray-800">
+            <a
+              href={`/dashboard/mods/${mod.slug}`}
+              className="hover:text-gray-800"
+            >
               {mod.name}
             </a>
             <span className="mx-2">›</span>
@@ -215,7 +218,7 @@ export default function FilesIndex({ mod, files, canEdit }: Props) {
                       <div className="flex items-center space-x-1">
                         <Button size="sm" variant="ghost" asChild>
                           <a
-                            href={`/dashboard/mods//${mod.slug}/files/${file.id}/download`}
+                            href={`/dashboard/mods/${mod.slug}/files/${file.id}/download`}
                           >
                             <DownloadIcon className="h-3 w-3" />
                           </a>

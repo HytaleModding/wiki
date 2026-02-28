@@ -263,7 +263,11 @@ export default function Dashboard({ stats }: Props) {
                   icon={UserPlus}
                   label="Invite Collaborator"
                   description="Add team members"
-                  href={(totalMods ?? 0) > 0 ? '/dashboard/mods' : '/dashboard/mods/create'}
+                  href={
+                    (totalMods ?? 0) > 0
+                      ? '/dashboard/mods'
+                      : '/dashboard/mods/create'
+                  }
                   variant="success"
                 />
                 <QuickActionButton

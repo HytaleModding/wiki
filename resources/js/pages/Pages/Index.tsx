@@ -97,7 +97,7 @@ export default function PagesIndex({ mod, pages, canEdit }: Props) {
     try {
       // Send to backend using form submission
       router.post(
-        `/dashboard/mods//${mod.slug}/pages/reorder`,
+        `/dashboard/mods/${mod.slug}/pages/reorder`,
         {
           pages: pagesToUpdate,
         },
@@ -209,7 +209,7 @@ export default function PagesIndex({ mod, pages, canEdit }: Props) {
 
               <div className="flex min-w-0 flex-1 items-center">
                 <a
-                  href={`/dashboard/mods//${mod.slug}/pages/${page.slug}`}
+                  href={`/dashboard/mods/${mod.slug}/pages/${page.slug}`}
                   className="truncate font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                 >
                   {page.title}
@@ -249,7 +249,7 @@ export default function PagesIndex({ mod, pages, canEdit }: Props) {
             <div className="flex items-center space-x-1 opacity-0 transition-opacity group-hover:opacity-100">
               <Button size="sm" variant="ghost" asChild className="h-6 w-6 p-0">
                 <a
-                  href={`/dashboard/mods//${mod.slug}/pages/${page.slug}`}
+                  href={`/dashboard/mods/${mod.slug}/pages/${page.slug}`}
                   title="View page"
                 >
                   <EyeIcon className="h-3 w-3" />
@@ -263,7 +263,7 @@ export default function PagesIndex({ mod, pages, canEdit }: Props) {
                   className="h-6 w-6 p-0"
                 >
                   <a
-                    href={`/dashboard/mods//${mod.slug}/pages/${page.slug}/edit`}
+                    href={`/dashboard/mods/${mod.slug}/pages/${page.slug}/edit`}
                     title="Edit page"
                   >
                     <PencilIcon className="h-3 w-3" />
@@ -352,7 +352,7 @@ export default function PagesIndex({ mod, pages, canEdit }: Props) {
         <div className="mb-8">
           <nav className="mb-4 text-sm text-gray-600 dark:text-gray-400">
             <a
-              href={`/dashboard/mods//${mod.slug}`}
+              href={`/dashboard/mods/${mod.slug}`}
               className="hover:text-gray-800 dark:hover:text-gray-200"
             >
               {mod.name}
@@ -383,7 +383,7 @@ export default function PagesIndex({ mod, pages, canEdit }: Props) {
               )}
               {canEdit && (
                 <Button asChild>
-                  <a href={`/dashboard/mods//${mod.slug}/pages/create`}>
+                  <a href={`/dashboard/mods/${mod.slug}/pages/create`}>
                     <PlusIcon className="mr-2 h-4 w-4" />
                     New Page
                   </a>
@@ -431,7 +431,7 @@ export default function PagesIndex({ mod, pages, canEdit }: Props) {
               </p>
               {canEdit && (
                 <Button asChild>
-                  <a href={`/dashboard/mods//${mod.slug}/pages/create`}>
+                  <a href={`/dashboard/mods/${mod.slug}/pages/create`}>
                     Create First Page
                   </a>
                 </Button>

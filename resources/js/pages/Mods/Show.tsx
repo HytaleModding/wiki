@@ -104,7 +104,7 @@ export default function ShowMod({ mod, userRole, canEdit, canManage }: Props) {
           <div className="flex items-center">
             <BookOpenIcon className="mr-2 h-4 w-4 text-muted-foreground group-hover:text-foreground" />
             <a
-              href={`/dashboard/mods//${mod.slug}/pages/${page.slug}`}
+              href={`/dashboard/mods/${mod.slug}/pages/${page.slug}`}
               className="text-foreground transition-colors hover:text-primary"
             >
               {page.title}
@@ -117,13 +117,13 @@ export default function ShowMod({ mod, userRole, canEdit, canManage }: Props) {
           </div>
           <div className="flex items-center space-x-1 opacity-0 transition-opacity group-hover:opacity-100">
             <Button size="sm" variant="ghost" asChild>
-              <a href={`/dashboard/mods//${mod.slug}/pages/${page.slug}`}>
+              <a href={`/dashboard/mods/${mod.slug}/pages/${page.slug}`}>
                 <EyeIcon className="h-3 w-3" />
               </a>
             </Button>
             {canEdit && (
               <Button size="sm" variant="ghost" asChild>
-                <a href={`/dashboard/mods//${mod.slug}/pages/${page.slug}/edit`}>
+                <a href={`/dashboard/mods/${mod.slug}/pages/${page.slug}/edit`}>
                   <PencilIcon className="h-3 w-3" />
                 </a>
               </Button>
@@ -177,7 +177,7 @@ export default function ShowMod({ mod, userRole, canEdit, canManage }: Props) {
             )}
             {canEdit && (
               <Button asChild>
-                <a href={`/dashboard/mods//${mod.slug}/pages/create`}>
+                <a href={`/dashboard/mods/${mod.slug}/pages/create`}>
                   <PlusIcon className="mr-2 h-4 w-4" />
                   New Page
                 </a>
@@ -185,7 +185,7 @@ export default function ShowMod({ mod, userRole, canEdit, canManage }: Props) {
             )}
             {canManage && (
               <Button variant="outline" asChild>
-                <a href={`/dashboard/mods//${mod.slug}/edit`}>
+                <a href={`/dashboard/mods/${mod.slug}/edit`}>
                   <CogIcon className="mr-2 h-4 w-4" />
                   Settings
                 </a>
@@ -214,7 +214,7 @@ export default function ShowMod({ mod, userRole, canEdit, canManage }: Props) {
                     </span>
                     <Button variant="outline" size="sm" asChild>
                       <a
-                        href={`/dashboard/mods//${mod.slug}/pages/${mod.index_page.slug}`}
+                        href={`/dashboard/mods/${mod.slug}/pages/${mod.index_page.slug}`}
                       >
                         Read More
                       </a>
@@ -231,7 +231,7 @@ export default function ShowMod({ mod, userRole, canEdit, canManage }: Props) {
                   <CardTitle>Pages</CardTitle>
                   {canEdit && (
                     <Button size="sm" asChild>
-                      <a href={`/dashboard/mods//${mod.slug}/pages/create`}>
+                      <a href={`/dashboard/mods/${mod.slug}/pages/create`}>
                         <PlusIcon className="mr-2 h-4 w-4" />
                         Add Page
                       </a>
@@ -249,7 +249,7 @@ export default function ShowMod({ mod, userRole, canEdit, canManage }: Props) {
                     </p>
                     {canEdit && (
                       <Button asChild>
-                        <a href={`/dashboard/mods//${mod.slug}/pages/create`}>
+                        <a href={`/dashboard/mods/${mod.slug}/pages/create`}>
                           Create First Page
                         </a>
                       </Button>
@@ -275,18 +275,22 @@ export default function ShowMod({ mod, userRole, canEdit, canManage }: Props) {
                 {canEdit && (
                   <>
                     <Button className="w-full" asChild>
-                      <a href={`/dashboard/mods//${mod.slug}/pages/create`}>
+                      <a href={`/dashboard/mods/${mod.slug}/pages/create`}>
                         <PlusIcon className="mr-2 h-4 w-4" />
                         New Page
                       </a>
                     </Button>
                     <Button variant="outline" className="w-full" asChild>
-                      <a href={`/dashboard/mods//${mod.slug}/files`}>Upload Files</a>
+                      <a href={`/dashboard/mods/${mod.slug}/files`}>
+                        Upload Files
+                      </a>
                     </Button>
                   </>
                 )}
                 <Button variant="outline" className="w-full" asChild>
-                  <a href={`/dashboard/mods//${mod.slug}/pages`}>View All Pages</a>
+                  <a href={`/dashboard/mods/${mod.slug}/pages`}>
+                    View All Pages
+                  </a>
                 </Button>
               </CardContent>
             </Card>
@@ -299,7 +303,7 @@ export default function ShowMod({ mod, userRole, canEdit, canManage }: Props) {
                     <CardTitle>Collaborators</CardTitle>
                     {canManage && (
                       <Button size="sm" variant="outline" asChild>
-                        <a href={`/dashboard/mods//${mod.slug}/collaborators`}>
+                        <a href={`/dashboard/mods/${mod.slug}/collaborators`}>
                           <UsersIcon className="mr-2 h-4 w-4" />
                           Manage
                         </a>

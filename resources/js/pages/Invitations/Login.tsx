@@ -40,10 +40,7 @@ interface Props {
   wrongUser: boolean;
 }
 
-export default function LoginRequired({
-  invitation,
-  needsLogin,
-}: Props) {
+export default function LoginRequired({ invitation, needsLogin }: Props) {
   return (
     <AppLayout>
       <Head title="Login Required" />

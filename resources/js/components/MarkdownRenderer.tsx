@@ -21,11 +21,11 @@ function createSlug(text: string): string {
 }
 
 function createHeadingRenderer() {
-  return function(heading: { tokens: Token[], depth: number }): string {
+  return function (heading: { tokens: Token[]; depth: number }): string {
     const text = marked.parser(heading.tokens, {
       renderer: new marked.Renderer(),
       gfm: true,
-      breaks: true
+      breaks: true,
     });
     const rawText = text.replace(/<[^>]*>/g, '');
     const slug = createSlug(rawText);
@@ -90,34 +90,37 @@ export default function MarkdownRenderer({
   const [, copy] = useClipboard();
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const handleCopyClick = useCallback(async (event: Event) => {
-    const target = event.target as HTMLElement;
-    const button = target.closest('.copy-heading-btn') as HTMLButtonElement;
+  const handleCopyClick = useCallback(
+    async (event: Event) => {
+      const target = event.target as HTMLElement;
+      const button = target.closest('.copy-heading-btn') as HTMLButtonElement;
 
-    if (!button) return;
+      if (!button) return;
 
-    const slug = button.dataset.headingSlug;
-    if (!slug) return;
+      const slug = button.dataset.headingSlug;
+      if (!slug) return;
 
-    const url = `${window.location.origin}${window.location.pathname}#${slug}`;
+      const url = `${window.location.origin}${window.location.pathname}#${slug}`;
 
-    const success = await copy(url);
+      const success = await copy(url);
 
-    if (success) {
-      const copyIcon = button.querySelector('.copy-icon') as HTMLElement;
-      const checkIcon = button.querySelector('.check-icon') as HTMLElement;
+      if (success) {
+        const copyIcon = button.querySelector('.copy-icon') as HTMLElement;
+        const checkIcon = button.querySelector('.check-icon') as HTMLElement;
 
-      if (copyIcon && checkIcon) {
-        copyIcon.classList.add('hidden');
-        checkIcon.classList.remove('hidden');
+        if (copyIcon && checkIcon) {
+          copyIcon.classList.add('hidden');
+          checkIcon.classList.remove('hidden');
 
-        setTimeout(() => {
-          copyIcon.classList.remove('hidden');
-          checkIcon.classList.add('hidden');
-        }, 2000);
+          setTimeout(() => {
+            copyIcon.classList.remove('hidden');
+            checkIcon.classList.add('hidden');
+          }, 2000);
+        }
       }
-    }
-  }, [copy]);
+    },
+    [copy],
+  );
 
   useEffect(() => {
     const parseContent = async () => {
@@ -133,12 +136,12 @@ export default function MarkdownRenderer({
     if (!container) return;
 
     const copyButtons = container.querySelectorAll('.copy-heading-btn');
-    copyButtons.forEach(button => {
+    copyButtons.forEach((button) => {
       button.addEventListener('click', handleCopyClick);
     });
 
     return () => {
-      copyButtons.forEach(button => {
+      copyButtons.forEach((button) => {
         button.removeEventListener('click', handleCopyClick);
       });
     };

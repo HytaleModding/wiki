@@ -33,7 +33,7 @@ export default function CreatePage({ mod, parent }: Props) {
     published: true,
   });
 
-  const submit = (e: React.FormEvent) => {
+  const submit = (e: React.SubmitEvent) => {
     e.preventDefault();
     post(`/dashboard/mods/${mod.slug}/pages`);
   };
@@ -45,7 +45,10 @@ export default function CreatePage({ mod, parent }: Props) {
       <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="mb-8">
           <nav className="mb-4 text-sm text-gray-600">
-            <a href={`/dashboard/mods//${mod.slug}`} className="hover:text-gray-800">
+            <a
+              href={`/dashboard/mods/${mod.slug}`}
+              className="hover:text-gray-800"
+            >
               {mod.name}
             </a>
             {parent && (
@@ -97,19 +100,6 @@ export default function CreatePage({ mod, parent }: Props) {
                     Index page (home page of the mod)
                   </Label>
                 </div>
-
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="published"
-                    checked={data.published}
-                    onCheckedChange={(checked) =>
-                      setData('published', !!checked)
-                    }
-                  />
-                  <Label htmlFor="published" className="text-sm">
-                    Published
-                  </Label>
-                </div>
               </div>
             </CardContent>
           </Card>
@@ -159,7 +149,7 @@ For more information, see the other pages in this documentation."
 
           <div className="flex items-center justify-between pt-4">
             <Button type="button" variant="outline" asChild>
-              <a href={`/dashboard/mods//${mod.slug}`}>Cancel</a>
+              <a href={`/dashboard/mods/${mod.slug}`}>Cancel</a>
             </Button>
             <div className="flex space-x-3">
               <Button
@@ -167,7 +157,7 @@ For more information, see the other pages in this documentation."
                 variant="outline"
                 onClick={() => {
                   setData('published', false);
-                  post(`/dashboard/mods//${mod.slug}/pages`);
+                  post(`/dashboard/mods/${mod.slug}/pages`);
                 }}
                 disabled={processing}
               >

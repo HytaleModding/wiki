@@ -67,7 +67,10 @@ export default function EditMod({ mod }: Props) {
       <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="mb-8">
           <nav className="mb-4 text-sm text-gray-600">
-            <a href={`/dashboard/mods//${mod.slug}`} className="hover:text-gray-800">
+            <a
+              href={`/dashboard/mods/${mod.slug}`}
+              className="hover:text-gray-800"
+            >
               {mod.name}
             </a>
             <span className="mx-2">›</span>
@@ -212,7 +215,7 @@ export default function EditMod({ mod }: Props) {
 
                 <div className="flex items-center justify-between pt-4">
                   <Button type="button" variant="outline" asChild>
-                    <a href={`/dashboard/mods//${mod.slug}`}>Cancel</a>
+                    <a href={`/dashboard/mods/${mod.slug}`}>Cancel</a>
                   </Button>
                   <Button type="submit" disabled={processing}>
                     {processing ? 'Saving...' : 'Save Changes'}
