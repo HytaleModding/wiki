@@ -198,6 +198,18 @@
   border-left-color: #ef4444;
 }
 
+[data-slot="card"]:has(.prose) {
+  padding: 0;
+}
+
+[data-slot="card"]:has(.prose) [data-slot="card-title"] {
+  padding-top: 30px;
+}
+
+[data-slot="card"]:has(.prose) [data-slot="card-header"] svg {
+  transform: translateY(15px);
+}
+
 @theme {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
