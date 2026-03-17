@@ -158,7 +158,7 @@ export default function ShowMod({ mod, userRole, canEdit, canManage }: Props) {
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center">
-                        <BookOpenIcon className="mr-2 h-5 w-5 text-primary" />
+                        <BookOpenIcon className="mr-2 h-5 w-5 text-primary translate-y-[15px]" />
                         {mod.index_page.title}
                       </CardTitle>
                     </CardHeader>

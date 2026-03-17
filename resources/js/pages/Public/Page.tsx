@@ -190,8 +190,8 @@ export default function PublicPage({ mod, page, navigation }: Props) {
         </aside>
 
         <main className="min-w-0 lg:col-span-8 xl:col-span-9">
-          <Card className="mb-8 overflow-hidden rounded-2xl border-border/70 bg-card/95 shadow-sm">
-            <CardHeader className="border-b border-border/60 bg-muted/10">
+          <Card className="mb-8 overflow-hidden rounded-2xl border-border/70 bg-card/95 shadow-sm p-0">
+            <CardHeader className="border-b border-border/60 bg-muted/10 pt-[30px]">
               <div className="space-y-2">
                 <CardTitle className="text-2xl break-words sm:text-3xl">
                   {page.title}
@@ -203,7 +203,7 @@ export default function PublicPage({ mod, page, navigation }: Props) {
               </div>
             </CardHeader>
 
-            <CardContent className="p-8">
+            <CardContent className="p-0">
               <div className="prose max-w-none min-w-0 [overflow-wrap:anywhere] break-words prose-gray dark:prose-invert prose-code:break-words prose-pre:max-w-full prose-pre:overflow-x-auto">
                 <MarkdownRenderer
                   content={
