@@ -109,6 +109,7 @@ export default function PublicMod({ mod }: Props) {
         title={`${mod.name} Documentation`}
         description={metaDescription}
         image={mod.icon_url}
+        favicon={mod.icon_url}
       />
 
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8 xl:gap-10">

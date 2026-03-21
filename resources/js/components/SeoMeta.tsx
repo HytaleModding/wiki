@@ -6,6 +6,7 @@ type SeoMetaProps = {
   title?: string;
   description?: string;
   image?: string;
+  favicon?: string;
   url?: string;
   type?: 'website' | 'article';
   noIndex?: boolean;
@@ -27,6 +28,7 @@ export default function SeoMeta({
   title,
   description,
   image,
+  favicon,
   url,
   type = 'website',
   noIndex = false,
@@ -44,6 +46,9 @@ export default function SeoMeta({
   const resolvedImage = image
     ? toAbsoluteUrl(image, fallbackBaseUrl)
     : props.meta?.default_image;
+  const resolvedFavicon = favicon
+    ? toAbsoluteUrl(favicon, fallbackBaseUrl)
+    : null;
   const ogTitle = title ? `${title} | ${siteName}` : siteName;
 
   return (
@@ -55,6 +60,16 @@ export default function SeoMeta({
       />
       {resolvedUrl && (
         <link head-key="meta-canonical" rel="canonical" href={resolvedUrl} />
+      )}
+      {resolvedFavicon && (
+        <>
+          <link head-key="meta-favicon" rel="icon" href={resolvedFavicon} />
+          <link
+            head-key="meta-apple-touch-icon"
+            rel="apple-touch-icon"
+            href={resolvedFavicon}
+          />
+        </>
       )}
       <meta
         head-key="meta-robots"

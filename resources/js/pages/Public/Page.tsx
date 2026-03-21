@@ -133,6 +133,7 @@ export default function PublicPage({ mod, page, navigation }: Props) {
         title={`${page.title} - ${mod.name} Documentation`}
         description={metaDescription}
         image={mod.icon_url}
+        favicon={mod.icon_url}
         type="article"
       />
 
