@@ -570,38 +570,11 @@ export default function EditMod({ mod }: Props) {
                         variant="outline"
                         onClick={openCssEditor}
                         disabled={processing}
-                        className="border-violet-500/40 bg-violet-500/10 text-violet-600 hover:bg-violet-500/20 hover:text-violet-600 dark:text-violet-400"
                       >
-                        <span>✨</span>
                         {processing ? 'Saving...' : 'Open CSS Editor'}
                       </Button>
                     </div>
 
-                    <Separator />
-                    <div className="relative overflow-hidden rounded-md border border-border/70 bg-muted/10 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/30">
-                      <div className="flex items-center justify-between border-b border-border/60 bg-muted/30 px-3 py-1.5">
-                        <span className="text-xs font-medium text-muted-foreground">
-                          CSS
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          Applied to all public pages
-                        </span>
-                      </div>
-                      <textarea
-                        id="custom_css"
-                        value={data.custom_css}
-                        onChange={(e) => setData('custom_css', e.target.value)}
-                        placeholder={`/* Custom styles for your mod's public pages */\n\n.prose h1 {\n  color: #your-color;\n}\n\nbody {\n  --background: your-value;\n}`}
-                        rows={14}
-                        spellCheck={false}
-                        className="w-full resize-y bg-transparent p-4 font-mono text-sm leading-relaxed text-foreground outline-none placeholder:text-muted-foreground/50"
-                      />
-                    </div>
-                    {errors.custom_css && (
-                      <p className="text-sm text-destructive">
-                        {errors.custom_css}
-                      </p>
-                    )}
                   </CardContent>
                 </Card>
               </TabsContent>
