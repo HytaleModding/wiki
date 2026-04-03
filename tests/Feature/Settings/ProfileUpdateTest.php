@@ -4,6 +4,8 @@ namespace Tests\Feature\Settings;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class ProfileUpdateTest extends TestCase
@@ -95,5 +97,50 @@ class ProfileUpdateTest extends TestCase
             ->assertRedirect(route('profile.edit'));
 
         $this->assertNotNull($user->fresh());
+    }
+
+    public function test_user_avatar_is_uploaded_to_r2_disk()
+    {
+        Storage::fake('r2');
+        config(['filesystems.upload_disk' => 'r2']);
+
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->patch(route('profile.update'), [
+                'name' => $user->name,
+                'email' => $user->email,
+                'avatar' => UploadedFile::fake()->image('avatar.png'),
+            ])
+            ->assertSessionHasNoErrors()
+            ->assertRedirect(route('profile.edit'));
+
+        $user->refresh();
+
+        $this->assertNotNull($user->avatar_path);
+        Storage::disk('r2')->assertExists($user->avatar_path);
+    }
+
+    public function test_deleting_avatar_removes_r2_object()
+    {
+        Storage::fake('r2');
+        config(['filesystems.upload_disk' => 'r2']);
+
+        $path = 'avatars/existing-avatar.png';
+        Storage::disk('r2')->put($path, 'avatar-bytes');
+
+        $user = User::factory()->create([
+            'avatar_url' => 'https://cdn.example.com/'.$path,
+            'avatar_path' => $path,
+        ]);
+
+        $this->actingAs($user)
+            ->delete(route('profile.avatar.delete'))
+            ->assertRedirect(route('profile.edit'));
+
+        $user->refresh();
+        $this->assertNull($user->avatar_url);
+        $this->assertNull($user->avatar_path);
+        Storage::disk('r2')->assertMissing($path);
     }
 }

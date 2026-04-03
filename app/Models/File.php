@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
+use App\Services\FileUploadService;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\Storage;
 
 class File extends Model
 {
@@ -65,11 +65,7 @@ class File extends Model
             return $value;
         }
 
-        if ($this->storage_driver === 's3') {
-            return Storage::disk('s3')->url($this->path);
-        }
-
-        return Storage::disk('public')->url($this->path);
+        return app(FileUploadService::class)->url($this->path, $this->storage_driver);
     }
 
     /**
@@ -118,11 +114,7 @@ class File extends Model
         parent::boot();
 
         static::deleting(function ($file) {
-            if ($file->storage_driver === 's3') {
-                Storage::disk('s3')->delete($file->path);
-            } else {
-                Storage::disk('public')->delete($file->path);
-            }
+            app(FileUploadService::class)->delete($file->path, $file->storage_driver);
         });
     }
 }

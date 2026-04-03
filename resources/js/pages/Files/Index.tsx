@@ -123,9 +123,6 @@ export default function FilesIndex({ mod, files, canEdit }: Props) {
                 Upload and manage files for your mod documentation
               </p>
             </div>
-            <Badge className="border border-gray-400 bg-transparent font-bold text-gray-400">
-              {mod.storage_driver === 's3' ? 'S3 Storage' : 'Local Storage'}
-            </Badge>
           </div>
         </div>
 

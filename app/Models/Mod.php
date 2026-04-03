@@ -18,6 +18,7 @@ class Mod extends Model
         'slug',
         'description',
         'icon_url',
+        'icon_path',
         'owner_id',
         'visibility',
         'storage_driver',

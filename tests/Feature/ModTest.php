@@ -7,7 +7,9 @@ use App\Models\Page;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
@@ -535,5 +537,61 @@ class ModTest extends TestCase
             'id' => $mod->id,
             'custom_css' => null,
         ]);
+    }
+
+    public function test_mod_icon_is_uploaded_to_r2_on_create()
+    {
+        Storage::fake('r2');
+        config(['filesystems.upload_disk' => 'r2']);
+
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $response = $this->post(route('mods.store'), [
+            'name' => 'R2 Icon Mod',
+            'description' => 'R2 icon upload test',
+            'visibility' => 'public',
+            'storage_driver' => 'local',
+            'icon' => UploadedFile::fake()->image('icon.png', 128, 128),
+        ]);
+
+        $mod = Mod::where('name', 'R2 Icon Mod')->firstOrFail();
+
+        $response->assertRedirect(route('mods.show', $mod));
+        $this->assertNotNull($mod->icon_path);
+        Storage::disk('r2')->assertExists($mod->icon_path);
+    }
+
+    public function test_updating_mod_icon_replaces_previous_r2_file()
+    {
+        Storage::fake('r2');
+        config(['filesystems.upload_disk' => 'r2']);
+
+        $owner = User::factory()->create();
+        $oldPath = 'mods/icons/old-icon.png';
+        Storage::disk('r2')->put($oldPath, 'old-icon-bytes');
+
+        $mod = Mod::factory()->create([
+            'owner_id' => $owner->id,
+            'icon_url' => 'https://cdn.example.com/'.$oldPath,
+            'icon_path' => $oldPath,
+        ]);
+
+        $this->actingAs($owner);
+
+        $response = $this->patch(route('mods.update', $mod), [
+            'name' => $mod->name,
+            'description' => $mod->description,
+            'visibility' => $mod->visibility,
+            'storage_driver' => $mod->storage_driver,
+            'icon' => UploadedFile::fake()->image('new-icon.png', 128, 128),
+        ]);
+
+        $response->assertRedirect(route('mods.show', $mod));
+        Storage::disk('r2')->assertMissing($oldPath);
+
+        $mod->refresh();
+        $this->assertNotNull($mod->icon_path);
+        Storage::disk('r2')->assertExists($mod->icon_path);
     }
 }

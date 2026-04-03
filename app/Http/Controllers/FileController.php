@@ -5,14 +5,16 @@ namespace App\Http\Controllers;
 use App\Models\File;
 use App\Models\Mod;
 use App\Models\Page;
+use App\Services\FileUploadService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class FileController extends Controller
 {
+    public function __construct(private readonly FileUploadService $fileUploadService) {}
+
     /**
      * Display files for a mod.
      */
@@ -48,7 +50,7 @@ class FileController extends Controller
                 'id' => $mod->id,
                 'name' => $mod->name,
                 'slug' => $mod->slug,
-                'storage_driver' => $mod->storage_driver,
+                'storage_driver' => $this->fileUploadService->defaultStorageDriver(),
             ],
             'files' => $files,
             'canEdit' => $user && $mod->userCan($user, 'edit'),
@@ -85,28 +87,20 @@ class FileController extends Controller
 
         foreach ($uploadedFiles as $uploadedFile) {
             $originalName = $uploadedFile->getClientOriginalName();
-            $extension = $uploadedFile->getClientOriginalExtension();
-            $filename = Str::uuid().'.'.$extension;
-
-            $path = "mods/{$mod->id}/files/{$filename}";
-
-            $disk = 'public';
-            $uploadedFile->storeAs("mods/{$mod->id}/files", $filename, $disk);
+            $uploaded = $this->fileUploadService->upload($uploadedFile, "mods/{$mod->id}/files");
 
             $file = File::create([
                 'mod_id' => $mod->id,
                 'page_id' => $pageId,
                 'original_name' => $originalName,
-                'filename' => $filename,
-                'path' => $path,
+                'filename' => $uploaded['filename'],
+                'path' => $uploaded['path'],
                 'mime_type' => $uploadedFile->getMimeType(),
                 'size' => $uploadedFile->getSize(),
-                'storage_driver' => 'local', // hard coded local for now
+                'storage_driver' => $uploaded['storage_driver'],
+                'url' => $uploaded['url'],
                 'uploaded_by' => $user->id,
             ]);
-            $url = Storage::disk('public')->url($path);
-
-            $file->update(['url' => $url]);
 
             $uploadedFileData[] = [
                 'id' => $file->id,
@@ -166,7 +160,7 @@ class FileController extends Controller
             abort(403);
         }
 
-        $disk = 'public';
+        $disk = $this->fileUploadService->diskForStorageDriver($file->storage_driver);
 
         if (! Storage::disk($disk)->exists($file->path)) {
             abort(404, 'File not found on storage.');
@@ -227,26 +221,20 @@ class FileController extends Controller
         }
 
         $originalName = $uploadedFile->getClientOriginalName();
-        $extension = $uploadedFile->getClientOriginalExtension();
-        $filename = Str::uuid().'.'.$extension;
-
-        $path = "mods/{$mod->id}/files/{$filename}";
-        $disk = 'public';
-        $uploadedFile->storeAs("mods/{$mod->id}/files", $filename, $disk);
+        $uploaded = $this->fileUploadService->upload($uploadedFile, "mods/{$mod->id}/files");
 
         $file = File::create([
             'mod_id' => $mod->id,
             'original_name' => $originalName,
-            'filename' => $filename,
-            'path' => $path,
+            'filename' => $uploaded['filename'],
+            'path' => $uploaded['path'],
             'mime_type' => $uploadedFile->getMimeType(),
             'size' => $uploadedFile->getSize(),
-            'storage_driver' => $mod->storage_driver,
+            'storage_driver' => $uploaded['storage_driver'],
+            'url' => $uploaded['url'],
             'uploaded_by' => $user->id,
         ]);
 
-        $url = Storage::disk('public')->url($path);
-        $file->update(['url' => $url]);
 
         return response()->json([
             'success' => true,
