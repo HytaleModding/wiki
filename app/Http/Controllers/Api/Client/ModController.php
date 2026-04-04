@@ -151,7 +151,6 @@ class ModController extends ClientController
                 $query->where('id', $modIdentifier)
                     ->orWhere('slug', $modIdentifier);
             })
-            ->with('owner')
             ->firstOrFail();
 
         if (! $mod->canBeAccessedBy(Auth::user()) || ! $mod->external_access) {
