@@ -87,6 +87,7 @@ class MakeApiKey extends Command
         'read:mods:*',
         'read:mods:index',
         'read:mods:show',
+        'read:mods:search',
         'read:mods:getPageContent',
         '*:*  (full access)',
     ];

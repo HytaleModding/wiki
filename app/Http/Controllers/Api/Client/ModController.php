@@ -6,6 +6,7 @@ use App\Models\Mod;
 use App\Models\Page;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class ModController extends ClientController
 {
@@ -128,6 +129,92 @@ class ModController extends ClientController
             'parent' => $page->parent ? $this->pagePayload($page->parent) : null,
             'children' => $page->children()->orderBy('order_index')->get()->map(function (Page $child) {
                 return $this->pagePayload($child);
+            })->values()->toArray(),
+        ]);
+    }
+
+    /**
+     * Search pages for a mod by title, slug, or content.
+     */
+    public function search(Request $request)
+    {
+        $modIdentifier = $request->route('mod');
+        $validated = $request->validate([
+            'query' => 'required|string|min:2|max:120',
+            'limit' => 'nullable|integer|min:1|max:25',
+        ]);
+
+        $searchQuery = trim((string) $validated['query']);
+        $limit = (int) ($validated['limit'] ?? 10);
+
+        $mod = Mod::where('visibility', 'public')
+            ->where(function ($query) use ($modIdentifier) {
+                $query->where('id', $modIdentifier)
+                    ->orWhere('slug', $modIdentifier);
+            })
+            ->with('owner')
+            ->firstOrFail();
+
+        if (! $mod->canBeAccessedBy(Auth::user()) || ! $mod->external_access) {
+            return response()->json(['error' => 'Access denied. You do not have permission to view this mod.'], 403);
+        }
+
+        $normalizedQuery = Str::lower($searchQuery);
+        $queryPattern = '%'.$normalizedQuery.'%';
+
+        $slugQuery = Str::slug($searchQuery);
+        $slugNeedle = $slugQuery !== '' ? Str::lower($slugQuery) : '__never_match_slug__';
+        $slugPattern = '%'.$slugNeedle.'%';
+
+        $pages = $mod->pages()
+            ->where('published', true)
+            ->where(function ($query) use ($queryPattern, $slugPattern) {
+                $query->whereRaw('LOWER(title) LIKE ?', [$queryPattern])
+                    ->orWhereRaw('LOWER(slug) LIKE ?', [$slugPattern])
+                    ->orWhereRaw('LOWER(content) LIKE ?', [$queryPattern]);
+            })
+            ->orderByRaw(
+                'CASE
+                    WHEN LOWER(title) = ? THEN 0
+                    WHEN LOWER(slug) = ? THEN 1
+                    WHEN LOWER(title) LIKE ? THEN 2
+                    WHEN LOWER(slug) LIKE ? THEN 3
+                    WHEN LOWER(title) LIKE ? THEN 4
+                    WHEN LOWER(slug) LIKE ? THEN 5
+                    ELSE 6
+                END',
+                [
+                    $normalizedQuery,
+                    $slugNeedle,
+                    $normalizedQuery.'%',
+                    $slugNeedle.'%',
+                    $queryPattern,
+                    $slugPattern,
+                ]
+            )
+            ->orderBy('title')
+            ->limit($limit)
+            ->get();
+
+        return response()->json([
+            'mod' => [
+                'id' => $mod->id,
+                'name' => $mod->name,
+                'slug' => $mod->slug,
+            ],
+            'query' => $searchQuery,
+            'results' => $pages->map(function (Page $page) use ($mod) {
+                return [
+                    ...$this->pagePayload($page),
+                    'url' => route('public.page', [
+                        'mod' => $mod->slug,
+                        'page' => $page->slug,
+                    ]),
+                    'snippet' => Str::limit(
+                        preg_replace('/\s+/', ' ', trim((string) $page->content)) ?? '',
+                        180
+                    ),
+                ];
             })->values()->toArray(),
         ]);
     }

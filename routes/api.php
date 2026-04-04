@@ -9,6 +9,7 @@ Route::group([
     Route::group(['prefix' => 'mods', 'middleware' => ['api.scope:read:mods']], function () {
         Route::get('/', [\App\Http\Controllers\Api\Client\ModController::class, 'index'])->middleware('api.scope:read:mods:index');
         Route::get('/{mod}', [\App\Http\Controllers\Api\Client\ModController::class, 'show'])->middleware('api.scope:read:mods:show');
+        Route::get('/{mod}/search', [\App\Http\Controllers\Api\Client\ModController::class, 'search'])->middleware('api.scope:read:mods:search');
         Route::get('/{mod}/{page}', [\App\Http\Controllers\Api\Client\ModController::class, 'getPageContent'])->middleware('api.scope:read:mods:getPageContent');
     });
 });
