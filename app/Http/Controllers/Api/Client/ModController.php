@@ -53,7 +53,6 @@ class ModController extends ClientController
                 $query->where('id', $modIdentifier)
                     ->orWhere('slug', $modIdentifier);
             })
-            ->with('owner')
             ->firstOrFail();
 
         if (! $mod->canBeAccessedBy(Auth::user()) || ! $mod->external_access) {
@@ -160,7 +159,18 @@ class ModController extends ClientController
         }
 
         $normalizedQuery = Str::lower($searchQuery);
-        $queryPattern = '%'.$normalizedQuery.'%';
+        $literalQuery = preg_replace('/\s+/', ' ', trim(str_replace(['%', '_'], ' ', $normalizedQuery))) ?? '';
+
+        if ($literalQuery === '') {
+            return response()->json([
+                'message' => 'The given data was invalid.',
+                'errors' => [
+                    'query' => ['Query must include at least one searchable character.'],
+                ],
+            ], 422);
+        }
+
+        $queryPattern = '%'.$literalQuery.'%';
 
         $slugQuery = Str::slug($searchQuery);
         $slugNeedle = $slugQuery !== '' ? Str::lower($slugQuery) : '__never_match_slug__';
@@ -184,9 +194,9 @@ class ModController extends ClientController
                     ELSE 6
                 END',
                 [
-                    $normalizedQuery,
+                    $literalQuery,
                     $slugNeedle,
-                    $normalizedQuery.'%',
+                    $literalQuery.'%',
                     $slugNeedle.'%',
                     $queryPattern,
                     $slugPattern,

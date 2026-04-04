@@ -21,7 +21,7 @@ class ModApiSearchTest extends TestCase
             'external_access' => true,
         ]);
 
-        $response = $this->getJson("/api/mods/{$mod->slug}/search?query=beast");
+        $response = $this->getJson("/api/mods/{$mod->slug}/pages/search?query=beast");
 
         $response->assertStatus(401);
     }
@@ -37,7 +37,7 @@ class ModApiSearchTest extends TestCase
 
         $response = $this
             ->withHeader('X-API-Key', $apiKey->key)
-            ->getJson("/api/mods/{$mod->slug}/search?query=beast");
+            ->getJson("/api/mods/{$mod->slug}/pages/search?query=beast");
 
         $response
             ->assertStatus(403)
@@ -83,7 +83,7 @@ class ModApiSearchTest extends TestCase
 
         $response = $this
             ->withHeader('X-API-Key', $apiKey->key)
-            ->getJson("/api/mods/{$mod->slug}/search?query=beast%20taming");
+            ->getJson("/api/mods/{$mod->slug}/pages/search?query=beast%20taming");
 
         $response->assertOk();
         $response->assertJsonPath('mod.slug', $mod->slug);
@@ -137,7 +137,7 @@ class ModApiSearchTest extends TestCase
 
         $response = $this
             ->withHeader('X-API-Key', $apiKey->key)
-            ->getJson("/api/mods/{$mod->id}/search?query=beast&limit=2");
+            ->getJson("/api/mods/{$mod->id}/pages/search?query=beast&limit=2");
 
         $response->assertOk();
         $response->assertJsonCount(2, 'results');
@@ -164,11 +164,58 @@ class ModApiSearchTest extends TestCase
 
         $response = $this
             ->withHeader('X-API-Key', $apiKey->key)
-            ->getJson("/api/mods/{$mod->slug}/search?query=beast");
+            ->getJson("/api/mods/{$mod->slug}/pages/search?query=beast");
 
         $response
             ->assertStatus(403)
             ->assertJsonPath('error', 'Access denied. You do not have permission to view this mod.');
+    }
+
+    public function test_search_endpoint_rejects_query_with_only_like_wildcards()
+    {
+        $owner = User::factory()->create();
+        $mod = Mod::factory()->public()->create([
+            'owner_id' => $owner->id,
+            'external_access' => true,
+        ]);
+
+        $apiKey = $this->createApiKey($owner, ['read:mods', 'read:mods:search']);
+
+        $response = $this
+            ->withHeader('X-API-Key', $apiKey->key)
+            ->getJson("/api/mods/{$mod->slug}/pages/search?query=%25%25");
+
+        $response
+            ->assertStatus(422)
+            ->assertJsonPath('errors.query.0', 'Query must include at least one searchable character.');
+    }
+
+    public function test_page_slug_search_still_resolves_get_page_content_route()
+    {
+        $owner = User::factory()->create();
+        $mod = Mod::factory()->public()->create([
+            'owner_id' => $owner->id,
+            'external_access' => true,
+        ]);
+
+        Page::factory()->published()->create([
+            'mod_id' => $mod->id,
+            'title' => 'Search',
+            'slug' => 'search',
+            'content' => 'Content for a page that uses the search slug.',
+            'created_by' => $owner->id,
+            'updated_by' => $owner->id,
+        ]);
+
+        $apiKey = $this->createApiKey($owner, ['read:mods', 'read:mods:getPageContent']);
+
+        $response = $this
+            ->withHeader('X-API-Key', $apiKey->key)
+            ->getJson("/api/mods/{$mod->id}/search");
+
+        $response
+            ->assertOk()
+            ->assertJsonPath('page.slug', 'search');
     }
 
     private function createApiKey(User $user, array $scopes): ApiKey
