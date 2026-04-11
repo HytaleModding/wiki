@@ -62,6 +62,29 @@ class GitHubMarkdownSyncService
             $indexFiles = $this->extractIndexFiles($filesByFolder);
             $metaFiles = $this->extractMetaFiles($filesByFolder);
 
+            if ($prune) {
+                $expectedSourcePaths = $this->buildExpectedSourcePathSet($files, $filesByFolder, $indexFiles);
+
+                $pagesToDelete = $existingGithubPages
+                    ->filter(function (Page $page) use ($expectedSourcePaths): bool {
+                        if ($page->trashed()) {
+                            return false;
+                        }
+
+                        if ($page->source_path === null) {
+                            return true;
+                        }
+
+                        return ! isset($expectedSourcePaths[$page->source_path]);
+                    })
+                    ->values();
+
+                foreach ($pagesToDelete as $page) {
+                    $page->delete();
+                    $deleted++;
+                }
+            }
+
             $categoryResults = $this->processFolderCategories($mod, $filesByFolder, $indexFiles, $metaFiles, $existingGithubPages, $pagesBySourcePath);
             $created += $categoryResults['created'];
             $updated += $categoryResults['updated'];
@@ -136,29 +159,6 @@ class GitHubMarkdownSyncService
                     ->where('is_index', true)
                     ->where('id', '!=', $indexPageId)
                     ->update(['is_index' => false]);
-            }
-
-            if ($prune) {
-                $syncedPaths = array_fill_keys(array_keys($pagesBySourcePath), true);
-
-                $pagesToDelete = $existingGithubPages
-                    ->filter(function (Page $page) use ($syncedPaths): bool {
-                        if ($page->trashed()) {
-                            return false;
-                        }
-
-                        if ($page->source_path === null) {
-                            return true;
-                        }
-
-                        return ! isset($syncedPaths[$page->source_path]);
-                    })
-                    ->values();
-
-                foreach ($pagesToDelete as $page) {
-                    $page->delete();
-                    $deleted++;
-                }
             }
 
             return [
@@ -349,6 +349,41 @@ class GitHubMarkdownSyncService
         }
 
         return $metaFiles;
+    }
+
+    /**
+     * Build the expected source paths for this sync so stale rows can be pruned before upserts.
+     *
+     * @param  array<int, array{path:string,sha:string,content:string}>  $files
+     * @param  array<string, array<int, array{path:string,sha:string,content:string}>>  $filesByFolder
+     * @param  array<string, array{path:string,sha:string,content:string}>  $indexFiles
+     * @return array<string, true>
+     */
+    private function buildExpectedSourcePathSet(array $files, array $filesByFolder, array $indexFiles): array
+    {
+        $expectedSourcePaths = [];
+
+        foreach ($filesByFolder as $folder => $folderFiles) {
+            if (isset($indexFiles[$folder])) {
+                $expectedSourcePaths[$indexFiles[$folder]['path']] = true;
+
+                continue;
+            }
+
+            if ($folder !== '') {
+                $expectedSourcePaths[$folder] = true;
+            }
+        }
+
+        foreach ($files as $file) {
+            if ($this->isIndexFile($file['path']) || $this->isMetaFile($file['path'])) {
+                continue;
+            }
+
+            $expectedSourcePaths[$file['path']] = true;
+        }
+
+        return $expectedSourcePaths;
     }
 
     /**

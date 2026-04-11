@@ -212,6 +212,37 @@ class SyncGithubMarkdownCommandTest extends TestCase
         $this->assertNull($stalePage->deleted_at);
     }
 
+    public function test_it_reuses_slug_after_pruning_stale_page_before_upsert(): void
+    {
+        $owner = User::factory()->create();
+
+        $mod = Mod::factory()->create([
+            'owner_id' => $owner->id,
+            'github_repository_url' => 'https://github.com/acme/docs-repo',
+            'github_repository_path' => '/docs/',
+        ]);
+
+        Page::factory()->create([
+            'mod_id' => $mod->id,
+            'source_type' => 'github',
+            'source_path' => 'install.md',
+            'kind' => Page::KIND_PAGE,
+            'title' => 'Installation Guide',
+            'slug' => 'installation-guide',
+            'created_by' => $owner->id,
+            'updated_by' => $owner->id,
+        ]);
+
+        $this->fakeRepoContentsWithInstallInGuideFolder();
+        $this->artisan('mods:sync-github-markdown')->assertSuccessful();
+
+        $movedInstallPage = Page::where('mod_id', $mod->id)
+            ->where('source_path', 'guide/install.md')
+            ->firstOrFail();
+
+        $this->assertSame('installation-guide', $movedInstallPage->slug);
+    }
+
     private function fakeRepoContents(string $installContent, string $installSha = 'sha-install', bool $includeGettingStarted = true): void
     {
         $rootListing = [
@@ -264,6 +295,49 @@ class SyncGithubMarkdownCommandTest extends TestCase
             'https://raw.githubusercontent.com/acme/docs-repo/main/docs/getting-started.md' => Http::response('# Getting Started', 200),
             'https://raw.githubusercontent.com/acme/docs-repo/main/docs/guide/README.md' => Http::response('# Guide', 200),
             'https://raw.githubusercontent.com/acme/docs-repo/main/docs/guide/install.md' => Http::response($installContent, 200),
+        ]);
+    }
+
+
+    private function fakeRepoContentsWithInstallInGuideFolder(): void
+    {
+        Http::fake([
+            'https://api.github.com/repos/acme/docs-repo' => Http::response([
+                'default_branch' => 'main',
+            ], 200),
+            'https://api.github.com/repos/acme/docs-repo/contents/docs?ref=main' => Http::response([
+                [
+                    'type' => 'file',
+                    'name' => 'README.md',
+                    'path' => 'docs/README.md',
+                    'sha' => 'sha-root-readme',
+                    'download_url' => 'https://raw.githubusercontent.com/acme/docs-repo/main/docs/README.md',
+                ],
+                [
+                    'type' => 'dir',
+                    'name' => 'guide',
+                    'path' => 'docs/guide',
+                ],
+            ], 200),
+            'https://api.github.com/repos/acme/docs-repo/contents/docs/guide?ref=main' => Http::response([
+                [
+                    'type' => 'file',
+                    'name' => 'README.md',
+                    'path' => 'docs/guide/README.md',
+                    'sha' => 'sha-guide-readme',
+                    'download_url' => 'https://raw.githubusercontent.com/acme/docs-repo/main/docs/guide/README.md',
+                ],
+                [
+                    'type' => 'file',
+                    'name' => 'install.md',
+                    'path' => 'docs/guide/install.md',
+                    'sha' => 'sha-install-guide',
+                    'download_url' => 'https://raw.githubusercontent.com/acme/docs-repo/main/docs/guide/install.md',
+                ],
+            ], 200),
+            'https://raw.githubusercontent.com/acme/docs-repo/main/docs/README.md' => Http::response('# Welcome', 200),
+            'https://raw.githubusercontent.com/acme/docs-repo/main/docs/guide/README.md' => Http::response('# Guide', 200),
+            'https://raw.githubusercontent.com/acme/docs-repo/main/docs/guide/install.md' => Http::response("---\ntitle: Installation Guide\n---\n# Install", 200),
         ]);
     }
 }
