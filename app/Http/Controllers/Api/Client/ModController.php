@@ -157,14 +157,13 @@ class ModController extends ClientController
             return response()->json(['error' => 'Access denied. You do not have permission to view this mod.'], 403);
         }
 
-        $normalizedQuery = Str::lower($searchQuery);
-        $literalQuery = preg_replace('/\s+/', ' ', trim(str_replace(['%', '_'], ' ', $normalizedQuery))) ?? '';
+        $literalQuery = preg_replace('/\s+/', ' ', trim(str_replace(['%', '_'], ' ', $searchQuery))) ?? '';
 
-        if ($literalQuery === '') {
+        if (Str::length($literalQuery) < 2) {
             return response()->json([
                 'message' => 'The given data was invalid.',
                 'errors' => [
-                    'query' => ['Query must include at least one searchable character.'],
+                    'query' => ['Query must include at least two searchable characters.'],
                 ],
             ], 422);
         }
@@ -178,18 +177,18 @@ class ModController extends ClientController
         $pages = $mod->pages()
             ->where('published', true)
             ->where(function ($query) use ($queryPattern, $slugPattern) {
-                $query->whereRaw('LOWER(title) LIKE ?', [$queryPattern])
-                    ->orWhereRaw('LOWER(slug) LIKE ?', [$slugPattern])
-                    ->orWhereRaw('LOWER(content) LIKE ?', [$queryPattern]);
+                $query->where('title', 'like', $queryPattern)
+                    ->orWhere('slug', 'like', $slugPattern)
+                    ->orWhere('content', 'like', $queryPattern);
             })
             ->orderByRaw(
                 'CASE
-                    WHEN LOWER(title) = ? THEN 0
-                    WHEN LOWER(slug) = ? THEN 1
-                    WHEN LOWER(title) LIKE ? THEN 2
-                    WHEN LOWER(slug) LIKE ? THEN 3
-                    WHEN LOWER(title) LIKE ? THEN 4
-                    WHEN LOWER(slug) LIKE ? THEN 5
+                    WHEN title = ? THEN 0
+                    WHEN slug = ? THEN 1
+                    WHEN title LIKE ? THEN 2
+                    WHEN slug LIKE ? THEN 3
+                    WHEN title LIKE ? THEN 4
+                    WHEN slug LIKE ? THEN 5
                     ELSE 6
                 END',
                 [

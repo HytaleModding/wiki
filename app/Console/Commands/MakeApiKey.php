@@ -11,7 +11,7 @@ class MakeApiKey extends Command
     protected $signature = 'make:apikey
                             {user : Username or email address of the user}
                             {--name= : Label for the key (default: "CLI Generated Key")}
-                            {--scopes= : Comma-separated scopes e.g. read:orders,write:orders}
+                            {--scopes= : Comma-separated scopes e.g. read:mods:index,read:mods:search}
                             {--rate= : Requests per minute (default: 60)}
                             {--expires= : Expiry date in YYYY-MM-DD format (optional)}';
 
@@ -131,7 +131,7 @@ class MakeApiKey extends Command
         $scopes = array_values(array_filter((array) $selected));
 
         if ($this->confirm('Add any custom scopes not in the list above?', false)) {
-            $this->line('  <fg=gray>Enter one scope per line (e.g. read:invoices). Empty line to finish.</>');
+            $this->line('  <fg=gray>Enter one scope per line (e.g. read:mods:search). Empty line to finish.</>');
 
             while (true) {
                 $custom = $this->ask('Custom scope (or press Enter to finish)');
@@ -140,8 +140,8 @@ class MakeApiKey extends Command
                     break;
                 }
 
-                if (! preg_match('/^[a-z*]+:[a-z_*]+$/', $custom)) {
-                    $this->line('  <fg=red>Invalid format. Use action:resource (e.g. read:invoices)</>  ');
+                if (! preg_match('/^[a-z*]+:[A-Za-z0-9_*]+(?::[A-Za-z0-9_*]+)*$/', $custom)) {
+                    $this->line('  <fg=red>Invalid format. Use action:resource[:subresource...] (e.g. read:mods:search)</>  ');
 
                     continue;
                 }

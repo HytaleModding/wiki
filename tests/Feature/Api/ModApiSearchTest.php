@@ -171,7 +171,7 @@ class ModApiSearchTest extends TestCase
             ->assertJsonPath('error', 'Access denied. You do not have permission to view this mod.');
     }
 
-    public function test_search_endpoint_rejects_query_with_only_like_wildcards()
+    public function test_search_endpoint_rejects_query_with_insufficient_searchable_length_after_normalization()
     {
         $owner = User::factory()->create();
         $mod = Mod::factory()->public()->create([
@@ -183,11 +183,11 @@ class ModApiSearchTest extends TestCase
 
         $response = $this
             ->withHeader('X-API-Key', $apiKey->key)
-            ->getJson("/api/mods/{$mod->slug}/pages/search?query=%25%25");
+            ->getJson("/api/mods/{$mod->slug}/pages/search?query=%25a");
 
         $response
             ->assertStatus(422)
-            ->assertJsonPath('errors.query.0', 'Query must include at least one searchable character.');
+            ->assertJsonPath('errors.query.0', 'Query must include at least two searchable characters.');
     }
 
     public function test_page_slug_search_still_resolves_get_page_content_route()
