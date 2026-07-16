@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/sheet';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { cn } from '@/lib/utils';
-import { dashboard, login, register } from '@/routes';
+import { home, login, register } from '@/routes';
 import type { SharedData } from '@/types';
 import { mainNavItems } from '@/utils/commonUtils';
 import HytaleModdingLogo from './hytale-modding-logo';
@@ -27,9 +27,7 @@ interface AppNavbarProps {
   brandHref?: string;
 }
 
-export default function AppNavbar({
-  brandHref = dashboard().url,
-}: AppNavbarProps) {
+export default function AppNavbar({ brandHref = home().url }: AppNavbarProps) {
   const { isCurrentUrl } = useCurrentUrl();
   const { auth } = usePage<SharedData>().props;
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
