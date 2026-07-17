@@ -173,6 +173,7 @@
         @viteReactRefresh
         @vite(['resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])
         @inertiaHead
+        <script type="module" src="https://cdn.jsdelivr.net/gh/Voronoi-Studios/Node-Graph@v0.3.1/dist/node-graph.js"></script>
     </head>
     <body class="font-sans antialiased">
         @inertia
