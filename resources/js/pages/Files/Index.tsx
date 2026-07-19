@@ -1,10 +1,13 @@
 import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { Head, useForm } from '@inertiajs/react';
+import { useState } from 'react';
 import {
   DownloadIcon,
   UploadIcon,
   FileIcon,
   ChevronRightIcon,
+  CopyIcon,
+  CheckIcon,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -53,6 +56,8 @@ export default function FilesIndex({ mod, files, canEdit }: Props) {
     files: [],
   });
 
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
   const handleFileUpload = (e: React.SubmitEvent) => {
     e.preventDefault();
     if (!data.files.length) return;
@@ -99,6 +104,16 @@ export default function FilesIndex({ mod, files, canEdit }: Props) {
     if (mimeType.includes('pdf')) return '📄';
     if (mimeType.includes('zip') || mimeType.includes('rar')) return '📦';
     return '📄';
+  };
+
+  const copyUrl = async (id: string, url: string) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 1500);
+    } catch (err) {
+      console.error('Failed to copy URL', err);
+    }
   };
 
   return (
@@ -256,9 +271,24 @@ export default function FilesIndex({ mod, files, canEdit }: Props) {
 
                     <div className="space-y-1 text-xs text-muted-foreground">
                       <p>Uploaded {formatDate(file.created_at)}</p>
-                      <p className="truncate rounded px-2 py-1 font-mono text-xs">
-                        {file.url}
-                      </p>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 w-full justify-center gap-1.5 text-xs"
+                        onClick={() => copyUrl(file.id, file.url)}
+                      >
+                        {copiedId === file.id ? (
+                          <>
+                            <CheckIcon className="h-3 w-3" />
+                            Copied
+                          </>
+                        ) : (
+                          <>
+                            <CopyIcon className="h-3 w-3" />
+                            Copy URL
+                          </>
+                        )}
+                      </Button>
                     </div>
                   </div>
                 ))}
