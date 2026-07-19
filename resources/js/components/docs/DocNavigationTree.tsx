@@ -38,9 +38,20 @@ export default function DocNavigationTree({
 
 function containsActivePage(nodes: DocPageNode[], activeId?: string): boolean {
   if (!activeId) return false;
-  return nodes.some(
-    (n) => n.id === activeId || (n.children && containsActivePage(n.children, activeId)),
-  );
+
+  for (const node of nodes) {
+    if (node.id === activeId) return true;
+    if (node.children && containsActivePage(node.children, activeId)) return true;
+  }
+
+  return false;
+}
+
+interface DocNavigationItemProps {
+  page: DocPageNode;
+  modSlug: string;
+  activePageId?: string;
+  level: number;
 }
 
 function DocNavigationItem({
@@ -48,52 +59,57 @@ function DocNavigationItem({
   modSlug,
   activePageId,
   level,
-}: {
-  page: DocPageNode;
-  modSlug: string;
-  activePageId?: string;
-  level: number;
-}) {
+}: DocNavigationItemProps) {
   const hasChildren = !!page.children && page.children.length > 0;
-  // Start expanded if the active page lives inside this category, otherwise collapsed for tidiness.
-  const [collapsed, setCollapsed] = useState(
+
+  const [collapsed, setCollapsed] = useState<boolean>(() =>
     hasChildren ? !containsActivePage(page.children!, activePageId) : false,
   );
-  const isActive = page.id === activePageId;
 
-  if (page.kind === 'category') {
+  const isActive = page.id === activePageId;
+  const isCategory = page.kind === 'category';
+
+  let leadingIcon: React.ReactNode;
+  if (isCategory && hasChildren) {
+    leadingIcon = collapsed ? (
+      <ChevronRightIcon className="mt-0.5 h-4 w-4 shrink-0" />
+    ) : (
+      <ChevronDownIcon className="mt-0.5 h-4 w-4 shrink-0" />
+    );
+  } else {
+    leadingIcon = <BookOpenIcon className="mt-0.5 h-4 w-4 shrink-0" />;
+  }
+
+  const draftBadge =
+    page.published === false ? (
+      <Badge variant="outline" className="text-xs">
+        Draft
+      </Badge>
+    ) : null;
+
+  const childTree = hasChildren ? (
+    <DocNavigationTree
+      pages={page.children!}
+      modSlug={modSlug}
+      activePageId={activePageId}
+      level={level + 1}
+    />
+  ) : null;
+
+  if (isCategory) {
     return (
       <div>
         <button
           type="button"
-          onClick={() => hasChildren && setCollapsed((c) => !c)}
+          onClick={() => hasChildren && setCollapsed((prev) => !prev)}
           disabled={!hasChildren}
           className="flex w-full items-start gap-2 rounded-lg border border-transparent px-3 py-2 text-left text-sm text-muted-foreground/90 transition-colors hover:bg-accent/40 disabled:cursor-default"
         >
-          {hasChildren ? (
-            collapsed ? (
-              <ChevronRightIcon className="mt-0.5 h-4 w-4 shrink-0" />
-            ) : (
-              <ChevronDownIcon className="mt-0.5 h-4 w-4 shrink-0" />
-            )
-          ) : (
-            <BookOpenIcon className="mt-0.5 h-4 w-4 shrink-0" />
-          )}
+          {leadingIcon}
           <span className="min-w-0 flex-1 break-words">{page.title}</span>
-          {page.published === false && (
-            <Badge variant="outline" className="text-xs">
-              Draft
-            </Badge>
-          )}
+          {draftBadge}
         </button>
-        {hasChildren && !collapsed && (
-          <DocNavigationTree
-            pages={page.children!}
-            modSlug={modSlug}
-            activePageId={activePageId}
-            level={level + 1}
-          />
-        )}
+        {!collapsed && childTree}
       </div>
     );
   }
@@ -108,22 +124,11 @@ function DocNavigationItem({
             : 'border-transparent text-muted-foreground hover:border-border/70 hover:bg-accent/60 hover:text-foreground'
         }`}
       >
-        <BookOpenIcon className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground group-hover:text-foreground" />
+        {leadingIcon}
         <span className="min-w-0 flex-1 break-words">{page.title}</span>
-        {page.published === false && (
-          <Badge variant="outline" className="text-xs">
-            Draft
-          </Badge>
-        )}
+        {draftBadge}
       </a>
-      {hasChildren && (
-        <DocNavigationTree
-          pages={page.children!}
-          modSlug={modSlug}
-          activePageId={activePageId}
-          level={level + 1}
-        />
-      )}
+      {childTree}
     </div>
   );
 }
