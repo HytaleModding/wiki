@@ -116,7 +116,7 @@ function DocNavigationItem({
 
   return (
     <div>
-      
+      <a>
         href={`/mod/${modSlug}/${page.slug}`}
         className={`group flex items-start gap-2 rounded-lg border px-3 py-2 text-sm transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:outline-none ${
           isActive
