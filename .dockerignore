@@ -1,0 +1,51 @@
+# VCS / CI
+.git
+.gitattributes
+.gitignore
+.github
+
+# Dependencies & build output (rebuilt inside the image)
+node_modules
+vendor
+public/build
+public/hot
+public/storage
+bootstrap/ssr
+bootstrap/cache/*.php
+
+# Wayfinder generated files (regenerated during the frontend build)
+resources/js/actions
+resources/js/routes
+resources/js/wayfinder
+
+# Runtime / mutable state
+storage/app/public/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/logs/*
+storage/pail
+*.sqlite
+database/database.sqlite
+
+# Local env — never bake secrets into the image
+.env
+.env.*
+!.env.example
+
+# Tooling / editor / docs
+.editorconfig
+.prettierignore
+.prettierrc
+eslint.config.js
+phpunit.xml
+pint.json
+tests
+.phpunit.cache
+.phpunit.result.cache
+.idea
+.vscode
+.zed
+.fleet
+.nova
+*.md

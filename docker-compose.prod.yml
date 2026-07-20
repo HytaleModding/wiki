@@ -1,0 +1,26 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # Baked into the frontend at build time.
+        VITE_APP_NAME: ${VITE_APP_NAME:-HytaleModding Wiki}
+    image: hytalemodding-wiki:latest
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    ports:
+      - "${APP_PORT:-8080}:80"
+    volumes:
+      # Persist uploaded files, logs and framework state across deploys.
+      - storage-data:/var/www/html/storage
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1/up"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  storage-data:
