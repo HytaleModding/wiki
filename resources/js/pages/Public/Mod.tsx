@@ -1,15 +1,15 @@
 import { BookOpenIcon } from '@heroicons/react/24/outline';
 
-import MarkdownRenderer from '@/components/MarkdownRenderer';
-import SeoMeta from '@/components/SeoMeta';
 import DocsShell from '@/components/docs/DocsShell';
 import DocsSidebar from '@/components/docs/DocsSidebar';
 import PageLinkGrid from '@/components/docs/PageLinkGrid';
+import MarkdownRenderer from '@/components/MarkdownRenderer';
+import SeoMeta from '@/components/SeoMeta';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import PublicLayout from '@/layouts/public-layout';
-import { getMarkdownPreview } from '@/utils/markdown';
-import { formatDate } from '@/utils/date';
 import type { DocMod, DocPageNode } from '@/types/docs';
+import { formatDate } from '@/utils/date';
+import { getMarkdownPreview } from '@/utils/markdown';
 
 interface Mod extends DocMod {
   root_pages: DocPageNode[];

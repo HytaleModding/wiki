@@ -1,15 +1,15 @@
-import MarkdownRenderer from '@/components/MarkdownRenderer';
-import SeoMeta from '@/components/SeoMeta';
 import DocsShell from '@/components/docs/DocsShell';
 import DocsSidebar from '@/components/docs/DocsSidebar';
 import PageLinkGrid from '@/components/docs/PageLinkGrid';
 import PrevNextNav from '@/components/docs/PrevNextNav';
+import MarkdownRenderer from '@/components/MarkdownRenderer';
+import SeoMeta from '@/components/SeoMeta';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import PublicLayout from '@/layouts/public-layout';
+import type { DocMod, DocPageNode } from '@/types/docs';
 import { formatDate } from '@/utils/date';
 import { getMarkdownPreview } from '@/utils/markdown';
-import type { DocMod, DocPageNode } from '@/types/docs';
 
 interface Page extends DocPageNode {
   content: string;

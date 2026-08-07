@@ -11,10 +11,10 @@ import HytaleModdingLogo from '@/components/hytale-modding-logo';
 import SeoMeta from '@/components/SeoMeta';
 import { Button } from '@/components/ui/button';
 import { UserMenuContent } from '@/components/user-menu-content';
+import type { SharedData } from '@/types';
 import { dashboard, home, login, register } from '@/routes';
 import mods from '@/routes/mods';
 import publicRoutes from '@/routes/public';
-import type { SharedData } from '@/types';
 
 const workflowSteps: Array<{
   title: string;

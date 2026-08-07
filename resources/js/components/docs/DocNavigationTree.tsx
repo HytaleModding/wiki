@@ -1,9 +1,9 @@
-import { useState } from 'react';
 import {
   BookOpenIcon,
   ChevronDownIcon,
   ChevronRightIcon,
 } from '@heroicons/react/24/outline';
+import { useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import type { DocPageNode } from '@/types/docs';

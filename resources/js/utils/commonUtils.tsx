@@ -1,6 +1,6 @@
 import { LayoutGrid } from 'lucide-react';
-import { dashboard } from '@/routes';
 import type { NavItem } from '@/types/navigation';
+import { dashboard } from '@/routes';
 
 export const mainNavItems: NavItem[] = [
   {

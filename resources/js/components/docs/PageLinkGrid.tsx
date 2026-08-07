@@ -1,6 +1,6 @@
 import { Card, CardContent } from '@/components/ui/card';
-import { getMarkdownPreview } from '@/utils/markdown';
 import type { DocPageNode } from '@/types/docs';
+import { getMarkdownPreview } from '@/utils/markdown';
 
 interface PageLinkGridProps {
   pages: DocPageNode[];

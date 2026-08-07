@@ -1,6 +1,6 @@
+import { SiGithub } from '@icons-pack/react-simple-icons';
 import { Link, usePage } from '@inertiajs/react';
 import { Menu, Search, Settings, ExternalLink } from 'lucide-react';
-import { SiGithub } from '@icons-pack/react-simple-icons';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,11 +18,11 @@ import {
 } from '@/components/ui/sheet';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { cn } from '@/lib/utils';
-import { dashboard, login, register } from '@/routes';
 import type { SharedData } from '@/types';
 import { mainNavItems } from '@/utils/commonUtils';
 import HytaleModdingLogo from './hytale-modding-logo';
 import { UserMenuContent } from './user-menu-content';
+import { dashboard, login, register } from '@/routes';
 
 interface AppNavbarProps {
   brandHref?: string;

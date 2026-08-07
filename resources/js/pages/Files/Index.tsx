@@ -1,6 +1,5 @@
 import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { Head, useForm } from '@inertiajs/react';
-import { useState } from 'react';
 import {
   DownloadIcon,
   UploadIcon,
@@ -9,7 +8,7 @@ import {
   CopyIcon,
   CheckIcon,
 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
