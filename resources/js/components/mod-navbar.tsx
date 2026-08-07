@@ -2,10 +2,10 @@ import { Link, usePage } from '@inertiajs/react';
 import {
   Menu,
   Settings,
-  Github,
   ExternalLink,
   BookOpenIcon,
 } from 'lucide-react';
+import { SiGithub as Github } from '@icons-pack/react-simple-icons';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
