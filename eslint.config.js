@@ -4,7 +4,7 @@ import { includeIgnoreFile } from '@eslint/compat';
 import js from '@eslint/js';
 import { defineConfig } from 'eslint/config';
 import prettier from 'eslint-config-prettier/flat';
-import importPlugin from 'eslint-plugin-import';
+import importX from 'eslint-plugin-import-x';
 import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 import globals from 'globals';
@@ -39,15 +39,15 @@ export default defineConfig([
     },
   },
   {
-    ...importPlugin.flatConfigs.recommended,
+    ...importX.flatConfigs.recommended,
     settings: {
-      'import/resolver': {
+      'import-x/resolver': {
         typescript: true,
         node: true,
       },
     },
     rules: {
-      'import/order': [
+      'import-x/order': [
         'error',
         {
           groups: [
@@ -67,7 +67,7 @@ export default defineConfig([
     },
   },
   {
-    ...importPlugin.flatConfigs.typescript,
+    ...importX.flatConfigs.typescript,
     files: ['**/*.{ts,tsx}'],
     rules: {
       '@typescript-eslint/consistent-type-imports': [
@@ -89,5 +89,5 @@ export default defineConfig([
       'vite.config.ts',
     ],
   },
-  prettier, // Turn off all rules that might conflict with Prettier
+  prettier,
 ]);
