@@ -33,19 +33,26 @@ function flattenPages(pages: DocPageNode[]): DocPageNode[] {
 }
 
 export default function PublicPage({ mod, page, navigation }: Props) {
-  const allPages = flattenPages(navigation).filter((p) => p.kind !== 'category');
+  const allPages = flattenPages(navigation).filter(
+    (p) => p.kind !== 'category',
+  );
   const currentIndex = allPages.findIndex((p) => p.id === page.id);
   const prevPage = currentIndex > 0 ? allPages[currentIndex - 1] : null;
-  const nextPage = currentIndex < allPages.length - 1 ? allPages[currentIndex + 1] : null;
+  const nextPage =
+    currentIndex < allPages.length - 1 ? allPages[currentIndex + 1] : null;
 
-  const breadcrumbs = [{ title: page.title, href: `/mod/${mod.slug}/${page.slug}` }];
+  const breadcrumbs = [
+    { title: page.title, href: `/mod/${mod.slug}/${page.slug}` },
+  ];
 
   const metaDescription =
     getMarkdownPreview(page.content || '', 180) ||
     mod.description ||
     `Read ${page.title} in ${mod.name} documentation.`;
 
-  const relatedPages = (page.children || []).filter((child) => child.kind !== 'category');
+  const relatedPages = (page.children || []).filter(
+    (child) => child.kind !== 'category',
+  );
 
   return (
     <PublicLayout
@@ -78,7 +85,9 @@ export default function PublicPage({ mod, page, navigation }: Props) {
         <Card className="mb-8 overflow-hidden rounded-2xl border-border/70 bg-card/95 shadow-sm">
           <CardHeader className="border-b border-border/60 bg-muted/10">
             <div className="space-y-2">
-              <CardTitle className="text-2xl break-words sm:text-3xl">{page.title}</CardTitle>
+              <CardTitle className="text-2xl break-words sm:text-3xl">
+                {page.title}
+              </CardTitle>
               <div className="flex items-center justify-between text-sm text-muted-foreground">
                 <span>Last updated {formatDate(page.updated_at)}</span>
                 {!page.published && <Badge variant="outline">Draft</Badge>}
@@ -98,7 +107,11 @@ export default function PublicPage({ mod, page, navigation }: Props) {
             </div>
           </CardContent>
 
-          <PrevNextNav modSlug={mod.slug} prevPage={prevPage} nextPage={nextPage} />
+          <PrevNextNav
+            modSlug={mod.slug}
+            prevPage={prevPage}
+            nextPage={nextPage}
+          />
         </Card>
 
         {relatedPages.length > 0 && (
@@ -107,7 +120,11 @@ export default function PublicPage({ mod, page, navigation }: Props) {
               <CardTitle className="text-lg">Related Pages</CardTitle>
             </CardHeader>
             <CardContent className="p-6">
-              <PageLinkGrid pages={relatedPages} modSlug={mod.slug} columns={2} />
+              <PageLinkGrid
+                pages={relatedPages}
+                modSlug={mod.slug}
+                columns={2}
+              />
             </CardContent>
           </Card>
         )}

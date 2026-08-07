@@ -21,7 +21,9 @@ interface Props {
 }
 
 export default function PublicMod({ mod }: Props) {
-  const featuredPages = mod.root_pages.filter((page) => page.kind !== 'category').slice(0, 3);
+  const featuredPages = mod.root_pages
+    .filter((page) => page.kind !== 'category')
+    .slice(0, 3);
 
   const metaDescription =
     mod.description ||
@@ -57,7 +59,9 @@ export default function PublicMod({ mod }: Props) {
             <CardHeader className="border-b border-border/60 bg-muted/10">
               <div className="flex items-center space-x-2">
                 <BookOpenIcon className="h-5 w-5 text-primary" />
-                <CardTitle className="text-xl">{mod.index_page.title}</CardTitle>
+                <CardTitle className="text-xl">
+                  {mod.index_page.title}
+                </CardTitle>
               </div>
               <p className="text-sm text-muted-foreground">
                 Last updated {formatDate(mod.index_page.updated_at!)}
@@ -76,15 +80,21 @@ export default function PublicMod({ mod }: Props) {
             <CardContent>
               <div className="py-12 text-center">
                 <BookOpenIcon className="mx-auto mb-6 h-16 w-16 text-muted-foreground" />
-                <h3 className="mb-2 text-lg font-semibold">Explore the Documentation</h3>
+                <h3 className="mb-2 text-lg font-semibold">
+                  Explore the Documentation
+                </h3>
                 <p className="mx-auto mb-8 max-w-md text-muted-foreground">
-                  Browse through the navigation on the left to explore the available
-                  documentation pages.
+                  Browse through the navigation on the left to explore the
+                  available documentation pages.
                 </p>
                 {featuredPages.length > 0 && (
                   <div className="mx-auto max-w-2xl text-left">
                     <h4 className="mb-4 font-semibold">Featured Pages</h4>
-                    <PageLinkGrid pages={featuredPages} modSlug={mod.slug} columns={1} />
+                    <PageLinkGrid
+                      pages={featuredPages}
+                      modSlug={mod.slug}
+                      columns={1}
+                    />
                   </div>
                 )}
               </div>

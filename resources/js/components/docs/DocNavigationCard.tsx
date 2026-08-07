@@ -23,7 +23,9 @@ export default function DocNavigationCard({
   return (
     <Card className="gap-0 overflow-hidden rounded-2xl border-border/70 bg-card/90 shadow-sm backdrop-blur-sm">
       <CardHeader className="border-b border-border/60 pb-3">
-        <CardTitle className="text-sm font-semibold tracking-wide uppercase">{title}</CardTitle>
+        <CardTitle className="text-sm font-semibold tracking-wide uppercase">
+          {title}
+        </CardTitle>
       </CardHeader>
       <CardContent className="p-3">
         {pages.length === 0 ? (
@@ -33,7 +35,11 @@ export default function DocNavigationCard({
           </div>
         ) : (
           <nav>
-            <DocNavigationTree pages={pages} modSlug={modSlug} activePageId={activePageId} />
+            <DocNavigationTree
+              pages={pages}
+              modSlug={modSlug}
+              activePageId={activePageId}
+            />
           </nav>
         )}
       </CardContent>

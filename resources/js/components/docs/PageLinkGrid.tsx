@@ -8,7 +8,11 @@ interface PageLinkGridProps {
   columns?: 1 | 2;
 }
 
-export default function PageLinkGrid({ pages, modSlug, columns = 2 }: PageLinkGridProps) {
+export default function PageLinkGrid({
+  pages,
+  modSlug,
+  columns = 2,
+}: PageLinkGridProps) {
   return (
     <div className={`grid gap-4 ${columns === 2 ? 'md:grid-cols-2' : ''}`}>
       {pages.map((page) => (
