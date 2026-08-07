@@ -33,6 +33,9 @@ updates:
       frontend:
         patterns:
           - "*"
+    ignore:
+      - dependency-name: "typescript"
+        versions: [ ">= 7" ]
 
   # update PHP packages
   - package-ecosystem: "composer"
