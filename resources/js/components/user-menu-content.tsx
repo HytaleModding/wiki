@@ -10,9 +10,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useInitials } from '@/hooks/use-initials';
+import type { SharedData } from '@/types';
 import { dashboard } from '@/routes';
 import { index as modsIndex } from '@/routes/mods';
-import type { SharedData } from '@/types';
 
 export function UserMenuContent() {
   const { auth } = usePage<SharedData>().props;

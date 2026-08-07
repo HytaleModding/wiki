@@ -1,7 +1,7 @@
 import { Link } from '@inertiajs/react';
 import HytaleModdingLogo from '@/components/hytale-modding-logo';
-import { home } from '@/routes';
 import type { AuthLayoutProps } from '@/types';
+import { home } from '@/routes';
 
 export default function AuthSimpleLayout({
   children,

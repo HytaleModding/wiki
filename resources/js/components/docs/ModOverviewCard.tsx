@@ -19,7 +19,10 @@ export default function ModOverviewCard({
       <CardHeader className="pb-3">
         <CardTitle className="text-lg">
           {linkTitle ? (
-            <a href={`/mod/${mod.slug}`} className="transition-colors hover:text-primary">
+            <a
+              href={`/mod/${mod.slug}`}
+              className="transition-colors hover:text-primary"
+            >
               {mod.name}
             </a>
           ) : (
@@ -37,7 +40,9 @@ export default function ModOverviewCard({
               </AvatarFallback>
             </Avatar>
           )}
-          <span className="text-sm text-muted-foreground">by {mod.owner.name}</span>
+          <span className="text-sm text-muted-foreground">
+            by {mod.owner.name}
+          </span>
         </div>
       </CardContent>
     </Card>

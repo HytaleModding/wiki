@@ -764,6 +764,7 @@ class GitHubMarkdownSyncService
     {
         return Http::timeout(30)
             ->acceptJson()
+            ->withToken(config('services.github.token'))
             ->withHeaders([
                 'User-Agent' => 'wiki-mod-sync',
                 'X-GitHub-Api-Version' => '2022-11-28',

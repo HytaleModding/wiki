@@ -1,5 +1,6 @@
+import { SiGithub } from '@icons-pack/react-simple-icons';
 import { Link, usePage } from '@inertiajs/react';
-import { Menu, Search, Settings, Github, ExternalLink } from 'lucide-react';
+import { Menu, Search, Settings, ExternalLink } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,11 +18,11 @@ import {
 } from '@/components/ui/sheet';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { cn } from '@/lib/utils';
-import { dashboard, login, register } from '@/routes';
 import type { SharedData } from '@/types';
 import { mainNavItems } from '@/utils/commonUtils';
 import HytaleModdingLogo from './hytale-modding-logo';
 import { UserMenuContent } from './user-menu-content';
+import { dashboard, login, register } from '@/routes';
 
 interface AppNavbarProps {
   brandHref?: string;
@@ -187,7 +188,7 @@ export default function AppNavbar({
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        <Github className="mr-2 h-4 w-4" />
+                        <SiGithub className="mr-2 h-4 w-4" />
                         GitHub
                         <ExternalLink className="ml-auto h-3 w-3" />
                       </a>

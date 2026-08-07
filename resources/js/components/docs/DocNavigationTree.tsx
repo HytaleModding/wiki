@@ -1,9 +1,9 @@
-import { useState } from 'react';
 import {
   BookOpenIcon,
   ChevronDownIcon,
   ChevronRightIcon,
 } from '@heroicons/react/24/outline';
+import { useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import type { DocPageNode } from '@/types/docs';
@@ -22,7 +22,11 @@ export default function DocNavigationTree({
   level = 0,
 }: DocNavigationTreeProps) {
   return (
-    <div className={level === 0 ? undefined : 'ml-2 border-l border-border/60 pl-2'}>
+    <div
+      className={
+        level === 0 ? undefined : 'ml-2 border-l border-border/60 pl-2'
+      }
+    >
       {pages.map((page) => (
         <DocNavigationItem
           key={page.id}
@@ -41,7 +45,8 @@ function containsActivePage(nodes: DocPageNode[], activeId?: string): boolean {
 
   for (const node of nodes) {
     if (node.id === activeId) return true;
-    if (node.children && containsActivePage(node.children, activeId)) return true;
+    if (node.children && containsActivePage(node.children, activeId))
+      return true;
   }
 
   return false;

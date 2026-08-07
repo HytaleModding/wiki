@@ -22,7 +22,7 @@ export default function DocsSidebar({
 }: DocsSidebarProps) {
   return (
     <aside className="lg:col-span-4 lg:self-start xl:col-span-3">
-      <div className="space-y-4 lg:sticky lg:top-20 lg:max-h-[calc(100dvh-6rem)] lg:overflow-y-auto lg:overscroll-contain lg:pr-1 lg:[-ms-overflow-style:none] lg:[scrollbar-width:none] lg:[&::-webkit-scrollbar]:hidden">
+      <div className="space-y-4 lg:sticky lg:top-20 lg:max-h-[calc(100dvh-6rem)] lg:[scrollbar-width:none] lg:overflow-y-auto lg:overscroll-contain lg:pr-1 lg:[-ms-overflow-style:none] lg:[&::-webkit-scrollbar]:hidden">
         <div className="px-1 text-xs font-semibold tracking-widest text-muted-foreground uppercase">
           {overlineLabel}
         </div>
