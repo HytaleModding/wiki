@@ -127,11 +127,21 @@ export default function EditMod({ mod, githubConnected }: Props) {
   }, [githubConnected, mod.slug]);
 
   const selectGithubRepository = async (repositoryId: string) => {
-    setIsSelectingRepository(true);
-    setRepositoriesError(null);
     const selectedRepository = repositories.find(
       (repository) => repository.id === Number(repositoryId),
     );
+
+    if (!selectedRepository) {
+      setRepositoriesError('Unable to find the selected repository.');
+      return;
+    }
+
+    if (selectedRepository.html_url === data.github_repository_url) {
+      return;
+    }
+
+    setIsSelectingRepository(true);
+    setRepositoriesError(null);
 
     try {
       const response = await fetch(
@@ -148,7 +158,7 @@ export default function EditMod({ mod, githubConnected }: Props) {
           },
           body: JSON.stringify({
             repository_id: Number(repositoryId),
-            repository_url: selectedRepository?.html_url || null,
+            repository_url: selectedRepository.html_url,
           }),
         },
       );

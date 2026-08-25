@@ -10,7 +10,7 @@ use RuntimeException;
 class GitHubRepositoryService
 {
     /** @return array<int, array{id:int,full_name:string,html_url:string,private:bool,default_branch:string}> */
-    public function repositoriesFor(User $user): array
+    public function repositoriesFor(User $user, ?string $currentRepositoryUrl = null): array
     {
         $connection = $user->githubConnection;
         if (! $connection) {
@@ -40,13 +40,23 @@ class GitHubRepositoryService
             }
         }
 
+        if (filled($currentRepositoryUrl)) {
+            try {
+                $currentRepository = $this->repositoryFromUrl((string) $currentRepositoryUrl);
+                $repositories[$currentRepository['id']] = $currentRepository;
+            } catch (RuntimeException) {
+                // If the saved repository can no longer be resolved through the app installation,
+                // keep the normal list response rather than failing the whole picker.
+            }
+        }
+
         return array_values($repositories);
     }
 
     /** @return array{id:int,full_name:string,html_url:string,private:bool,default_branch:string} */
     public function repositoryForSelection(User $user, int $repositoryId, ?string $repositoryUrl = null): array
     {
-        $repository = collect($this->repositoriesFor($user))->firstWhere('id', $repositoryId);
+        $repository = collect($this->repositoriesFor($user, $repositoryUrl))->firstWhere('id', $repositoryId);
         if ($repository) {
             return $repository;
         }
@@ -55,6 +65,12 @@ class GitHubRepositoryService
             throw new RuntimeException('That repository is no longer available to your GitHub App connection.');
         }
 
+        return $this->repositoryFromUrl((string) $repositoryUrl);
+    }
+
+    /** @return array{id:int,full_name:string,html_url:string,private:bool,default_branch:string} */
+    public function repositoryFromUrl(string $repositoryUrl): array
+    {
         [$owner, $repo] = $this->parseRepositoryUrl($repositoryUrl);
         $installationToken = app(GitHubAppTokenService::class)->tokenForRepository($owner, $repo);
         $response = $this->client($installationToken)->get("https://api.github.com/repos/{$owner}/{$repo}");

@@ -94,7 +94,12 @@ class GitHubConnectionController extends Controller
         $this->authorizeSettings($mod);
 
         try {
-            return response()->json(['repositories' => $repositories->repositoriesFor(Auth::user())]);
+            return response()->json([
+                'repositories' => $repositories->repositoriesFor(
+                    Auth::user(),
+                    $mod->github_repository_url,
+                ),
+            ]);
         } catch (RuntimeException $exception) {
             return response()->json(['message' => $exception->getMessage()], 422);
         }
