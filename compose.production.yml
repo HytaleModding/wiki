@@ -6,13 +6,9 @@ services:
     env_file: .env.production
     command: ["frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile"]
     ports:
-      # Bind only the dedicated Caddy IP. This prevents any conflict with a
-      # separate Dokploy/Traefik listener on the server's other public IP.
       - "${PUBLIC_IP:?Set PUBLIC_IP in .env.production}:80:8080"
       - "${PUBLIC_IP:?Set PUBLIC_IP in .env.production}:443:8443"
     extra_hosts:
-      # Lets an optional Caddy route proxy a legacy host service such as
-      # Pterodactyl after its NGINX listener is moved to 127.0.0.1:8081.
       - "host.docker.internal:host-gateway"
     volumes:
       - app-storage:/app/storage
@@ -84,10 +80,6 @@ services:
       timeout: 5s
       retries: 10
     restart: unless-stopped
-    security_opt:
-      - no-new-privileges:true
-    cap_drop:
-      - ALL
 
   redis:
     image: redis:7.4-alpine
@@ -100,10 +92,6 @@ services:
       timeout: 5s
       retries: 10
     restart: unless-stopped
-    security_opt:
-      - no-new-privileges:true
-    cap_drop:
-      - ALL
 
 volumes:
   app-storage:
