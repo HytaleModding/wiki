@@ -6,7 +6,7 @@ import {
   PencilIcon,
   XIcon,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -87,6 +87,10 @@ export default function EditMod({ mod, githubConnected }: Props) {
     mod.icon_url || null,
   );
   const [repositories, setRepositories] = useState<GitHubRepository[]>([]);
+  // Radix can emit a value update as this controlled select settles after the
+  // async repository request. Keep the latest response synchronously available
+  // to the handler so it never reads a stale render's state.
+  const repositoriesRef = useRef<GitHubRepository[]>([]);
   const [repositoriesError, setRepositoriesError] = useState<string | null>(
     null,
   );
@@ -110,6 +114,7 @@ export default function EditMod({ mod, githubConnected }: Props) {
   useEffect(() => {
     if (!githubConnected) return;
 
+    setRepositoriesError(null);
     setIsLoadingRepositories(true);
     fetch(`/dashboard/mods/${mod.slug}/github/repositories`, {
       headers: { Accept: 'application/json' },
@@ -120,23 +125,28 @@ export default function EditMod({ mod, githubConnected }: Props) {
           message?: string;
         };
         if (!response.ok) throw new Error(payload.message || 'Unable to load repositories.');
-        setRepositories(payload.repositories || []);
+        const loadedRepositories = payload.repositories || [];
+        repositoriesRef.current = loadedRepositories;
+        setRepositories(loadedRepositories);
       })
       .catch((error: Error) => setRepositoriesError(error.message))
       .finally(() => setIsLoadingRepositories(false));
   }, [githubConnected, mod.slug]);
 
   const selectGithubRepository = async (repositoryId: string) => {
-    const selectedRepository = repositories.find(
+    const selectedRepository = repositoriesRef.current.find(
       (repository) => repository.id === Number(repositoryId),
     );
 
     if (!selectedRepository) {
-      setRepositoriesError('Unable to find the selected repository.');
+      // Ignore the select's transient initialization value. It is not a user
+      // selection and should never surface as an error.
       return;
     }
 
-    if (selectedRepository.html_url === data.github_repository_url) {
+    const normalizedRepositoryUrl = selectedRepository.html_url.replace(/\/+$/, '');
+    const normalizedCurrentUrl = data.github_repository_url.replace(/\/+$/, '');
+    if (normalizedRepositoryUrl === normalizedCurrentUrl) {
       return;
     }
 
