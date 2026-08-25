@@ -5,7 +5,8 @@ WORKDIR /app
 COPY composer.json composer.lock ./
 RUN composer install --no-dev --no-interaction --prefer-dist --no-scripts
 COPY . ./
-RUN composer dump-autoload --no-dev --classmap-authoritative
+RUN composer dump-autoload --no-dev --classmap-authoritative --no-scripts \
+    && php artisan package:discover --ansi
 
 FROM oven/bun:1.3.10 AS frontend
 WORKDIR /app
@@ -15,6 +16,7 @@ RUN apt-get update \
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
 COPY --from=vendor /app /app
+RUN php artisan wayfinder:generate --with-form
 RUN bun run build
 
 FROM dunglas/frankenphp:php8.3-bookworm AS production
