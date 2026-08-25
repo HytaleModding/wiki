@@ -6,7 +6,7 @@ import {
   PencilIcon,
   XIcon,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -66,9 +66,18 @@ interface Mod {
 
 interface Props {
   mod: Mod;
+  githubConnected: boolean;
 }
 
-export default function EditMod({ mod }: Props) {
+interface GitHubRepository {
+  id: number;
+  full_name: string;
+  html_url: string;
+  private: boolean;
+  default_branch: string;
+}
+
+export default function EditMod({ mod, githubConnected }: Props) {
   // Custom-domain settings are temporarily hidden from this page.
   // const appHost =
   //   typeof window !== 'undefined' ? window.location.hostname : 'your app host';
@@ -77,11 +86,16 @@ export default function EditMod({ mod }: Props) {
   const [iconPreview, setIconPreview] = useState<string | null>(
     mod.icon_url || null,
   );
-  const [isSyncing, setIsSyncing] = useState(false);
-  const [syncFeedback, setSyncFeedback] = useState<{
-    type: 'success' | 'error';
-    message: string;
-  } | null>(null);
+  const [repositories, setRepositories] = useState<GitHubRepository[]>([]);
+  // Radix can emit a value update as this controlled select settles after the
+  // async repository request. Keep the latest response synchronously available
+  // to the handler so it never reads a stale render's state.
+  const repositoriesRef = useRef<GitHubRepository[]>([]);
+  const [repositoriesError, setRepositoriesError] = useState<string | null>(
+    null,
+  );
+  const [isLoadingRepositories, setIsLoadingRepositories] = useState(false);
+  const [isSelectingRepository, setIsSelectingRepository] = useState(false);
   // const [verifyingDomain, setVerifyingDomain] = useState(false);
 
   const { data, setData, patch, processing, errors } = useForm({
@@ -96,6 +110,85 @@ export default function EditMod({ mod }: Props) {
     custom_domain: mod.custom_domain || '',
     icon: null as File | null,
   });
+
+  useEffect(() => {
+    if (!githubConnected) return;
+
+    setRepositoriesError(null);
+    setIsLoadingRepositories(true);
+    fetch(`/dashboard/mods/${mod.slug}/github/repositories`, {
+      headers: { Accept: 'application/json' },
+    })
+      .then(async (response) => {
+        const payload = (await response.json()) as {
+          repositories?: GitHubRepository[];
+          message?: string;
+        };
+        if (!response.ok) throw new Error(payload.message || 'Unable to load repositories.');
+        const loadedRepositories = payload.repositories || [];
+        repositoriesRef.current = loadedRepositories;
+        setRepositories(loadedRepositories);
+      })
+      .catch((error: Error) => setRepositoriesError(error.message))
+      .finally(() => setIsLoadingRepositories(false));
+  }, [githubConnected, mod.slug]);
+
+  const selectGithubRepository = async (repositoryId: string) => {
+    const selectedRepository = repositoriesRef.current.find(
+      (repository) => repository.id === Number(repositoryId),
+    );
+
+    if (!selectedRepository) {
+      // Ignore the select's transient initialization value. It is not a user
+      // selection and should never surface as an error.
+      return;
+    }
+
+    const normalizedRepositoryUrl = selectedRepository.html_url.replace(/\/+$/, '');
+    const normalizedCurrentUrl = data.github_repository_url.replace(/\/+$/, '');
+    if (normalizedRepositoryUrl === normalizedCurrentUrl) {
+      return;
+    }
+
+    setIsSelectingRepository(true);
+    setRepositoriesError(null);
+
+    try {
+      const response = await fetch(
+        `/dashboard/mods/${mod.slug}/github/repository`,
+        {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN':
+              document
+                .querySelector('meta[name="csrf-token"]')
+                ?.getAttribute('content') || '',
+          },
+          body: JSON.stringify({
+            repository_id: Number(repositoryId),
+            repository_url: selectedRepository.html_url,
+          }),
+        },
+      );
+      const payload = (await response.json()) as {
+        repository?: GitHubRepository;
+        message?: string;
+      };
+      if (!response.ok || !payload.repository) {
+        throw new Error(payload.message || 'Unable to select the repository.');
+      }
+
+      setData('github_repository_url', payload.repository.html_url);
+    } catch (error) {
+      setRepositoriesError(
+        error instanceof Error ? error.message : 'Unable to select the repository.',
+      );
+    } finally {
+      setIsSelectingRepository(false);
+    }
+  };
 
   const handleIconChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -135,42 +228,31 @@ export default function EditMod({ mod }: Props) {
     });
   };
 
-  const runGithubSync = async () => {
-    setIsSyncing(true);
-    setSyncFeedback(null);
+  const disconnectGithub = async () => {
+    setRepositoriesError(null);
 
-    try {
-      const response = await fetch(`/dashboard/mods/${mod.slug}/github-sync`, {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'X-CSRF-TOKEN':
-            document
-              .querySelector('meta[name="csrf-token"]')
-              ?.getAttribute('content') || '',
-        },
-      });
+    const confirmed = window.confirm(
+      'Disconnect your GitHub account from this wiki?',
+    );
+    if (!confirmed) return;
 
-      const payload = (await response.json().catch(() => null)) as {
-        message?: string;
-      } | null;
+    const response = await fetch(`/dashboard/mods/${mod.slug}/github/connect`, {
+      method: 'DELETE',
+      headers: {
+        Accept: 'application/json',
+        'X-CSRF-TOKEN':
+          document
+            .querySelector('meta[name="csrf-token"]')
+            ?.getAttribute('content') || '',
+      },
+    });
 
-      if (!response.ok) {
-        setSyncFeedback({
-          type: 'error',
-          message: payload?.message || 'GitHub sync failed.',
-        });
-
-        return;
-      }
-
-      setSyncFeedback({
-        type: 'success',
-        message: payload?.message || 'GitHub sync completed successfully.',
-      });
-    } finally {
-      setIsSyncing(false);
+    if (!response.ok) {
+      setRepositoriesError('Unable to unlink GitHub right now.');
+      return;
     }
+
+    window.location.reload();
   };
 
   const deleteMod = () => {
@@ -454,8 +536,8 @@ export default function EditMod({ mod }: Props) {
                       <div>
                         <CardTitle>GitHub Sync</CardTitle>
                         <CardDescription>
-                          When a GitHub URL is configured, pages are managed by
-                          sync and manual page create/edit is disabled.
+                          Pages are managed from GitHub and update whenever you
+                          push changes to the connected repository.
                         </CardDescription>
                       </div>
                       <HoverCard>
@@ -495,28 +577,101 @@ export default function EditMod({ mod }: Props) {
                   </CardHeader>
                   <CardContent className="space-y-6">
                     <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="github_repository_url">
-                          GitHub Repository URL
-                        </Label>
-                        <Input
-                          id="github_repository_url"
-                          type="url"
-                          value={data.github_repository_url}
-                          onChange={(e) =>
-                            setData('github_repository_url', e.target.value)
-                          }
-                          placeholder="https://github.com/owner/repository"
-                          className={cn(
-                            errors.github_repository_url
-                              ? 'border-destructive'
-                              : '',
-                          )}
-                        />
-                        {errors.github_repository_url && (
-                          <p className="mt-1 text-sm text-destructive">
-                            {errors.github_repository_url}
-                          </p>
+                      <div className="rounded-md border border-border/70 bg-muted/10 p-4">
+                        <Label>GitHub account</Label>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          {githubConnected
+                            ? 'Choose from repositories your connected GitHub App can access.'
+                            : 'Install the GitHub App and authorize your account to choose a repository.'}
+                        </p>
+                        {!githubConnected ? (
+                          <Button asChild className="mt-3" type="button">
+                            <a href={`/dashboard/mods/${mod.slug}/github/connect`}>
+                              Connect GitHub
+                            </a>
+                          </Button>
+                        ) : (
+                          <div className="mt-3 space-y-2">
+                            <Select
+                              value={
+                                repositories.find(
+                                  (repository) =>
+                                    repository.html_url === data.github_repository_url,
+                                )?.id.toString() || ''
+                              }
+                              onValueChange={selectGithubRepository}
+                              disabled={isLoadingRepositories || isSelectingRepository}
+                            >
+                              <SelectTrigger>
+                                <SelectValue
+                                  placeholder={
+                                    isLoadingRepositories
+                                      ? 'Loading repositories...'
+                                      : 'Select a repository'
+                                  }
+                                />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {repositories.map((repository) => (
+                                  <SelectItem
+                                    key={repository.id}
+                                    value={repository.id.toString()}
+                                  >
+                                    {repository.full_name}
+                                    {repository.private ? ' (private)' : ''}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            {!isLoadingRepositories &&
+                              repositories.length === 0 &&
+                              !repositoriesError && (
+                                <p className="text-sm text-muted-foreground">
+                                  No repositories are available yet. Install the
+                                  GitHub App on a personal account or
+                                  organization, grant it access to at least one
+                                  repository, then reconnect.
+                                </p>
+                              )}
+                            {repositoriesError && (
+                              <p className="text-sm text-destructive">
+                                {repositoriesError}
+                              </p>
+                            )}
+                            {data.github_repository_url && (
+                              <p className="text-sm text-muted-foreground">
+                                Connected repository:{' '}
+                                <a
+                                  href={data.github_repository_url}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="text-primary hover:underline"
+                                >
+                                  {repositories.find(
+                                    (repository) =>
+                                      repository.html_url ===
+                                      data.github_repository_url,
+                                  )?.full_name || data.github_repository_url}
+                                </a>
+                              </p>
+                            )}
+                            <div className="flex gap-2">
+                              <Button asChild type="button" variant="outline">
+                                <a
+                                  href={`/dashboard/mods/${mod.slug}/github/connect`}
+                                >
+                                  Reconnect GitHub
+                                </a>
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                onClick={disconnectGithub}
+                              >
+                                Unlink GitHub
+                              </Button>
+                            </div>
+                          </div>
                         )}
                       </div>
 
@@ -547,36 +702,6 @@ export default function EditMod({ mod }: Props) {
                           Optional subfolder to sync markdown from (for example:
                           docs/guides). Leave blank to sync the repository root.
                         </p>
-                      </div>
-
-                      <div className="rounded-md border border-border/70 bg-muted/10 p-4">
-                        <div className="mb-3">
-                          <Label>Manual Sync</Label>
-                          <p className="mt-1 text-sm text-muted-foreground">
-                            Pull markdown from your configured GitHub repository
-                            right now.
-                          </p>
-                        </div>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={runGithubSync}
-                          disabled={isSyncing || processing}
-                        >
-                          {isSyncing ? 'Running Sync...' : 'Run Sync'}
-                        </Button>
-                        {syncFeedback && (
-                          <p
-                            className={cn(
-                              'mt-3 text-sm',
-                              syncFeedback.type === 'success'
-                                ? 'text-emerald-600 dark:text-emerald-400'
-                                : 'text-destructive',
-                            )}
-                          >
-                            {syncFeedback.message}
-                          </p>
-                        )}
                       </div>
                     </div>
                   </CardContent>

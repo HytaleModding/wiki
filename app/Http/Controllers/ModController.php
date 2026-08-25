@@ -7,7 +7,6 @@ use App\Models\Mod;
 use App\Models\ModInvitation;
 use App\Models\Page;
 use App\Models\User;
-use App\Services\GitHubMarkdownSyncService;
 use App\Support\CustomCssSanitizer;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
@@ -17,7 +16,6 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
-use RuntimeException;
 
 class ModController extends Controller
 {
@@ -164,6 +162,7 @@ class ModController extends Controller
 
         return Inertia::render('Mods/Edit', [
             'mod' => $mod,
+            'githubConnected' => $user->githubConnection()->exists(),
         ]);
     }
 
@@ -302,48 +301,6 @@ class ModController extends Controller
         $mod->update(['custom_css' => $validated['custom_css'] ?? null]);
 
         return back()->with('success', 'CSS saved successfully!');
-    }
-
-    /**
-     * Manually trigger GitHub markdown sync for a mod.
-     */
-    public function runGithubSync(Request $request, Mod $mod, GitHubMarkdownSyncService $syncService)
-    {
-        $user = Auth::user();
-
-        if (! $mod->userCan($user, 'manage_settings')) {
-            abort(403);
-        }
-
-        if (blank($mod->github_repository_url)) {
-            $message = 'Set a GitHub repository URL before running sync.';
-
-            return $request->expectsJson()
-                ? response()->json(['message' => $message], 422)
-                : back()->withErrors(['github_repository_url' => $message]);
-        }
-
-        try {
-            $stats = $syncService->syncMod($mod);
-        } catch (RuntimeException $exception) {
-            $message = 'GitHub sync failed: '.$exception->getMessage();
-
-            return $request->expectsJson()
-                ? response()->json(['message' => $message], 422)
-                : back()->withErrors(['github_repository_url' => $message]);
-        }
-
-        $message = sprintf(
-            'Sync completed: %d files scanned, %d created, %d updated, %d deleted.',
-            $stats['total'],
-            $stats['created'],
-            $stats['updated'],
-            $stats['deleted'],
-        );
-
-        return $request->expectsJson()
-            ? response()->json(['message' => $message, 'stats' => $stats])
-            : back()->with('success', $message);
     }
 
     /**

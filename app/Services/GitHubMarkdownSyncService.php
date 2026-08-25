@@ -18,10 +18,11 @@ class GitHubMarkdownSyncService
     {
         [$owner, $repo] = $this->parseRepository($mod->github_repository_url);
         $basePath = $this->normalizeBasePath($mod->github_repository_path);
-        $branch = $this->fetchDefaultBranch($owner, $repo);
+        $token = app(GitHubAppTokenService::class)->tokenForRepository($owner, $repo);
+        $branch = $this->fetchDefaultBranch($owner, $repo, $token);
 
         $files = [];
-        $this->fetchMarkdownFiles($owner, $repo, $branch, $basePath, $basePath, $files);
+        $this->fetchMarkdownFiles($owner, $repo, $branch, $basePath, $basePath, $files, $token);
 
         usort($files, fn (array $a, array $b) => strcmp($a['path'], $b['path']));
 
@@ -199,9 +200,9 @@ class GitHubMarkdownSyncService
         return trim($path, '/');
     }
 
-    private function fetchDefaultBranch(string $owner, string $repo): string
+    private function fetchDefaultBranch(string $owner, string $repo, ?string $token): string
     {
-        $response = $this->githubClient()
+        $response = $this->githubClient($token)
             ->get("https://api.github.com/repos/{$owner}/{$repo}");
 
         if (! $response->successful()) {
@@ -214,7 +215,7 @@ class GitHubMarkdownSyncService
     /**
      * @param  array<int, array{path:string,sha:string,content:string}>  $files
      */
-    private function fetchMarkdownFiles(string $owner, string $repo, string $branch, string $basePath, string $currentPath, array &$files): void
+    private function fetchMarkdownFiles(string $owner, string $repo, string $branch, string $basePath, string $currentPath, array &$files, ?string $token): void
     {
         $contentsUrl = "https://api.github.com/repos/{$owner}/{$repo}/contents";
 
@@ -222,7 +223,7 @@ class GitHubMarkdownSyncService
             $contentsUrl .= '/'.$this->encodePath($currentPath);
         }
 
-        $response = $this->githubClient()->get($contentsUrl, ['ref' => $branch]);
+        $response = $this->githubClient($token)->get($contentsUrl, ['ref' => $branch]);
 
         if ($response->status() === 404) {
             return;
@@ -240,7 +241,7 @@ class GitHubMarkdownSyncService
 
         foreach ($items as $item) {
             if (($item['type'] ?? null) === 'dir') {
-                $this->fetchMarkdownFiles($owner, $repo, $branch, $basePath, $item['path'], $files);
+                $this->fetchMarkdownFiles($owner, $repo, $branch, $basePath, $item['path'], $files, $token);
 
                 continue;
             }
@@ -262,7 +263,7 @@ class GitHubMarkdownSyncService
                 continue;
             }
 
-            $contentResponse = Http::timeout(30)->get($downloadUrl);
+            $contentResponse = $this->githubClient($token)->get($downloadUrl);
 
             if (! $contentResponse->successful()) {
                 throw new RuntimeException("Unable to download file: {$downloadUrl}");
@@ -760,11 +761,11 @@ class GitHubMarkdownSyncService
         return $slug;
     }
 
-    private function githubClient()
+    private function githubClient(?string $token = null)
     {
         return Http::timeout(30)
             ->acceptJson()
-            ->withToken(config('services.github.token'))
+            ->when(filled($token), fn ($client) => $client->withToken($token))
             ->withHeaders([
                 'User-Agent' => 'wiki-mod-sync',
                 'X-GitHub-Api-Version' => '2022-11-28',
