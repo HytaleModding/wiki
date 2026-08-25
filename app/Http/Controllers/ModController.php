@@ -502,9 +502,7 @@ class ModController extends Controller
             abort(404, 'Documentation not found');
         }
 
-        return Inertia::render('Public/Mod', [
-            'mod' => $this->buildPublicModPayload($mod->load(['owner'])),
-        ]);
+        return app(PageController::class)->publicIndex($mod, $request);
     }
 
     /**
@@ -576,9 +574,7 @@ class ModController extends Controller
                 abort(404, 'Documentation not found');
             }
 
-            return Inertia::render('Public/Mod', [
-                'mod' => $this->buildPublicModPayload($resolvedMod->load(['owner'])),
-            ]);
+            return app(PageController::class)->publicIndex($resolvedMod, $request);
         }
 
         $mod = Mod::where('slug', $slug)
@@ -589,9 +585,7 @@ class ModController extends Controller
             abort(404, 'Documentation not found');
         }
 
-        return Inertia::render('Public/Mod', [
-            'mod' => $this->buildPublicModPayload($mod),
-        ]);
+        return app(PageController::class)->publicIndex($mod, $request);
     }
 
     private function canViewPublicDocumentation(Mod $mod, ?User $user): bool
@@ -601,51 +595,6 @@ class ModController extends Controller
         }
 
         return $user ? $mod->canBeAccessedBy($user) : false;
-    }
-
-    private function buildPublicModPayload(Mod $mod): array
-    {
-        $publishedChildren = function ($query) use (&$publishedChildren) {
-            $query->where('published', true)
-                ->orderBy('order_index')
-                ->with(['children' => $publishedChildren]);
-        };
-
-        $rootPages = $mod->pages()
-            ->whereNull('parent_id')
-            ->where('published', true)
-            ->with(['children' => $publishedChildren])
-            ->orderBy('order_index')
-            ->get();
-
-        $indexPage = $mod->pages()
-            ->where('is_index', true)
-            ->where('published', true)
-            ->first();
-
-        return [
-            'id' => $mod->id,
-            'name' => $mod->name,
-            'slug' => $mod->slug,
-            'description' => $mod->description,
-            'icon_url' => $mod->icon_url,
-            'visibility' => $mod->visibility,
-            'custom_css' => $mod->safe_custom_css,
-            'custom_domain' => $mod->custom_domain,
-            'owner' => $this->serializeOwner($mod->owner),
-            'root_pages' => $rootPages
-                ->map(fn (Page $page) => $this->serializePublicPageTree($page, true))
-                ->values()
-                ->toArray(),
-            'index_page' => $indexPage ? [
-                'id' => $indexPage->id,
-                'title' => $indexPage->title,
-                'slug' => $indexPage->slug,
-                'kind' => $indexPage->kind,
-                'content' => $indexPage->content,
-                'updated_at' => $indexPage->updated_at,
-            ] : null,
-        ];
     }
 
     private function customCssRules(): array
@@ -686,28 +635,6 @@ class ModController extends Controller
             'username' => $owner->username,
             'avatar_url' => $owner->avatar_url,
         ];
-    }
-
-    private function serializePublicPageTree(Page $page, bool $includeContent): array
-    {
-        $payload = [
-            'id' => $page->id,
-            'title' => $page->title,
-            'slug' => $page->slug,
-            'kind' => $page->kind,
-            'published' => $page->published,
-            'updated_at' => $page->updated_at,
-            'children' => $page->children
-                ->map(fn (Page $child) => $this->serializePublicPageTree($child, false))
-                ->values()
-                ->toArray(),
-        ];
-
-        if ($includeContent) {
-            $payload['content'] = substr($page->content ?? '', 0, 200);
-        }
-
-        return $payload;
     }
 
     /**
