@@ -32,7 +32,7 @@ Route::post('/webhooks/github', GitHubWebhookController::class)
     ->withoutMiddleware(VerifyCsrfToken::class)
     ->name('webhooks.github');
 
-Route::get('/api/github/callback', [GitHubConnectionController::class, 'callback'])
+Route::get('/github/callback', [GitHubConnectionController::class, 'callback'])
     ->middleware(['auth', 'verified'])
     ->name('github.callback');
 

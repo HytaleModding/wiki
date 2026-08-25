@@ -14,7 +14,7 @@ use RuntimeException;
 
 class GitHubConnectionController extends Controller
 {
-    public function redirect(Mod $mod): RedirectResponse
+    public function redirect(Request $request, Mod $mod): RedirectResponse
     {
         $this->authorizeSettings($mod);
         abort_unless(
@@ -30,6 +30,7 @@ class GitHubConnectionController extends Controller
 
         return redirect()->away('https://github.com/apps/'.config('services.github.app_slug').'/installations/new?'.http_build_query([
             'state' => $state,
+            'redirect_uri' => $this->callbackUrl($request),
         ]));
     }
 
@@ -51,7 +52,7 @@ class GitHubConnectionController extends Controller
             'client_id' => config('services.github.client_id'),
             'client_secret' => config('services.github.client_secret'),
             'code' => $request->query('code'),
-            'redirect_uri' => route('github.callback'),
+            'redirect_uri' => $this->callbackUrl($request),
         ]);
         if (! $tokenResponse->successful() || blank($tokenResponse->json('access_token'))) {
             return redirect()->route('mods.edit', $mod)->withErrors(['github' => 'GitHub authorization failed. Please try again.']);
@@ -117,5 +118,10 @@ class GitHubConnectionController extends Controller
     private function authorizeSettings(Mod $mod): void
     {
         abort_unless($mod->userCan(Auth::user(), 'manage_settings'), 403);
+    }
+
+    private function callbackUrl(Request $request): string
+    {
+        return $request->getSchemeAndHttpHost().route('github.callback', absolute: false);
     }
 }
