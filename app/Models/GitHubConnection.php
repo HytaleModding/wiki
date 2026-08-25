@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class GitHubConnection extends Model
 {
+    protected $table = 'github_connections';
+
     protected $fillable = [
         'user_id',
         'github_user_id',
