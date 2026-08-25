@@ -103,8 +103,10 @@ export default function EditMod({ mod, githubConnected, customDomainTarget }: Pr
     github_repository_url: mod.github_repository_url || '',
     github_repository_path: mod.github_repository_path || '',
     custom_css: mod.custom_css || '',
-    custom_domain: mod.custom_domain || '',
     icon: null as File | null,
+  });
+  const domainForm = useForm({
+    custom_domain: mod.custom_domain || '',
   });
 
   useEffect(() => {
@@ -221,6 +223,12 @@ export default function EditMod({ mod, githubConnected, customDomainTarget }: Pr
       onSuccess: () => {
         window.location.href = `/dashboard/mods/${mod.slug}/css-editor`;
       },
+    });
+  };
+
+  const submitDomain = () => {
+    domainForm.patch(`/dashboard/mods/${mod.slug}/domain`, {
+      onSuccess: () => window.location.reload(),
     });
   };
 
@@ -509,12 +517,12 @@ export default function EditMod({ mod, githubConnected, customDomainTarget }: Pr
                       <Label htmlFor="custom_domain">Domain</Label>
                       <Input
                         id="custom_domain"
-                        value={data.custom_domain}
-                        onChange={(e) => setData('custom_domain', e.target.value.toLowerCase())}
+                        value={domainForm.data.custom_domain}
+                        onChange={(e) => domainForm.setData('custom_domain', e.target.value.toLowerCase())}
                         placeholder="docs.example.com"
-                        className={cn(errors.custom_domain ? 'border-destructive' : '')}
+                        className={cn(domainForm.errors.custom_domain ? 'border-destructive' : '')}
                       />
-                      {errors.custom_domain && <p className="mt-1 text-sm text-destructive">{errors.custom_domain}</p>}
+                      {domainForm.errors.custom_domain && <p className="mt-1 text-sm text-destructive">{domainForm.errors.custom_domain}</p>}
                     </div>
                     <div className="rounded-md border border-border/70 bg-muted/10 p-4 text-sm">
                       <p className="font-medium">DNS setup</p>
@@ -527,6 +535,9 @@ export default function EditMod({ mod, githubConnected, customDomainTarget }: Pr
                         Status: <span className="font-medium text-foreground">{mod.domain_status === 'ready' ? 'Ready' : mod.domain_status === 'provisioning' ? 'Issuing HTTPS certificate' : 'Waiting for CNAME record'}</span>
                       </p>
                     )}
+                    <Button type="button" onClick={submitDomain} disabled={domainForm.processing}>
+                      {domainForm.processing ? 'Saving domain...' : 'Save domain'}
+                    </Button>
                   </CardContent>
                 </Card>
               </TabsContent>

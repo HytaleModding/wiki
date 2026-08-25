@@ -191,6 +191,7 @@ class ModController extends Controller
             'github_repository_path' => 'nullable|string|max:512',
             'custom_css' => $this->customCssRules(),
             'custom_domain' => [
+                'sometimes',
                 'nullable',
                 'string',
                 'max:255',
@@ -207,18 +208,20 @@ class ModController extends Controller
             ? null
             : trim((string) $validated['github_repository_path'], '/');
 
-        $validated['custom_domain'] = blank($validated['custom_domain'] ?? null)
-            ? null
-            : strtolower(trim((string) $validated['custom_domain']));
+        if (array_key_exists('custom_domain', $validated)) {
+            $validated['custom_domain'] = blank($validated['custom_domain'])
+                ? null
+                : strtolower(trim((string) $validated['custom_domain']));
 
-        if ($validated['custom_domain'] !== $mod->custom_domain) {
-            $validated['domain_verified'] = false;
-            $validated['domain_verification_token'] = $validated['custom_domain']
-                ? 'wiki-verify='.Str::random(32)
-                : null;
-            $validated['domain_status'] = $validated['custom_domain'] ? 'pending_dns' : 'not_configured';
-            $validated['domain_checked_at'] = null;
-            $validated['domain_ready_at'] = null;
+            if ($validated['custom_domain'] !== $mod->custom_domain) {
+                $validated['domain_verified'] = false;
+                $validated['domain_verification_token'] = $validated['custom_domain']
+                    ? 'wiki-verify='.Str::random(32)
+                    : null;
+                $validated['domain_status'] = $validated['custom_domain'] ? 'pending_dns' : 'not_configured';
+                $validated['domain_checked_at'] = null;
+                $validated['domain_ready_at'] = null;
+            }
         }
 
         if ($validated['name'] !== $mod->name) {
@@ -258,6 +261,53 @@ class ModController extends Controller
 
         return redirect()->route('mods.show', $mod->slug)
             ->with('success', 'Mod updated successfully!');
+    }
+
+    /**
+     * Update a custom domain without requiring unrelated mod settings.
+     */
+    public function updateDomain(Request $request, Mod $mod)
+    {
+        $user = Auth::user();
+
+        if (! $mod->userCan($user, 'manage_settings')) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'custom_domain' => [
+                'nullable',
+                'string',
+                'max:255',
+                'regex:/^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/',
+                Rule::unique('mods', 'custom_domain')->ignore($mod->id),
+            ],
+        ]);
+
+        $domain = blank($validated['custom_domain'])
+            ? null
+            : strtolower(trim((string) $validated['custom_domain']));
+
+        if ($domain === $mod->custom_domain) {
+            return back()->with('success', 'Custom domain settings are unchanged.');
+        }
+
+        $mod->update([
+            'custom_domain' => $domain,
+            'domain_verified' => false,
+            'domain_verification_token' => $domain ? 'wiki-verify='.Str::random(32) : null,
+            'domain_status' => $domain ? 'pending_dns' : 'not_configured',
+            'domain_checked_at' => null,
+            'domain_ready_at' => null,
+        ]);
+
+        if ($domain) {
+            ProvisionCustomDomain::dispatch($mod->id)->afterCommit();
+        }
+
+        return back()->with('success', $domain
+            ? 'Custom domain saved. We will email you when HTTPS is ready.'
+            : 'Custom domain removed.');
     }
 
     /**

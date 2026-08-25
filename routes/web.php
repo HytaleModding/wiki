@@ -122,6 +122,7 @@ Route::group(['prefix' => '/dashboard', 'middleware' => ['auth', 'verified']], f
     Route::get('/mods/{mod:slug}/github/repositories', [GitHubConnectionController::class, 'repositories'])->name('mods.github.repositories');
     Route::post('/mods/{mod:slug}/github/repository', [GitHubConnectionController::class, 'selectRepository'])->name('mods.github.repository.select');
     Route::post('/mods/{mod:slug}/domain/verify', [ModController::class, 'verifyDomain'])->name('mods.domain.verify');
+    Route::patch('/mods/{mod:slug}/domain', [ModController::class, 'updateDomain'])->name('mods.domain.update');
 
     Route::get('/mods/{mod:slug}/collaborators', [ModController::class, 'manageCollaborators'])->name('mods.collaborators.index');
     Route::post('/mods/{mod:slug}/collaborators', [ModController::class, 'addCollaborator'])->name('mods.collaborators.store');
