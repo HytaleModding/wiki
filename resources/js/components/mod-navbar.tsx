@@ -41,11 +41,7 @@ export default function ModNavbar({
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-border/80 bg-background/85 backdrop-blur-xl">
       <div className="container mx-auto flex h-16 max-w-[90rem] items-center justify-between px-4 sm:px-6 lg:px-8">
-        <div className="flex min-w-0 items-center">
-          <Link href={`/mod/${modSlug}`} className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
-            Documentation
-          </Link>
-        </div>
+        <div />
 
         <div className="hidden flex-1 items-center justify-end md:flex">
           <NavigationMenu>
