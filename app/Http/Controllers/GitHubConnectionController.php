@@ -17,14 +17,18 @@ class GitHubConnectionController extends Controller
     public function redirect(Mod $mod): RedirectResponse
     {
         $this->authorizeSettings($mod);
-        abort_unless(filled(config('services.github.client_id')) && filled(config('services.github.client_secret')), 503, 'GitHub App OAuth is not configured.');
+        abort_unless(
+            filled(config('services.github.client_id')) &&
+            filled(config('services.github.client_secret')) &&
+            filled(config('services.github.app_slug')),
+            503,
+            'GitHub App installation is not configured.'
+        );
 
         $state = Str::random(64);
         session(['github_oauth_state' => $state, 'github_oauth_mod_id' => $mod->id]);
 
-        return redirect()->away('https://github.com/login/oauth/authorize?'.http_build_query([
-            'client_id' => config('services.github.client_id'),
-            'redirect_uri' => route('github.callback'),
+        return redirect()->away('https://github.com/apps/'.config('services.github.app_slug').'/installations/new?'.http_build_query([
             'state' => $state,
         ]));
     }
@@ -66,6 +70,17 @@ class GitHubConnectionController extends Controller
         ]);
 
         return redirect()->route('mods.edit', $mod)->with('success', "Connected GitHub account @{$connection->github_login}. Choose a repository below.");
+    }
+
+    public function disconnect(Mod $mod): RedirectResponse
+    {
+        $this->authorizeSettings($mod);
+
+        Auth::user()?->githubConnection()?->delete();
+
+        return redirect()
+            ->route('mods.edit', $mod)
+            ->with('success', 'GitHub has been unlinked from your account.');
     }
 
     public function repositories(Mod $mod, GitHubRepositoryService $repositories)

@@ -249,6 +249,33 @@ export default function EditMod({ mod, githubConnected }: Props) {
     }
   };
 
+  const disconnectGithub = async () => {
+    setRepositoriesError(null);
+
+    const confirmed = window.confirm(
+      'Disconnect your GitHub account from this wiki?',
+    );
+    if (!confirmed) return;
+
+    const response = await fetch(`/dashboard/mods/${mod.slug}/github/connect`, {
+      method: 'DELETE',
+      headers: {
+        Accept: 'application/json',
+        'X-CSRF-TOKEN':
+          document
+            .querySelector('meta[name="csrf-token"]')
+            ?.getAttribute('content') || '',
+      },
+    });
+
+    if (!response.ok) {
+      setRepositoriesError('Unable to unlink GitHub right now.');
+      return;
+    }
+
+    window.location.reload();
+  };
+
   const deleteMod = () => {
     fetch(`/dashboard/mods/${mod.slug}`, {
       method: 'DELETE',
@@ -576,7 +603,7 @@ export default function EditMod({ mod, githubConnected }: Props) {
                         <p className="mt-1 text-sm text-muted-foreground">
                           {githubConnected
                             ? 'Choose from repositories your connected GitHub App can access.'
-                            : 'Connect GitHub to choose a repository you can access.'}
+                            : 'Install the GitHub App and authorize your account to choose a repository.'}
                         </p>
                         {!githubConnected ? (
                           <Button asChild className="mt-3" type="button">
@@ -617,11 +644,37 @@ export default function EditMod({ mod, githubConnected }: Props) {
                                 ))}
                               </SelectContent>
                             </Select>
+                            {!isLoadingRepositories &&
+                              repositories.length === 0 &&
+                              !repositoriesError && (
+                                <p className="text-sm text-muted-foreground">
+                                  No repositories are available yet. Install the
+                                  GitHub App on a personal account or
+                                  organization, grant it access to at least one
+                                  repository, then reconnect.
+                                </p>
+                              )}
                             {repositoriesError && (
                               <p className="text-sm text-destructive">
                                 {repositoriesError}
                               </p>
                             )}
+                            <div className="flex gap-2">
+                              <Button asChild type="button" variant="outline">
+                                <a
+                                  href={`/dashboard/mods/${mod.slug}/github/connect`}
+                                >
+                                  Reconnect GitHub
+                                </a>
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                onClick={disconnectGithub}
+                              >
+                                Unlink GitHub
+                              </Button>
+                            </div>
                           </div>
                         )}
                       </div>

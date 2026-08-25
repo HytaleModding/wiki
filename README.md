@@ -65,12 +65,15 @@ The app will be available at [http://localhost:8000](http://localhost:8000).
 
 GitHub sync is event-driven through a GitHub App. Create an app with **Contents: Read-only** and **Metadata: Read-only** repository permissions, enable user authorization (OAuth), install it on the repositories that provide documentation, and subscribe it to **Push** events. Set its webhook URL to `https://your-wiki-domain/webhooks/github` and its user authorization callback URL to `https://your-wiki-domain/api/github/callback`.
 
+Users connect by installing that shared app into their own personal account or organization and choosing which repositories it can access. The wiki then reads the repositories visible to the authorized user from that installation.
+
 Configure these values in production:
 
 ```dotenv
 GITHUB_APP_ID=your-app-id
 GITHUB_APP_CLIENT_ID=your-client-id
 GITHUB_APP_CLIENT_SECRET=your-client-secret
+GITHUB_APP_SLUG=your-app-slug
 GITHUB_APP_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----\n...\n-----END RSA PRIVATE KEY-----"
 GITHUB_WEBHOOK_SECRET=a-long-random-secret
 ```
