@@ -40,8 +40,6 @@ services:
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
-    cap_drop:
-      - ALL
 
   scheduler:
     build:
@@ -60,8 +58,6 @@ services:
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
-    cap_drop:
-      - ALL
 
   database:
     image: mariadb:11.8
