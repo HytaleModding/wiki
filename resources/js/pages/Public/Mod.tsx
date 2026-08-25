@@ -50,7 +50,6 @@ export default function PublicMod({ mod }: Props) {
           <DocsSidebar
             mod={mod}
             pages={mod.root_pages}
-            overlineLabel="Mod Details"
             navTitle="Documentation"
           />
         }

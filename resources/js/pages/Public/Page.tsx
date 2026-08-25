@@ -72,8 +72,6 @@ export default function PublicPage({ mod, page, navigation }: Props) {
             mod={mod}
             pages={navigation}
             activePageId={page.id}
-            linkTitle
-            overlineLabel="Overview"
             navTitle="Contents"
           />
         }
@@ -81,7 +79,6 @@ export default function PublicPage({ mod, page, navigation }: Props) {
         <article className="mb-12">
           <header className="border-b border-border/70 pb-7">
             <div className="space-y-3">
-              <p className="text-xs font-bold tracking-[0.16em] text-primary uppercase">Article</p>
               <h2 className="text-3xl font-semibold tracking-tight break-words sm:text-4xl">
                 {page.title}
               </h2>

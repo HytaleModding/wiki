@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Toaster } from 'sileo';
-import { BookOpen, ChevronRight } from 'lucide-react';
+import { BookOpen } from 'lucide-react';
 
 import AppNavbar from '@/components/app-navbar';
 import ModNavbar from '@/components/mod-navbar';
@@ -56,9 +56,7 @@ export default function PublicLayout({
     <div className="public-docs flex min-h-screen flex-col bg-background">
       {modName && modSlug ? (
         <ModNavbar
-          modName={modName}
           modSlug={modSlug}
-          modIconUrl={modIconUrl}
         />
       ) : (
         <AppNavbar brandHref="/" publicMode />
@@ -76,11 +74,6 @@ export default function PublicLayout({
                 </div>
               )}
               <div className="min-w-0">
-                <div className="mb-3 flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                  <a href="/mods" className="hover:text-foreground">Mod wikis</a>
-                  <ChevronRight className="h-3.5 w-3.5" />
-                  <span>Documentation</span>
-                </div>
                 <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{modName}</h1>
                 {modDescription && <p className="mt-3 max-w-2xl text-base leading-7 text-muted-foreground">{modDescription}</p>}
                 {ownerName && <p className="mt-4 text-sm text-muted-foreground">Maintained by <span className="font-medium text-foreground">{ownerName}</span></p>}

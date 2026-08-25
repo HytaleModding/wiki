@@ -1,6 +1,6 @@
 import { SiGithub as Github } from '@icons-pack/react-simple-icons';
 import { Link, usePage } from '@inertiajs/react';
-import { Menu, Settings, ExternalLink, BookOpenIcon, PanelLeft } from 'lucide-react';
+import { Menu, Settings, ExternalLink } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,34 +21,11 @@ import type { SharedData } from '@/types';
 import { UserMenuContent } from './user-menu-content';
 
 interface ModNavbarProps {
-  modName: string;
   modSlug: string;
-  modIconUrl?: string;
-}
-
-interface ModIconProps {
-  size?: string;
-  modName: string;
-  modIconUrl?: string;
-}
-
-function ModIcon({ size = 'h-8 w-8', modName, modIconUrl }: ModIconProps) {
-  if (modIconUrl) {
-    return (
-      <img
-        src={modIconUrl}
-        alt={`${modName} icon`}
-        className={cn(size, 'rounded-lg object-cover')}
-      />
-    );
-  }
-  return <BookOpenIcon className={cn(size, 'text-primary')} />;
 }
 
 export default function ModNavbar({
-  modName,
   modSlug,
-  modIconUrl,
 }: ModNavbarProps) {
   const { isCurrentUrl } = useCurrentUrl();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -64,27 +41,9 @@ export default function ModNavbar({
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-border/80 bg-background/85 backdrop-blur-xl">
       <div className="container mx-auto flex h-16 max-w-[90rem] items-center justify-between px-4 sm:px-6 lg:px-8">
-        <div className="flex min-w-0 items-center gap-3">
-          <Link
-            href="/mods"
-            className="hidden text-muted-foreground transition-colors hover:text-foreground sm:flex"
-            aria-label="Browse mod wikis"
-          >
-            <PanelLeft className="h-4 w-4" />
-          </Link>
-          <div className="hidden h-5 w-px bg-border sm:block" />
-          <Link
-            href={`/mod/${modSlug}`}
-            className="flex min-w-0 items-center gap-3 transition-opacity hover:opacity-80"
-          >
-            <ModIcon
-              size="h-8 w-8"
-              modName={modName}
-              modIconUrl={modIconUrl}
-            />
-            <span className="truncate text-base font-semibold tracking-tight text-foreground sm:text-lg">
-              {modName}
-            </span>
+        <div className="flex min-w-0 items-center">
+          <Link href={`/mod/${modSlug}`} className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+            Documentation
           </Link>
         </div>
 
@@ -124,16 +83,7 @@ export default function ModNavbar({
             <SheetContent side="right" className="w-80">
               <SheetHeader>
                 <SheetTitle className="text-left">
-                  <div className="flex items-center space-x-3">
-                    <ModIcon
-                      size="h-8 w-8"
-                      modName={modName}
-                      modIconUrl={modIconUrl}
-                    />
-                    <span className="bg-clip-text text-lg font-bold text-primary">
-                      {modName}
-                    </span>
-                  </div>
+                  Documentation
                 </SheetTitle>
               </SheetHeader>
               <div className="mt-6 flex flex-col space-y-6">
