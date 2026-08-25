@@ -43,6 +43,35 @@ class GitHubRepositoryService
         return array_values($repositories);
     }
 
+    /** @return array{id:int,full_name:string,html_url:string,private:bool,default_branch:string} */
+    public function repositoryForSelection(User $user, int $repositoryId, ?string $repositoryUrl = null): array
+    {
+        $repository = collect($this->repositoriesFor($user))->firstWhere('id', $repositoryId);
+        if ($repository) {
+            return $repository;
+        }
+
+        if (blank($repositoryUrl)) {
+            throw new RuntimeException('That repository is no longer available to your GitHub App connection.');
+        }
+
+        [$owner, $repo] = $this->parseRepositoryUrl($repositoryUrl);
+        $installationToken = app(GitHubAppTokenService::class)->tokenForRepository($owner, $repo);
+        $response = $this->client($installationToken)->get("https://api.github.com/repos/{$owner}/{$repo}");
+
+        if (! $response->successful() || ! is_int($response->json('id'))) {
+            throw new RuntimeException('That repository is no longer available to your GitHub App connection.');
+        }
+
+        return [
+            'id' => (int) $response->json('id'),
+            'full_name' => (string) $response->json('full_name'),
+            'html_url' => (string) $response->json('html_url'),
+            'private' => (bool) $response->json('private', false),
+            'default_branch' => (string) $response->json('default_branch', 'main'),
+        ];
+    }
+
     /** @return array<int, array<string, mixed>> */
     private function allInstallations(string $token): array
     {
@@ -121,5 +150,17 @@ class GitHubRepositoryService
             'User-Agent' => 'wiki-mod-sync',
             'X-GitHub-Api-Version' => '2022-11-28',
         ]);
+    }
+
+    /** @return array{0:string,1:string} */
+    private function parseRepositoryUrl(string $repositoryUrl): array
+    {
+        $trimmed = trim($repositoryUrl);
+
+        if (! preg_match('~github\.com[:/](?<owner>[A-Za-z0-9_.-]+)/(?<repo>[A-Za-z0-9_.-]+?)(?:\.git)?/?$~', $trimmed, $matches)) {
+            throw new RuntimeException('Invalid GitHub repository URL.');
+        }
+
+        return [$matches['owner'], $matches['repo']];
     }
 }

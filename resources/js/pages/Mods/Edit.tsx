@@ -129,6 +129,9 @@ export default function EditMod({ mod, githubConnected }: Props) {
   const selectGithubRepository = async (repositoryId: string) => {
     setIsSelectingRepository(true);
     setRepositoriesError(null);
+    const selectedRepository = repositories.find(
+      (repository) => repository.id === Number(repositoryId),
+    );
 
     try {
       const response = await fetch(
@@ -143,7 +146,10 @@ export default function EditMod({ mod, githubConnected }: Props) {
                 .querySelector('meta[name="csrf-token"]')
                 ?.getAttribute('content') || '',
           },
-          body: JSON.stringify({ repository_id: Number(repositoryId) }),
+          body: JSON.stringify({
+            repository_id: Number(repositoryId),
+            repository_url: selectedRepository?.html_url || null,
+          }),
         },
       );
       const payload = (await response.json()) as {

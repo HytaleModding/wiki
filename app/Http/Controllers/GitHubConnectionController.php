@@ -103,16 +103,19 @@ class GitHubConnectionController extends Controller
     public function selectRepository(Request $request, Mod $mod, GitHubRepositoryService $repositories)
     {
         $this->authorizeSettings($mod);
-        $validated = $request->validate(['repository_id' => ['required', 'integer']]);
+        $validated = $request->validate([
+            'repository_id' => ['required', 'integer'],
+            'repository_url' => ['nullable', 'string', 'url'],
+        ]);
 
         try {
-            $repository = collect($repositories->repositoriesFor(Auth::user()))->firstWhere('id', (int) $validated['repository_id']);
+            $repository = $repositories->repositoryForSelection(
+                Auth::user(),
+                (int) $validated['repository_id'],
+                $validated['repository_url'] ?? null,
+            );
         } catch (RuntimeException $exception) {
             return response()->json(['message' => $exception->getMessage()], 422);
-        }
-
-        if (! $repository) {
-            return response()->json(['message' => 'That repository is no longer available to your GitHub App connection.'], 422);
         }
 
         $mod->update(['github_repository_url' => $repository['html_url']]);
