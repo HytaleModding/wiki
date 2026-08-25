@@ -22,7 +22,13 @@ class ProvisionCustomDomain implements ShouldQueue
     {
         $mod = Mod::with('owner')->find($this->modId);
 
-        if (! $mod || blank($mod->custom_domain) || $mod->domain_status === 'ready') {
+        if (! $mod || blank($mod->custom_domain)) {
+            return;
+        }
+
+        if ($mod->domain_status === 'ready') {
+            $this->sendReadyEmail($mod);
+
             return;
         }
 
@@ -51,6 +57,17 @@ class ProvisionCustomDomain implements ShouldQueue
             'domain_ready_at' => now(),
         ]);
 
+        $this->sendReadyEmail($mod);
+    }
+
+    private function sendReadyEmail(Mod $mod): void
+    {
+        if ($mod->domain_ready_email_sent_at) {
+            return;
+        }
+
         Mail::to($mod->owner->email)->send(new CustomDomainReady($mod));
+
+        $mod->update(['domain_ready_email_sent_at' => now()]);
     }
 }

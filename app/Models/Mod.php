@@ -31,6 +31,7 @@ class Mod extends Model
         'domain_status',
         'domain_checked_at',
         'domain_ready_at',
+        'domain_ready_email_sent_at',
     ];
 
     protected $casts = [
@@ -39,6 +40,7 @@ class Mod extends Model
         'domain_verified' => 'boolean',
         'domain_checked_at' => 'datetime',
         'domain_ready_at' => 'datetime',
+        'domain_ready_email_sent_at' => 'datetime',
     ];
 
     protected function customCss(): Attribute

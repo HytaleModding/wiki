@@ -16,7 +16,13 @@ class ProvisionCustomDomains extends Command
     {
         Mod::query()
             ->whereNotNull('custom_domain')
-            ->whereIn('domain_status', ['pending_dns', 'provisioning'])
+            ->where(function ($query) {
+                $query->whereIn('domain_status', ['pending_dns', 'provisioning'])
+                    ->orWhere(function ($query) {
+                        $query->where('domain_status', 'ready')
+                            ->whereNull('domain_ready_email_sent_at');
+                    });
+            })
             ->pluck('id')
             ->each(fn (string $id) => ProvisionCustomDomain::dispatch($id));
 
