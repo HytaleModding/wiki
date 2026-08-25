@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Mail\CollaboratorInvitation;
+use App\Jobs\ProvisionCustomDomain;
 use App\Models\Mod;
 use App\Models\ModInvitation;
 use App\Models\Page;
 use App\Models\User;
 use App\Support\CustomCssSanitizer;
+use App\Services\CustomDomainService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -163,6 +165,7 @@ class ModController extends Controller
         return Inertia::render('Mods/Edit', [
             'mod' => $mod,
             'githubConnected' => $user->githubConnection()->exists(),
+            'customDomainTarget' => config('custom-domains.target'),
         ]);
     }
 
@@ -213,6 +216,9 @@ class ModController extends Controller
             $validated['domain_verification_token'] = $validated['custom_domain']
                 ? 'wiki-verify='.Str::random(32)
                 : null;
+            $validated['domain_status'] = $validated['custom_domain'] ? 'pending_dns' : 'not_configured';
+            $validated['domain_checked_at'] = null;
+            $validated['domain_ready_at'] = null;
         }
 
         if ($validated['name'] !== $mod->name) {
@@ -245,6 +251,10 @@ class ModController extends Controller
         }
 
         $mod->update($validated);
+
+        if ($mod->wasChanged('custom_domain') && $mod->custom_domain) {
+            ProvisionCustomDomain::dispatch($mod->id)->afterCommit();
+        }
 
         return redirect()->route('mods.show', $mod->slug)
             ->with('success', 'Mod updated successfully!');
@@ -531,18 +541,16 @@ class ModController extends Controller
             return str_contains($value, (string) $mod->domain_verification_token);
         });
 
-        $appHost = (string) parse_url((string) config('app.url'), PHP_URL_HOST);
-        $cnameRecords = dns_get_record($mod->custom_domain, DNS_CNAME) ?: [];
-        $cnameVerified = collect($cnameRecords)->contains(function (array $record) use ($appHost) {
-            $target = rtrim(strtolower((string) ($record['target'] ?? '')), '.');
-
-            return $target !== '' && $appHost !== '' && $target === strtolower($appHost);
-        });
+        $cnameVerified = app(CustomDomainService::class)->pointsToApplication($mod->custom_domain);
 
         if ($txtVerified || $cnameVerified) {
             $mod->update([
                 'domain_verified' => true,
+                'domain_status' => 'provisioning',
+                'domain_checked_at' => now(),
             ]);
+
+            ProvisionCustomDomain::dispatch($mod->id)->afterCommit();
 
             return $request->expectsJson()
                 ? response()->json(['verified' => true, 'message' => 'Domain verified successfully.'])
@@ -551,6 +559,8 @@ class ModController extends Controller
 
         $mod->update([
             'domain_verified' => false,
+            'domain_status' => 'pending_dns',
+            'domain_checked_at' => now(),
         ]);
 
         $message = 'Domain verification failed. Add the TXT token or CNAME record and try again.';
@@ -558,6 +568,29 @@ class ModController extends Controller
         return $request->expectsJson()
             ? response()->json(['verified' => false, 'message' => $message], 422)
             : back()->withErrors(['custom_domain' => $message]);
+    }
+
+    /**
+     * Caddy's on-demand TLS "ask" endpoint. It intentionally returns no
+     * domain details: a successful status is the only authorization signal.
+     */
+    public function allowCertificate(Request $request, CustomDomainService $domains)
+    {
+        $domain = strtolower(trim((string) $request->query('domain')));
+
+        if ($domain === '') {
+            abort(400);
+        }
+
+        $allowed = Mod::query()
+            ->where('custom_domain', $domain)
+            ->where('domain_verified', true)
+            ->whereIn('domain_status', ['provisioning', 'ready'])
+            ->exists();
+
+        abort_unless($allowed && $domains->pointsToApplication($domain), 403);
+
+        return response()->noContent();
     }
 
     private function publicShowForSlug(Request $request, string $slug)

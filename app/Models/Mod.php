@@ -28,12 +28,17 @@ class Mod extends Model
         'custom_domain',
         'domain_verified',
         'domain_verification_token',
+        'domain_status',
+        'domain_checked_at',
+        'domain_ready_at',
     ];
 
     protected $casts = [
         'id' => 'string',
         'external_access' => 'boolean',
         'domain_verified' => 'boolean',
+        'domain_checked_at' => 'datetime',
+        'domain_ready_at' => 'datetime',
     ];
 
     protected function customCss(): Attribute

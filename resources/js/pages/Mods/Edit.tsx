@@ -61,12 +61,14 @@ interface Mod {
   custom_css?: string | null;
   custom_domain?: string | null;
   domain_verified: boolean;
+  domain_status?: 'not_configured' | 'pending_dns' | 'provisioning' | 'ready';
   domain_verification_token?: string | null;
 }
 
 interface Props {
   mod: Mod;
   githubConnected: boolean;
+  customDomainTarget: string;
 }
 
 interface GitHubRepository {
@@ -77,12 +79,7 @@ interface GitHubRepository {
   default_branch: string;
 }
 
-export default function EditMod({ mod, githubConnected }: Props) {
-  // Custom-domain settings are temporarily hidden from this page.
-  // const appHost =
-  //   typeof window !== 'undefined' ? window.location.hostname : 'your app host';
-  // const savedCustomDomain = mod.custom_domain?.trim() || '';
-  // const hasSavedCustomDomain = savedCustomDomain.length > 0;
+export default function EditMod({ mod, githubConnected, customDomainTarget }: Props) {
   const [iconPreview, setIconPreview] = useState<string | null>(
     mod.icon_url || null,
   );
@@ -96,7 +93,6 @@ export default function EditMod({ mod, githubConnected }: Props) {
   );
   const [isLoadingRepositories, setIsLoadingRepositories] = useState(false);
   const [isSelectingRepository, setIsSelectingRepository] = useState(false);
-  // const [verifyingDomain, setVerifyingDomain] = useState(false);
 
   const { data, setData, patch, processing, errors } = useForm({
     name: mod.name,
@@ -269,35 +265,6 @@ export default function EditMod({ mod, githubConnected }: Props) {
     });
   };
 
-  // const verifyDomain = async () => {
-  //   setVerifyingDomain(true);
-  //
-  //   try {
-  //     const response = await fetch(`/dashboard/mods/${mod.slug}/domain/verify`, {
-  //       method: 'POST',
-  //       headers: {
-  //         Accept: 'application/json',
-  //         'X-CSRF-TOKEN':
-  //           document
-  //             .querySelector('meta[name="csrf-token"]')
-  //             ?.getAttribute('content') || '',
-  //       },
-  //     });
-  //
-  //     if (response.ok) {
-  //       window.location.reload();
-  //       return;
-  //     }
-  //
-  //     const payload = (await response.json().catch(() => null)) as
-  //       | { message?: string }
-  //       | null;
-  //     alert(payload?.message || 'Domain verification failed.');
-  //   } finally {
-  //     setVerifyingDomain(false);
-  //   }
-  // };
-
   return (
     <AppLayout>
       <Head title={`Edit ${mod.name}`} />
@@ -374,6 +341,7 @@ export default function EditMod({ mod, githubConnected }: Props) {
               <TabsList className="mb-6">
                 <TabsTrigger value="general">General</TabsTrigger>
                 <TabsTrigger value="github-sync">GitHub Sync</TabsTrigger>
+                <TabsTrigger value="custom-domain">Custom Domain</TabsTrigger>
                 <TabsTrigger value="custom-css">Custom CSS</TabsTrigger>
               </TabsList>
 
@@ -524,6 +492,41 @@ export default function EditMod({ mod, githubConnected }: Props) {
                         </p>
                       )}
                     </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="custom-domain">
+                <Card className="bg-transparent">
+                  <CardHeader className="border-b pb-6">
+                    <CardTitle>Custom Domain</CardTitle>
+                    <CardDescription>
+                      Connect a domain you own. HTTPS is issued automatically at no extra cost.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <Label htmlFor="custom_domain">Domain</Label>
+                      <Input
+                        id="custom_domain"
+                        value={data.custom_domain}
+                        onChange={(e) => setData('custom_domain', e.target.value.toLowerCase())}
+                        placeholder="docs.example.com"
+                        className={cn(errors.custom_domain ? 'border-destructive' : '')}
+                      />
+                      {errors.custom_domain && <p className="mt-1 text-sm text-destructive">{errors.custom_domain}</p>}
+                    </div>
+                    <div className="rounded-md border border-border/70 bg-muted/10 p-4 text-sm">
+                      <p className="font-medium">DNS setup</p>
+                      <p className="mt-1 text-muted-foreground">
+                        Create a CNAME record for this domain pointing to <code>{customDomainTarget}</code>, then save these settings. We check it automatically every five minutes and email the owner when HTTPS is ready.
+                      </p>
+                    </div>
+                    {mod.custom_domain && (
+                      <p className="text-sm text-muted-foreground">
+                        Status: <span className="font-medium text-foreground">{mod.domain_status === 'ready' ? 'Ready' : mod.domain_status === 'provisioning' ? 'Issuing HTTPS certificate' : 'Waiting for CNAME record'}</span>
+                      </p>
+                    )}
                   </CardContent>
                 </Card>
               </TabsContent>
