@@ -9,6 +9,9 @@ RUN composer dump-autoload --no-dev --classmap-authoritative
 
 FROM oven/bun:1.3.10 AS frontend
 WORKDIR /app
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends php-cli php-intl php-mbstring php-xml \
+    && rm -rf /var/lib/apt/lists/*
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
 COPY --from=vendor /app /app
@@ -17,8 +20,6 @@ RUN bun run build
 FROM dunglas/frankenphp:php8.3-bookworm AS production
 WORKDIR /app
 
-# Only production runtime extensions are installed. Build tooling stays in the
-# previous stages, keeping the final image small and reducing attack surface.
 RUN install-php-extensions pdo_mysql intl opcache zip \
     && rm -rf /var/lib/apt/lists/*
 
