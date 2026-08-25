@@ -164,6 +164,7 @@ class ModController extends Controller
 
         return Inertia::render('Mods/Edit', [
             'mod' => $mod,
+            'githubConnected' => $user->githubConnection()->exists(),
         ]);
     }
 

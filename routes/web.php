@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\FileController;
+use App\Http\Controllers\GitHubWebhookController;
+use App\Http\Controllers\GitHubConnectionController;
 use App\Http\Controllers\ModController;
 use App\Http\Controllers\PageController;
 use App\Http\Middleware\ResolveModByDomain;
@@ -8,6 +10,7 @@ use App\Services\PageViewService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
 
@@ -24,6 +27,10 @@ Route::get('/', function (Request $request) {
         'canRegister' => Features::enabled(Features::registration()),
     ]);
 })->name('home');
+
+Route::post('/webhooks/github', GitHubWebhookController::class)
+    ->withoutMiddleware(VerifyCsrfToken::class)
+    ->name('webhooks.github');
 
 Route::get('/privacy', function () {
     return Inertia::render('Legal/Privacy');
@@ -103,6 +110,10 @@ Route::group(['prefix' => '/dashboard', 'middleware' => ['auth', 'verified']], f
     Route::get('/mods/{mod:slug}/css-editor', [ModController::class, 'cssEditor'])->name('mods.css-editor');
     Route::patch('/mods/{mod:slug}/css', [ModController::class, 'updateCss'])->name('mods.css.update');
     Route::post('/mods/{mod:slug}/github-sync', [ModController::class, 'runGithubSync'])->name('mods.github-sync.run');
+    Route::get('/mods/{mod:slug}/github/connect', [GitHubConnectionController::class, 'redirect'])->name('mods.github.connect');
+    Route::get('/api/github/callback', [GitHubConnectionController::class, 'callback'])->name('github.callback');
+    Route::get('/mods/{mod:slug}/github/repositories', [GitHubConnectionController::class, 'repositories'])->name('mods.github.repositories');
+    Route::post('/mods/{mod:slug}/github/repository', [GitHubConnectionController::class, 'selectRepository'])->name('mods.github.repository.select');
     Route::post('/mods/{mod:slug}/domain/verify', [ModController::class, 'verifyDomain'])->name('mods.domain.verify');
 
     Route::get('/mods/{mod:slug}/collaborators', [ModController::class, 'manageCollaborators'])->name('mods.collaborators.index');

@@ -69,6 +69,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Mod::class, 'owner_id');
     }
 
+    public function githubConnection()
+    {
+        return $this->hasOne(GitHubConnection::class);
+    }
+
     /**
      * Get all mods this user has access to (including collaborations).
      */

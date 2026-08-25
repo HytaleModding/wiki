@@ -6,7 +6,7 @@ import {
   PencilIcon,
   XIcon,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -66,9 +66,18 @@ interface Mod {
 
 interface Props {
   mod: Mod;
+  githubConnected: boolean;
 }
 
-export default function EditMod({ mod }: Props) {
+interface GitHubRepository {
+  id: number;
+  full_name: string;
+  html_url: string;
+  private: boolean;
+  default_branch: string;
+}
+
+export default function EditMod({ mod, githubConnected }: Props) {
   // Custom-domain settings are temporarily hidden from this page.
   // const appHost =
   //   typeof window !== 'undefined' ? window.location.hostname : 'your app host';
@@ -82,6 +91,12 @@ export default function EditMod({ mod }: Props) {
     type: 'success' | 'error';
     message: string;
   } | null>(null);
+  const [repositories, setRepositories] = useState<GitHubRepository[]>([]);
+  const [repositoriesError, setRepositoriesError] = useState<string | null>(
+    null,
+  );
+  const [isLoadingRepositories, setIsLoadingRepositories] = useState(false);
+  const [isSelectingRepository, setIsSelectingRepository] = useState(false);
   // const [verifyingDomain, setVerifyingDomain] = useState(false);
 
   const { data, setData, patch, processing, errors } = useForm({
@@ -96,6 +111,67 @@ export default function EditMod({ mod }: Props) {
     custom_domain: mod.custom_domain || '',
     icon: null as File | null,
   });
+
+  useEffect(() => {
+    if (!githubConnected) return;
+
+    setIsLoadingRepositories(true);
+    fetch(`/dashboard/mods/${mod.slug}/github/repositories`, {
+      headers: { Accept: 'application/json' },
+    })
+      .then(async (response) => {
+        const payload = (await response.json()) as {
+          repositories?: GitHubRepository[];
+          message?: string;
+        };
+        if (!response.ok) throw new Error(payload.message || 'Unable to load repositories.');
+        setRepositories(payload.repositories || []);
+      })
+      .catch((error: Error) => setRepositoriesError(error.message))
+      .finally(() => setIsLoadingRepositories(false));
+  }, [githubConnected, mod.slug]);
+
+  const selectGithubRepository = async (repositoryId: string) => {
+    setIsSelectingRepository(true);
+    setRepositoriesError(null);
+
+    try {
+      const response = await fetch(
+        `/dashboard/mods/${mod.slug}/github/repository`,
+        {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN':
+              document
+                .querySelector('meta[name="csrf-token"]')
+                ?.getAttribute('content') || '',
+          },
+          body: JSON.stringify({ repository_id: Number(repositoryId) }),
+        },
+      );
+      const payload = (await response.json()) as {
+        repository?: GitHubRepository;
+        message?: string;
+      };
+      if (!response.ok || !payload.repository) {
+        throw new Error(payload.message || 'Unable to select the repository.');
+      }
+
+      setData('github_repository_url', payload.repository.html_url);
+      setSyncFeedback({
+        type: 'success',
+        message: `${payload.repository.full_name} is now connected.`,
+      });
+    } catch (error) {
+      setRepositoriesError(
+        error instanceof Error ? error.message : 'Unable to select the repository.',
+      );
+    } finally {
+      setIsSelectingRepository(false);
+    }
+  };
 
   const handleIconChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -495,28 +571,58 @@ export default function EditMod({ mod }: Props) {
                   </CardHeader>
                   <CardContent className="space-y-6">
                     <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="github_repository_url">
-                          GitHub Repository URL
-                        </Label>
-                        <Input
-                          id="github_repository_url"
-                          type="url"
-                          value={data.github_repository_url}
-                          onChange={(e) =>
-                            setData('github_repository_url', e.target.value)
-                          }
-                          placeholder="https://github.com/owner/repository"
-                          className={cn(
-                            errors.github_repository_url
-                              ? 'border-destructive'
-                              : '',
-                          )}
-                        />
-                        {errors.github_repository_url && (
-                          <p className="mt-1 text-sm text-destructive">
-                            {errors.github_repository_url}
-                          </p>
+                      <div className="rounded-md border border-border/70 bg-muted/10 p-4">
+                        <Label>GitHub account</Label>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          {githubConnected
+                            ? 'Choose from repositories your connected GitHub App can access.'
+                            : 'Connect GitHub to choose a repository you can access.'}
+                        </p>
+                        {!githubConnected ? (
+                          <Button asChild className="mt-3" type="button">
+                            <a href={`/dashboard/mods/${mod.slug}/github/connect`}>
+                              Connect GitHub
+                            </a>
+                          </Button>
+                        ) : (
+                          <div className="mt-3 space-y-2">
+                            <Select
+                              value={
+                                repositories.find(
+                                  (repository) =>
+                                    repository.html_url === data.github_repository_url,
+                                )?.id.toString() || ''
+                              }
+                              onValueChange={selectGithubRepository}
+                              disabled={isLoadingRepositories || isSelectingRepository}
+                            >
+                              <SelectTrigger>
+                                <SelectValue
+                                  placeholder={
+                                    isLoadingRepositories
+                                      ? 'Loading repositories...'
+                                      : 'Select a repository'
+                                  }
+                                />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {repositories.map((repository) => (
+                                  <SelectItem
+                                    key={repository.id}
+                                    value={repository.id.toString()}
+                                  >
+                                    {repository.full_name}
+                                    {repository.private ? ' (private)' : ''}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            {repositoriesError && (
+                              <p className="text-sm text-destructive">
+                                {repositoriesError}
+                              </p>
+                            )}
+                          </div>
                         )}
                       </div>
 
