@@ -180,6 +180,21 @@ class ModController extends Controller
             abort(403);
         }
 
+        // Settings are edited in independent tabs. Preserve existing values
+        // when a client submits only the setting it changed, rather than
+        // rejecting the request because another tab's required field was not
+        // included in its payload.
+        $request->mergeIfMissing([
+            'name' => $mod->name,
+            'description' => $mod->description,
+            'visibility' => $mod->visibility,
+            'storage_driver' => $mod->storage_driver,
+            'external_access' => $mod->external_access,
+            'github_repository_url' => $mod->github_repository_url,
+            'github_repository_path' => $mod->github_repository_path,
+            'custom_css' => $mod->custom_css,
+        ]);
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -249,8 +264,6 @@ class ModController extends Controller
 
             $iconFile->storeAs('mods/icons', $iconFilename, 'public');
             $validated['icon_url'] = Storage::disk('public')->url($iconPath);
-        } else {
-            $validated['icon_url'] = null;
         }
 
         $mod->update($validated);

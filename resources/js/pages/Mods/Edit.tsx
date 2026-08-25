@@ -299,6 +299,7 @@ export default function EditMod({ mod, githubConnected, customDomainTarget }: Pr
                     </Label>
                     <Input
                       id="name"
+                      name="name"
                       type="text"
                       value={data.name}
                       onChange={(e) => setData('name', e.target.value)}
@@ -323,6 +324,7 @@ export default function EditMod({ mod, githubConnected, customDomainTarget }: Pr
                   <div className="relative">
                     <Textarea
                       id="description"
+                      name="description"
                       value={data.description}
                       onChange={(e) => setData('description', e.target.value)}
                       placeholder="A brief description of what your mod does..."
