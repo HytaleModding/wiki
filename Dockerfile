@@ -33,7 +33,7 @@ COPY deploy/frankenphp/Caddyfile /etc/frankenphp/Caddyfile
 COPY deploy/docker-entrypoint.sh /usr/local/bin/wiki-entrypoint
 
 RUN chmod +x /usr/local/bin/wiki-entrypoint \
-    && mkdir -p storage/framework/{cache,sessions,testing,views} storage/logs bootstrap/cache \
+    && mkdir -p storage/framework/cache storage/framework/sessions storage/framework/testing storage/framework/views storage/logs bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache
 
 ENV APP_ENV=production \
