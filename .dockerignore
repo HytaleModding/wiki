@@ -12,5 +12,6 @@ storage/logs
 storage/framework
 storage/app/private
 storage/app/public
+bootstrap/cache/*.php
 .phpunit.cache
 phpunit.result.cache

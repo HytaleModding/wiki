@@ -5,7 +5,9 @@ WORKDIR /app
 COPY composer.json composer.lock ./
 RUN composer install --no-dev --no-interaction --prefer-dist --no-scripts
 COPY . ./
-RUN composer dump-autoload --no-dev --classmap-authoritative --no-scripts \
+RUN mkdir -p bootstrap/cache storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs \
+    && rm -f bootstrap/cache/*.php \
+    && composer dump-autoload --no-dev --classmap-authoritative --no-scripts \
     && php artisan package:discover --ansi
 
 FROM oven/bun:1.3.10 AS frontend
