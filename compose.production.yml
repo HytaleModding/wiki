@@ -1,0 +1,113 @@
+services:
+  web:
+    build:
+      context: .
+      target: production
+    env_file: .env.production
+    command: ["frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile"]
+    ports:
+      # Bind only the dedicated Caddy IP. This prevents any conflict with a
+      # separate Dokploy/Traefik listener on the server's other public IP.
+      - "${PUBLIC_IP:?Set PUBLIC_IP in .env.production}:80:8080"
+      - "${PUBLIC_IP:?Set PUBLIC_IP in .env.production}:443:8443"
+    extra_hosts:
+      # Lets an optional Caddy route proxy a legacy host service such as
+      # Pterodactyl after its NGINX listener is moved to 127.0.0.1:8081.
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - app-storage:/app/storage
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+  queue:
+    build:
+      context: .
+      target: production
+    env_file: .env.production
+    entrypoint: ["php"]
+    command: ["artisan", "queue:work", "--sleep=3", "--tries=3", "--max-time=3600"]
+    volumes:
+      - app-storage:/app/storage
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+  scheduler:
+    build:
+      context: .
+      target: production
+    env_file: .env.production
+    entrypoint: ["php"]
+    command: ["artisan", "schedule:work"]
+    volumes:
+      - app-storage:/app/storage
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+  database:
+    image: mariadb:11.8
+    environment:
+      MARIADB_DATABASE: ${DB_DATABASE:-wiki}
+      MARIADB_USER: ${DB_USERNAME:-wiki}
+      MARIADB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env.production}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Set DB_ROOT_PASSWORD in .env.production}
+    volumes:
+      - database-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+  redis:
+    image: redis:7.4-alpine
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env.production}"]
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli --no-auth-warning -a \"$$REDIS_PASSWORD\" ping | grep PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+volumes:
+  app-storage:
+  caddy-data:
+  caddy-config:
+  database-data:
+  redis-data:

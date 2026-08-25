@@ -58,6 +58,46 @@
   --markdown-table: var(--color-muted-foreground);
 }
 
+/* Public documentation adopts a restrained indigo palette, while dashboard
+   surfaces remain neutral and compatible with per-mod custom CSS. */
+.public-docs {
+  --primary: oklch(0.52 0.2 265);
+  --primary-foreground: oklch(0.985 0 0);
+  --ring: oklch(0.62 0.17 265);
+  --accent: oklch(0.96 0.025 265);
+  --accent-foreground: oklch(0.32 0.12 265);
+  --sidebar-primary: oklch(0.52 0.2 265);
+}
+
+.dark .public-docs {
+  --primary: oklch(0.72 0.16 265);
+  --primary-foreground: oklch(0.18 0.04 265);
+  --ring: oklch(0.72 0.16 265);
+  --accent: oklch(0.25 0.05 265);
+  --accent-foreground: oklch(0.88 0.07 265);
+}
+
+.public-prose {
+  --tw-prose-headings: var(--color-foreground);
+  --tw-prose-links: var(--color-primary);
+  --tw-prose-bold: var(--color-foreground);
+  --tw-prose-code: var(--color-foreground);
+  line-height: 1.8;
+}
+
+.public-prose h2 {
+  margin-top: 2.5em;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 0.55em;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.public-prose h3 {
+  font-weight: 650;
+  letter-spacing: -0.015em;
+}
+
 .prose :where(p):not(blockquote p),
 .prose li,
 .prose strong,

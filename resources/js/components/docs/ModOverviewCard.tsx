@@ -15,9 +15,9 @@ export default function ModOverviewCard({
   showAvatar = true,
 }: ModOverviewCardProps) {
   return (
-    <Card className="overflow-hidden rounded-2xl border-border/70 bg-card/90 shadow-sm backdrop-blur-sm">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg">
+    <Card className="overflow-hidden rounded-xl border-border/70 bg-card shadow-none">
+      <CardHeader className="px-4 pt-4 pb-2">
+        <CardTitle className="text-base">
           {linkTitle ? (
             <a
               href={`/mod/${mod.slug}`}
@@ -30,8 +30,8 @@ export default function ModOverviewCard({
           )}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-2 pt-0">
-        <p className="text-sm text-muted-foreground">{mod.description}</p>
+      <CardContent className="space-y-3 px-4 pb-4 pt-0">
+        <p className="text-sm leading-6 text-muted-foreground">{mod.description}</p>
         <div className="flex items-center space-x-2">
           {showAvatar && (
             <Avatar className="h-6 w-6">

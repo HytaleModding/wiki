@@ -471,6 +471,19 @@ class PageController extends Controller
     }
 
     /**
+     * Display a mod's index page using the standard public page view.
+     */
+    public function publicIndex(Mod $mod, Request $request)
+    {
+        $page = $mod->pages()
+            ->where('is_index', true)
+            ->where('published', true)
+            ->firstOrFail();
+
+        return $this->publicShow($mod, $page, $request);
+    }
+
+    /**
      * Display the specified page for public viewing.
      */
     public function publicShow(Mod $mod, Page $page, Request $request)

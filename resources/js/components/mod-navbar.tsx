@@ -1,6 +1,6 @@
 import { SiGithub as Github } from '@icons-pack/react-simple-icons';
 import { Link, usePage } from '@inertiajs/react';
-import { Menu, Settings, ExternalLink, BookOpenIcon } from 'lucide-react';
+import { Menu, Settings, ExternalLink } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,34 +21,11 @@ import type { SharedData } from '@/types';
 import { UserMenuContent } from './user-menu-content';
 
 interface ModNavbarProps {
-  modName: string;
   modSlug: string;
-  modIconUrl?: string;
-}
-
-interface ModIconProps {
-  size?: string;
-  modName: string;
-  modIconUrl?: string;
-}
-
-function ModIcon({ size = 'h-8 w-8', modName, modIconUrl }: ModIconProps) {
-  if (modIconUrl) {
-    return (
-      <img
-        src={modIconUrl}
-        alt={`${modName} icon`}
-        className={cn(size, 'rounded-lg object-cover')}
-      />
-    );
-  }
-  return <BookOpenIcon className={cn(size, 'text-primary')} />;
 }
 
 export default function ModNavbar({
-  modName,
   modSlug,
-  modIconUrl,
 }: ModNavbarProps) {
   const { isCurrentUrl } = useCurrentUrl();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -62,19 +39,9 @@ export default function ModNavbar({
   ];
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
-      <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
-        <div className="flex items-center space-x-4">
-          <Link
-            href={`/mod/${modSlug}`}
-            className="flex items-center space-x-3 transition-opacity hover:opacity-80"
-          >
-            <ModIcon size="h-8 w-8" modName={modName} modIconUrl={modIconUrl} />
-            <span className="bg-clip-text text-xl font-semibold text-primary">
-              {modName}
-            </span>
-          </Link>
-        </div>
+    <nav className="sticky top-0 z-50 w-full border-b border-border/80 bg-background/85 backdrop-blur-xl">
+      <div className="container mx-auto flex h-16 max-w-[90rem] items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div />
 
         <div className="hidden flex-1 items-center justify-end md:flex">
           <NavigationMenu>
@@ -99,7 +66,7 @@ export default function ModNavbar({
           </NavigationMenu>
         </div>
 
-        <div className="ml-8 flex items-center space-x-4">
+        <div className="ml-4 flex items-center space-x-3">
           {auth.user && <UserMenuContent />}
 
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
@@ -112,16 +79,7 @@ export default function ModNavbar({
             <SheetContent side="right" className="w-80">
               <SheetHeader>
                 <SheetTitle className="text-left">
-                  <div className="flex items-center space-x-3">
-                    <ModIcon
-                      size="h-8 w-8"
-                      modName={modName}
-                      modIconUrl={modIconUrl}
-                    />
-                    <span className="bg-clip-text text-lg font-bold text-primary">
-                      {modName}
-                    </span>
-                  </div>
+                  Documentation
                 </SheetTitle>
               </SheetHeader>
               <div className="mt-6 flex flex-col space-y-6">

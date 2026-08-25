@@ -1,0 +1,37 @@
+{
+	admin off
+	email {$CADDY_EMAIL}
+
+	on_demand_tls {
+		# The request stays inside this container; Laravel verifies that the
+		# hostname is in its allow-list and still points to our CNAME target.
+		ask http://127.0.0.1:8080/internal/caddy/allow-domain
+		interval 2m
+		burst 5
+	}
+}
+
+https://:8443 {
+	tls {
+		on_demand
+	}
+
+	root * /app/public
+	php_server
+}
+
+# Required for ACME HTTP-01 challenges. Docker maps host port 80 here.
+http://:8080 {
+	# Keep Caddy's local certificate allow-list request on HTTP; everything a
+	# visitor sends is upgraded to HTTPS. ACME challenge paths are handled by
+	# Caddy before this site handler.
+	@local_ask host 127.0.0.1 localhost
+	handle @local_ask {
+		root * /app/public
+		php_server
+	}
+
+	handle {
+		redir https://{host}{uri} permanent
+	}
+}

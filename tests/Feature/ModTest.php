@@ -214,11 +214,12 @@ class ModTest extends TestCase
             'owner_id' => $owner->id,
             'custom_css' => '.prose h1 { color: #8b5cf6; }',
         ]);
+        Page::factory()->published()->create(['mod_id' => $mod->id, 'is_index' => true]);
 
         $response = $this->get("/mod/{$mod->slug}");
         $response->assertOk();
         $response->assertInertia(fn (Assert $page) => $page
-            ->component('Public/Mod')
+            ->component('Public/Page')
             ->where('mod.custom_css', '.prose h1 { color: #8b5cf6; }')
         );
     }
@@ -230,12 +231,13 @@ class ModTest extends TestCase
             'owner_id' => $owner->id,
             'custom_css' => 'body { background-image: url(javascript:alert(1)); }',
         ]);
+        Page::factory()->published()->create(['mod_id' => $mod->id, 'is_index' => true]);
 
         $response = $this->get(route('public.mod', $mod));
 
         $response->assertOk();
         $response->assertInertia(fn (Assert $page) => $page
-            ->component('Public/Mod')
+            ->component('Public/Page')
             ->where('mod.custom_css', null)
         );
     }
@@ -268,15 +270,20 @@ class ModTest extends TestCase
             'slug' => 'deep-topic',
             'order_index' => 0,
         ]);
+        Page::factory()->published()->create([
+            'mod_id' => $mod->id,
+            'is_index' => true,
+            'order_index' => 1,
+        ]);
 
         $response = $this->get(route('public.mod', $mod));
 
         $response->assertOk();
         $response->assertInertia(fn (Assert $inertia) => $inertia
-            ->component('Public/Mod')
-            ->where('mod.root_pages.0.slug', 'guides')
-            ->where('mod.root_pages.0.children.0.slug', 'advanced')
-            ->where('mod.root_pages.0.children.0.children.0.slug', 'deep-topic')
+            ->component('Public/Page')
+            ->where('navigation.0.slug', 'guides')
+            ->where('navigation.0.children.0.slug', 'advanced')
+            ->where('navigation.0.children.0.children.0.slug', 'deep-topic')
         );
     }
 
@@ -284,12 +291,13 @@ class ModTest extends TestCase
     {
         $owner = User::factory()->create(['email' => 'owner@example.com']);
         $mod = Mod::factory()->public()->create(['owner_id' => $owner->id]);
+        Page::factory()->published()->create(['mod_id' => $mod->id, 'is_index' => true]);
 
         $response = $this->get(route('public.mod', $mod));
 
         $response->assertOk();
         $response->assertInertia(fn (Assert $page) => $page
-            ->component('Public/Mod')
+            ->component('Public/Page')
             ->missing('mod.owner.email')
         );
     }
@@ -312,6 +320,7 @@ class ModTest extends TestCase
     {
         $owner = User::factory()->create();
         $mod = Mod::factory()->private()->create(['owner_id' => $owner->id]);
+        Page::factory()->published()->create(['mod_id' => $mod->id, 'is_index' => true]);
 
         $response = $this->get("/docs/{$mod->slug}");
         $response->assertNotFound(); // Private mods are not found in public routes
@@ -321,13 +330,14 @@ class ModTest extends TestCase
     {
         $owner = User::factory()->create();
         $mod = Mod::factory()->private()->create(['owner_id' => $owner->id]);
+        Page::factory()->published()->create(['mod_id' => $mod->id, 'is_index' => true]);
         $this->actingAs($owner);
 
         $response = $this->get(route('public.mod', $mod));
 
         $response->assertOk();
         $response->assertInertia(fn (Assert $page) => $page
-            ->component('Public/Mod')
+            ->component('Public/Page')
         );
     }
 

@@ -68,25 +68,6 @@
                     : 'Explore publicly available Hytale mod wikis from the community.';
             }
 
-            if ($component === 'Public/Mod') {
-                $modName = trim((string) data_get($props, 'mod.name', ''));
-                $modDescription = $toPreview((string) data_get($props, 'mod.description', ''), 180);
-                $indexContent = $toPreview((string) data_get($props, 'mod.index_page.content', ''), 180);
-                $iconUrl = trim((string) data_get($props, 'mod.icon_url', ''));
-
-                if ($modName !== '') {
-                    $metaTitle = "{$modName} Documentation";
-                }
-
-                $metaDescription = $modDescription !== ''
-                    ? $modDescription
-                    : ($indexContent !== '' ? $indexContent : $defaultDescription);
-
-                if ($iconUrl !== '') {
-                    $metaImage = $iconUrl;
-                }
-            }
-
             if ($component === 'Public/Page') {
                 $modName = trim((string) data_get($props, 'mod.name', ''));
                 $pageTitle = trim((string) data_get($props, 'page.title', ''));

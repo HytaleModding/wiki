@@ -32,6 +32,10 @@ Route::post('/webhooks/github', GitHubWebhookController::class)
     ->withoutMiddleware(VerifyCsrfToken::class)
     ->name('webhooks.github');
 
+// Called only by the local Caddy process before it requests an on-demand TLS certificate.
+Route::get('/internal/caddy/allow-domain', [ModController::class, 'allowCertificate'])
+    ->name('internal.caddy.allow-domain');
+
 Route::get('/github/callback', [GitHubConnectionController::class, 'callback'])
     ->middleware(['auth', 'verified'])
     ->name('github.callback');

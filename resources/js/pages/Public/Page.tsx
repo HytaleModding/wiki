@@ -5,7 +5,6 @@ import PrevNextNav from '@/components/docs/PrevNextNav';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import SeoMeta from '@/components/SeoMeta';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import PublicLayout from '@/layouts/public-layout';
 import type { DocMod, DocPageNode } from '@/types/docs';
 import { formatDate } from '@/utils/date';
@@ -41,10 +40,6 @@ export default function PublicPage({ mod, page, navigation }: Props) {
   const nextPage =
     currentIndex < allPages.length - 1 ? allPages[currentIndex + 1] : null;
 
-  const breadcrumbs = [
-    { title: page.title, href: `/mod/${mod.slug}/${page.slug}` },
-  ];
-
   const metaDescription =
     getMarkdownPreview(page.content || '', 180) ||
     mod.description ||
@@ -59,8 +54,9 @@ export default function PublicPage({ mod, page, navigation }: Props) {
       modName={mod.name}
       modSlug={mod.slug}
       modIconUrl={mod.icon_url}
+      modDescription={mod.description}
+      ownerName={mod.owner.name}
       customCss={mod.custom_css}
-      breadcrumbs={breadcrumbs}
     >
       <SeoMeta
         title={`${page.title} - ${mod.name} Documentation`}
@@ -76,27 +72,25 @@ export default function PublicPage({ mod, page, navigation }: Props) {
             mod={mod}
             pages={navigation}
             activePageId={page.id}
-            linkTitle
-            overlineLabel="Overview"
             navTitle="Contents"
           />
         }
       >
-        <Card className="mb-8 overflow-hidden rounded-2xl border-border/70 bg-card/95 shadow-sm">
-          <CardHeader className="border-b border-border/60 bg-muted/10">
-            <div className="space-y-2">
-              <CardTitle className="text-2xl break-words sm:text-3xl">
+        <article className="mb-12">
+          <header className="border-b border-border/70 pb-7">
+            <div className="space-y-3">
+              <h2 className="text-3xl font-semibold tracking-tight break-words sm:text-4xl">
                 {page.title}
-              </CardTitle>
+              </h2>
               <div className="flex items-center justify-between text-sm text-muted-foreground">
                 <span>Last updated {formatDate(page.updated_at)}</span>
                 {!page.published && <Badge variant="outline">Draft</Badge>}
               </div>
             </div>
-          </CardHeader>
+          </header>
 
-          <CardContent className="p-8">
-            <div className="prose max-w-none min-w-0 [overflow-wrap:anywhere] break-words prose-gray dark:prose-invert prose-code:break-words prose-pre:max-w-full prose-pre:overflow-x-auto">
+          <div className="py-8">
+            <div className="public-prose prose max-w-none min-w-0 [overflow-wrap:anywhere] break-words prose-gray dark:prose-invert prose-code:break-words prose-pre:max-w-full prose-pre:overflow-x-auto">
               <MarkdownRenderer
                 content={
                   page.kind === 'category' && !page.content
@@ -105,28 +99,26 @@ export default function PublicPage({ mod, page, navigation }: Props) {
                 }
               />
             </div>
-          </CardContent>
+          </div>
 
           <PrevNextNav
             modSlug={mod.slug}
             prevPage={prevPage}
             nextPage={nextPage}
           />
-        </Card>
+        </article>
 
         {relatedPages.length > 0 && (
-          <Card className="overflow-hidden rounded-2xl border-border/70 bg-card/95 shadow-sm">
-            <CardHeader className="border-b border-border/60 bg-muted/10">
-              <CardTitle className="text-lg">Related Pages</CardTitle>
-            </CardHeader>
-            <CardContent className="p-6">
-              <PageLinkGrid
-                pages={relatedPages}
-                modSlug={mod.slug}
-                columns={2}
-              />
-            </CardContent>
-          </Card>
+          <section className="border-t border-border/70 pt-8">
+            <header className="mb-5">
+              <h2 className="text-base font-semibold">Related pages</h2>
+            </header>
+            <PageLinkGrid
+              pages={relatedPages}
+              modSlug={mod.slug}
+              columns={2}
+            />
+          </section>
         )}
       </DocsShell>
     </PublicLayout>

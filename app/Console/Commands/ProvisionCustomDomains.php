@@ -1,0 +1,25 @@
+<?php
+
+namespace App\Console\Commands;
+
+use App\Jobs\ProvisionCustomDomain;
+use App\Models\Mod;
+use Illuminate\Console\Command;
+
+class ProvisionCustomDomains extends Command
+{
+    protected $signature = 'custom-domains:provision';
+
+    protected $description = 'Verify pending custom-domain CNAME records and provision certificates';
+
+    public function handle(): int
+    {
+        Mod::query()
+            ->whereNotNull('custom_domain')
+            ->whereIn('domain_status', ['pending_dns', 'provisioning'])
+            ->pluck('id')
+            ->each(fn (string $id) => ProvisionCustomDomain::dispatch($id));
+
+        return self::SUCCESS;
+    }
+}

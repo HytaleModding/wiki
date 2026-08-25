@@ -21,13 +21,13 @@ export default function DocNavigationCard({
   emptyMessage = 'No pages available yet.',
 }: DocNavigationCardProps) {
   return (
-    <Card className="gap-0 overflow-hidden rounded-2xl border-border/70 bg-card/90 shadow-sm backdrop-blur-sm">
-      <CardHeader className="border-b border-border/60 pb-3">
-        <CardTitle className="text-sm font-semibold tracking-wide uppercase">
+    <Card className="gap-0 overflow-hidden rounded-xl border-border/70 bg-card shadow-none">
+      <CardHeader className="border-b border-border/60 px-4 pt-4 pb-3">
+        <CardTitle className="text-xs font-bold tracking-[0.12em] text-muted-foreground uppercase">
           {title}
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-3">
+      <CardContent className="p-2">
         {pages.length === 0 ? (
           <div className="py-8 text-center">
             <BookOpenIcon className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />

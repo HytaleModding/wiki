@@ -1,0 +1,30 @@
+{
+	# A real email is required by Let's Encrypt. Set CADDY_EMAIL in the service environment.
+	email {$CADDY_EMAIL}
+
+	on_demand_tls {
+		# Laravel only authorizes domains that have a verified CNAME in its database.
+		ask http://127.0.0.1/internal/caddy/allow-domain
+		interval 2m
+		burst 5
+	}
+}
+
+# This single catch-all listener replaces per-domain NGINX server blocks.
+:443 {
+	tls {
+		on_demand
+	}
+
+	root * /var/www/wiki/public
+	php_fastcgi unix//run/php/php8.3-fpm.sock
+	file_server
+}
+
+# Kept on HTTP so Caddy can complete HTTP-01 challenges and call the ask
+# endpoint locally. Caddy handles ACME challenge paths before PHP receives them.
+:80 {
+	root * /var/www/wiki/public
+	php_fastcgi unix//run/php/php8.3-fpm.sock
+	file_server
+}

@@ -1,14 +1,11 @@
 import type { DocMod, DocPageNode } from '@/types/docs';
 
-import DocNavigationCard from './DocNavigationCard';
-import ModOverviewCard from './ModOverviewCard';
+import DocNavigationTree from './DocNavigationTree';
 
 interface DocsSidebarProps {
   mod: DocMod;
   pages: DocPageNode[];
   activePageId?: string;
-  linkTitle?: boolean;
-  overlineLabel?: string;
   navTitle?: string;
 }
 
@@ -16,23 +13,15 @@ export default function DocsSidebar({
   mod,
   pages,
   activePageId,
-  linkTitle = false,
-  overlineLabel = 'Overview',
   navTitle = 'Documentation',
 }: DocsSidebarProps) {
   return (
-    <aside className="lg:col-span-4 lg:self-start xl:col-span-3">
-      <div className="space-y-4 lg:sticky lg:top-20 lg:max-h-[calc(100dvh-6rem)] lg:[scrollbar-width:none] lg:overflow-y-auto lg:overscroll-contain lg:pr-1 lg:[-ms-overflow-style:none] lg:[&::-webkit-scrollbar]:hidden">
-        <div className="px-1 text-xs font-semibold tracking-widest text-muted-foreground uppercase">
-          {overlineLabel}
-        </div>
-        <ModOverviewCard mod={mod} linkTitle={linkTitle} />
-        <DocNavigationCard
-          title={navTitle}
-          pages={pages}
-          modSlug={mod.slug}
-          activePageId={activePageId}
-        />
+    <aside className="lg:self-start">
+      <div className="border-border/70 lg:sticky lg:top-20 lg:max-h-[calc(100dvh-6rem)] lg:overflow-y-auto lg:overscroll-contain lg:border-r lg:pr-6">
+        <nav>
+          <p className="mb-2 px-2 text-[0.68rem] font-bold tracking-[0.16em] text-muted-foreground uppercase">{navTitle}</p>
+          {pages.length ? <DocNavigationTree pages={pages} modSlug={mod.slug} activePageId={activePageId} /> : <p className="px-2 text-sm text-muted-foreground">No pages available yet.</p>}
+        </nav>
       </div>
     </aside>
   );

@@ -24,7 +24,7 @@ export default function DocNavigationTree({
   return (
     <div
       className={
-        level === 0 ? undefined : 'ml-2 border-l border-border/60 pl-2'
+        level === 0 ? undefined : 'ml-3 border-l border-border/60 pl-2'
       }
     >
       {pages.map((page) => (
@@ -108,7 +108,7 @@ function DocNavigationItem({
           type="button"
           onClick={() => hasChildren && setCollapsed((prev) => !prev)}
           disabled={!hasChildren}
-          className="flex w-full items-start gap-2 rounded-lg border border-transparent px-3 py-2 text-left text-sm text-muted-foreground/90 transition-colors hover:bg-accent/40 disabled:cursor-default"
+          className="flex w-full items-start gap-2 rounded-md border border-transparent px-2.5 py-2 text-left text-sm text-muted-foreground/90 transition-colors hover:bg-accent/50 disabled:cursor-default"
         >
           {leadingIcon}
           <span className="min-w-0 flex-1 break-words">{page.title}</span>
@@ -123,10 +123,10 @@ function DocNavigationItem({
     <div>
       <a
         href={`/mod/${modSlug}/${page.slug}`}
-        className={`group flex items-start gap-2 rounded-lg border px-3 py-2 text-sm transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:outline-none ${
+        className={`group flex items-start gap-2 rounded-md border px-2.5 py-2 text-sm transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:outline-none ${
           isActive
-            ? 'border-primary/25 bg-accent font-medium text-accent-foreground shadow-sm'
-            : 'border-transparent text-muted-foreground hover:border-border/70 hover:bg-accent/60 hover:text-foreground'
+            ? 'border-primary/15 bg-primary/10 font-medium text-primary'
+            : 'border-transparent text-muted-foreground hover:bg-accent/60 hover:text-foreground'
         }`}
       >
         {leadingIcon}
