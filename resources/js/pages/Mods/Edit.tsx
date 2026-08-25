@@ -242,13 +242,9 @@ export default function EditMod({
           </a>
           <div className="mt-5 flex flex-col gap-3 border-b border-border pb-7 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-sm font-medium text-primary">Wiki settings</p>
               <h1 className="mt-1 text-3xl font-semibold tracking-tight">
-                {mod.name}
+                Wiki Settings
               </h1>
-              <p className="mt-1 text-muted-foreground">
-                A calm home for the details behind your documentation.
-              </p>
             </div>
             <Button asChild variant="outline">
               <a href={`/mod/${mod.slug}`} target="_blank" rel="noreferrer">
@@ -583,7 +579,7 @@ export default function EditMod({
                   <PageIntro
                     eyebrow="Publishing"
                     title="Custom domain"
-                    text="Point a domain you own at this wiki. This page has its own URL, so refreshing always keeps you here."
+                    text="Point a domain you own at this wiki."
                   />
                   <Card>
                     <CardContent className="space-y-7 p-6 sm:p-8">
@@ -600,7 +596,7 @@ export default function EditMod({
                       </div>
                       <Field
                         label="Domain"
-                        hint="Use a subdomain such as docs.example.com."
+                        hint="You can also use a subdomain such as docs.example.com."
                       >
                         <Input
                           value={domainForm.data.custom_domain}
@@ -616,7 +612,7 @@ export default function EditMod({
                           <Error>{domainForm.errors.custom_domain}</Error>
                         )}
                       </Field>
-                      <div className="rounded-xl bg-sky-500/10 p-5">
+                      <div className="rounded-xl bg-sky-700/10 p-5">
                         <h3 className="font-medium">Set up your DNS</h3>
                         <p className="mt-2 text-sm leading-6 text-muted-foreground">
                           Create a CNAME record for your domain that points to{' '}
@@ -624,7 +620,7 @@ export default function EditMod({
                             {customDomainTarget}
                           </code>
                           . We automatically check the record every five minutes
-                          and issue HTTPS when it is ready.
+                          and issue a SSL certificate when it is ready.
                         </p>
                       </div>
                       <Button
@@ -682,7 +678,6 @@ function PageIntro({
 }) {
   return (
     <div>
-      <p className="text-sm font-medium text-primary">{eyebrow}</p>
       <h2 className="mt-1 text-2xl font-semibold tracking-tight">{title}</h2>
       <p className="mt-2 max-w-2xl text-muted-foreground">{text}</p>
     </div>
