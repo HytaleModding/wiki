@@ -1,6 +1,6 @@
 import { SiGithub as Github } from '@icons-pack/react-simple-icons';
 import { Link, usePage } from '@inertiajs/react';
-import { Menu, Settings, ExternalLink, BookOpenIcon } from 'lucide-react';
+import { Menu, Settings, ExternalLink, BookOpenIcon, PanelLeft } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -62,15 +62,27 @@ export default function ModNavbar({
   ];
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
-      <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
-        <div className="flex items-center space-x-4">
+    <nav className="sticky top-0 z-50 w-full border-b border-border/80 bg-background/85 backdrop-blur-xl">
+      <div className="container mx-auto flex h-16 max-w-[90rem] items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div className="flex min-w-0 items-center gap-3">
+          <Link
+            href="/mods"
+            className="hidden text-muted-foreground transition-colors hover:text-foreground sm:flex"
+            aria-label="Browse mod wikis"
+          >
+            <PanelLeft className="h-4 w-4" />
+          </Link>
+          <div className="hidden h-5 w-px bg-border sm:block" />
           <Link
             href={`/mod/${modSlug}`}
-            className="flex items-center space-x-3 transition-opacity hover:opacity-80"
+            className="flex min-w-0 items-center gap-3 transition-opacity hover:opacity-80"
           >
-            <ModIcon size="h-8 w-8" modName={modName} modIconUrl={modIconUrl} />
-            <span className="bg-clip-text text-xl font-semibold text-primary">
+            <ModIcon
+              size="h-8 w-8"
+              modName={modName}
+              modIconUrl={modIconUrl}
+            />
+            <span className="truncate text-base font-semibold tracking-tight text-foreground sm:text-lg">
               {modName}
             </span>
           </Link>
@@ -99,7 +111,7 @@ export default function ModNavbar({
           </NavigationMenu>
         </div>
 
-        <div className="ml-8 flex items-center space-x-4">
+        <div className="ml-4 flex items-center space-x-3">
           {auth.user && <UserMenuContent />}
 
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>

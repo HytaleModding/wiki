@@ -7,9 +7,9 @@ interface DocsShellProps {
 
 export default function DocsShell({ sidebar, children }: DocsShellProps) {
   return (
-    <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8 xl:gap-10">
+    <div className="mx-auto grid max-w-[90rem] grid-cols-1 gap-8 lg:grid-cols-[17rem_minmax(0,1fr)] xl:grid-cols-[18rem_minmax(0,1fr)] xl:gap-14">
       {sidebar}
-      <main className="min-w-0 lg:col-span-8 xl:col-span-9">{children}</main>
+      <main className="min-w-0 max-w-4xl">{children}</main>
     </div>
   );
 }

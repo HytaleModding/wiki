@@ -1,6 +1,6 @@
 import { SiGithub } from '@icons-pack/react-simple-icons';
 import { Link, usePage } from '@inertiajs/react';
-import { Menu, Search, Settings, ExternalLink } from 'lucide-react';
+import { BookOpen, Menu, Search, Settings, ExternalLink } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,14 +26,19 @@ import { dashboard, login, register } from '@/routes';
 
 interface AppNavbarProps {
   brandHref?: string;
+  publicMode?: boolean;
 }
 
 export default function AppNavbar({
   brandHref = dashboard().url,
+  publicMode = false,
 }: AppNavbarProps) {
   const { isCurrentUrl } = useCurrentUrl();
   const { auth } = usePage<SharedData>().props;
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const navItems = publicMode
+    ? [{ title: 'Mod wikis', href: '/mods', icon: BookOpen }]
+    : mainNavItems;
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
@@ -53,7 +58,7 @@ export default function AppNavbar({
         <div className="hidden flex-1 items-center justify-end md:flex">
           <NavigationMenu>
             <NavigationMenuList className="flex space-x-1">
-              {mainNavItems.map((item, index) => (
+              {navItems.map((item, index) => (
                 <NavigationMenuItem key={index}>
                   <Link
                     href={item.href}
@@ -117,7 +122,7 @@ export default function AppNavbar({
                 </div>
 
                 <div className="flex flex-col space-y-3">
-                  {mainNavItems.map((item, index) => (
+                  {navItems.map((item, index) => (
                     <Link
                       key={index}
                       href={item.href}

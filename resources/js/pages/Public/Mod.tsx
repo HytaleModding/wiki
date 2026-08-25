@@ -5,7 +5,6 @@ import DocsSidebar from '@/components/docs/DocsSidebar';
 import PageLinkGrid from '@/components/docs/PageLinkGrid';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import SeoMeta from '@/components/SeoMeta';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import PublicLayout from '@/layouts/public-layout';
 import type { DocMod, DocPageNode } from '@/types/docs';
 import { formatDate } from '@/utils/date';
@@ -35,6 +34,8 @@ export default function PublicMod({ mod }: Props) {
       modName={mod.name}
       modSlug={mod.slug}
       modIconUrl={mod.icon_url}
+      modDescription={mod.description}
+      ownerName={mod.owner.name}
       customCss={mod.custom_css}
     >
       <SeoMeta
@@ -55,51 +56,44 @@ export default function PublicMod({ mod }: Props) {
         }
       >
         {mod.index_page ? (
-          <Card className="overflow-hidden rounded-2xl border-border/70 bg-card/95 shadow-sm">
-            <CardHeader className="border-b border-border/60 bg-muted/10">
-              <div className="flex items-center space-x-2">
-                <BookOpenIcon className="h-5 w-5 text-primary" />
-                <CardTitle className="text-xl">
-                  {mod.index_page.title}
-                </CardTitle>
-              </div>
-              <p className="text-sm text-muted-foreground">
+          <article>
+            <header className="border-b border-border/70 pb-7">
+              <p className="text-xs font-bold tracking-[0.16em] text-primary uppercase">
+                Getting started
+              </p>
+              <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
+                {mod.index_page.title}
+              </h2>
+              <p className="mt-3 text-sm text-muted-foreground">
                 Last updated {formatDate(mod.index_page.updated_at!)}
               </p>
-            </CardHeader>
-            <CardContent className="prose max-w-none min-w-0 p-8 [overflow-wrap:anywhere] break-words prose-gray dark:prose-invert prose-code:break-words prose-pre:max-w-full prose-pre:overflow-x-auto">
+            </header>
+            <div className="public-prose prose max-w-none min-w-0 py-8 [overflow-wrap:anywhere] break-words prose-gray dark:prose-invert prose-code:break-words prose-pre:max-w-full prose-pre:overflow-x-auto">
               <MarkdownRenderer content={mod.index_page.content || ''} />
-            </CardContent>
-          </Card>
+            </div>
+          </article>
         ) : (
-          <Card className="overflow-hidden rounded-2xl border-border/70 bg-card/95 shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-xl">Welcome to {mod.name}</CardTitle>
-              <p className="text-muted-foreground">{mod.description}</p>
-            </CardHeader>
-            <CardContent>
-              <div className="py-12 text-center">
-                <BookOpenIcon className="mx-auto mb-6 h-16 w-16 text-muted-foreground" />
-                <h3 className="mb-2 text-lg font-semibold">
-                  Explore the Documentation
-                </h3>
-                <p className="mx-auto mb-8 max-w-md text-muted-foreground">
-                  Browse through the navigation on the left to explore the
-                  available documentation pages.
-                </p>
-                {featuredPages.length > 0 && (
-                  <div className="mx-auto max-w-2xl text-left">
-                    <h4 className="mb-4 font-semibold">Featured Pages</h4>
-                    <PageLinkGrid
-                      pages={featuredPages}
-                      modSlug={mod.slug}
-                      columns={1}
-                    />
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+          <section>
+            <div className="py-12 text-center">
+              <BookOpenIcon className="mx-auto mb-6 h-16 w-16 text-muted-foreground" />
+              <h3 className="mb-2 text-lg font-semibold">
+                Explore the documentation
+              </h3>
+              <p className="mx-auto mb-8 max-w-md text-muted-foreground">
+                Browse the sections in the navigation to find what you need.
+              </p>
+              {featuredPages.length > 0 && (
+                <div className="mx-auto max-w-2xl text-left">
+                  <h4 className="mb-4 font-semibold">Start here</h4>
+                  <PageLinkGrid
+                    pages={featuredPages}
+                    modSlug={mod.slug}
+                    columns={1}
+                  />
+                </div>
+              )}
+            </div>
+          </section>
         )}
       </DocsShell>
     </PublicLayout>

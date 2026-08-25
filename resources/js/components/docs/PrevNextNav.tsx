@@ -14,7 +14,7 @@ export default function PrevNextNav({
   nextPage,
 }: PrevNextNavProps) {
   return (
-    <div className="border-t border-border/60 bg-muted/15 px-6 py-6">
+    <div className="border-t border-border/70 py-8">
       <div className="grid grid-cols-2 gap-6">
         <div className="flex justify-start">
           {prevPage && (
@@ -22,7 +22,7 @@ export default function PrevNextNav({
               variant="outline"
               size="lg"
               asChild
-              className="group h-auto rounded-xl border-border/60 bg-background/70 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md hover:shadow-primary/5"
+              className="group h-auto rounded-none border-0 bg-transparent p-0 shadow-none hover:bg-transparent"
             >
               <a
                 href={`/mod/${modSlug}/${prevPage.slug}`}
@@ -48,7 +48,7 @@ export default function PrevNextNav({
               variant="outline"
               size="lg"
               asChild
-              className="group h-auto rounded-xl border-border/60 bg-background/70 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md hover:shadow-primary/5"
+              className="group h-auto rounded-none border-0 bg-transparent p-0 shadow-none hover:bg-transparent"
             >
               <a
                 href={`/mod/${modSlug}/${nextPage.slug}`}

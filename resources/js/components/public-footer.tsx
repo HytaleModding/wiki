@@ -3,8 +3,8 @@ import HytaleModdingLogo from './hytale-modding-logo';
 
 export default function PublicFooter() {
   return (
-    <footer className="border-t bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
-      <div className="container mx-auto max-w-7xl px-4 py-6">
+    <footer className="border-t border-border/80 bg-muted/25">
+      <div className="container mx-auto max-w-[90rem] px-4 py-7 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center justify-between gap-4 text-sm text-muted-foreground sm:flex-row sm:gap-0">
           <div className="flex flex-col items-center gap-2 sm:flex-row sm:items-start">
             <p>© {new Date().getFullYear()} HytaleModding.</p>

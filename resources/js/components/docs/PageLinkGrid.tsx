@@ -1,4 +1,4 @@
-import { Card, CardContent } from '@/components/ui/card';
+import { ArrowUpRight } from 'lucide-react';
 import type { DocPageNode } from '@/types/docs';
 import { getMarkdownPreview } from '@/utils/markdown';
 
@@ -14,23 +14,19 @@ export default function PageLinkGrid({
   columns = 2,
 }: PageLinkGridProps) {
   return (
-    <div className={`grid gap-4 ${columns === 2 ? 'md:grid-cols-2' : ''}`}>
+    <div className={`grid gap-x-8 gap-y-3 ${columns === 2 ? 'md:grid-cols-2' : ''}`}>
       {pages.map((page) => (
-        <Card
+        <a
           key={page.id}
-          className="border-border/60 bg-background/70 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md hover:shadow-primary/5"
+          href={`/mod/${modSlug}/${page.slug}`}
+          className="group border-b border-border/70 py-4 transition-colors hover:border-primary"
         >
-          <CardContent className="p-4">
-            <a href={`/mod/${modSlug}/${page.slug}`} className="group block">
-              <h4 className="mb-2 font-medium break-words text-foreground group-hover:text-primary">
-                {page.title}
-              </h4>
-              <p className="text-sm break-words text-muted-foreground">
-                {getMarkdownPreview(page.content || '', 120)}
-              </p>
-            </a>
-          </CardContent>
-        </Card>
+          <div className="flex items-start justify-between gap-3">
+            <h4 className="font-medium break-words text-foreground group-hover:text-primary">{page.title}</h4>
+            <ArrowUpRight className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary" />
+          </div>
+          <p className="mt-1.5 text-sm leading-6 break-words text-muted-foreground">{getMarkdownPreview(page.content || '', 120)}</p>
+        </a>
       ))}
     </div>
   );

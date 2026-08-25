@@ -1,6 +1,6 @@
 import { BookOpenIcon } from '@heroicons/react/24/outline';
 import { Link, router } from '@inertiajs/react';
-import { Search } from 'lucide-react';
+import { ArrowUpRight, Search, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 
 import AppFooter from '@/components/app-footer';
@@ -25,7 +25,6 @@ interface Mod {
   visibility: 'public';
   owner: User;
   published_pages_count: number;
-  updated_at: string;
 }
 
 interface PaginationLink {
@@ -48,14 +47,6 @@ interface Props {
   query: string;
 }
 
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
-}
-
 export default function PublicMods({ mods, query }: Props) {
   const [search, setSearch] = useState(query ?? '');
 
@@ -75,41 +66,58 @@ export default function PublicMods({ mods, query }: Props) {
     <>
       <SeoMeta title="Browse Mods" description={description} />
 
-      <div className="flex min-h-screen flex-col bg-background text-foreground">
-        <AppNavbar brandHref="/" />
+      <div className="public-docs flex min-h-screen flex-col bg-background text-foreground">
+        <AppNavbar brandHref="/" publicMode />
 
-        <main className="mx-auto w-full max-w-7xl flex-1 px-6 py-10 md:px-8 md:py-14">
-          <div className="mb-10 space-y-4">
-            <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
-              Browse Mods
-            </h1>
-            <p className="max-w-2xl text-muted-foreground">
-              Explore publicly available Hytale mod wikis from the community.
-            </p>
-
-            <form onSubmit={handleSearch} className="flex max-w-md gap-2">
-              <div className="relative flex-1">
-                <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  type="search"
-                  placeholder="Search mods…"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="pl-9"
-                />
+        <main className="mx-auto w-full max-w-[90rem] flex-1 px-5 py-10 sm:px-8 sm:py-16">
+          <div className="relative mb-14 border-b border-border/70 pb-12 sm:pb-16">
+            <div className="absolute -top-24 right-0 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+            <div className="relative max-w-2xl space-y-5">
+              <div className="flex items-center gap-2 text-xs font-bold tracking-[0.16em] text-primary uppercase">
+                <Sparkles className="h-3.5 w-3.5" /> Community knowledge base
               </div>
-              <Button type="submit" variant="secondary">
-                Search
-              </Button>
-            </form>
+              <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
+                Find a mod wiki
+              </h1>
+              <p className="max-w-xl text-base leading-7 text-muted-foreground sm:text-lg">
+                Guides, references, and everything players need to get the most
+                out of their mods.
+              </p>
+
+              <form onSubmit={handleSearch} className="flex max-w-xl gap-2 pt-2">
+                <div className="relative flex-1">
+                  <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    type="search"
+                    placeholder="Search mods…"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="h-11 border-border/80 bg-background/80 pl-10 shadow-sm"
+                  />
+                </div>
+                <Button type="submit" className="h-11 px-5">
+                  Search
+                </Button>
+              </form>
+            </div>
           </div>
 
-          {query && (
-            <p className="mb-6 text-sm text-muted-foreground">
-              {mods.total} result{mods.total !== 1 ? 's' : ''} for &ldquo;
-              {query}&rdquo;
-            </p>
-          )}
+          <div className="mb-6 flex items-end justify-between gap-4">
+            <div>
+              <p className="text-xs font-bold tracking-[0.14em] text-primary uppercase">
+                Directory
+              </p>
+              <h2 className="mt-1 text-xl font-semibold">
+                {query ? 'Search results' : 'Explore community mods'}
+              </h2>
+            </div>
+            {query && (
+              <p className="text-sm text-muted-foreground">
+                {mods.total} result{mods.total !== 1 ? 's' : ''} for &ldquo;
+                {query}&rdquo;
+              </p>
+            )}
+          </div>
 
           {mods.data.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-24 text-center">
@@ -134,7 +142,7 @@ export default function PublicMods({ mods, query }: Props) {
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid grid-cols-1 gap-x-10 sm:grid-cols-2 xl:grid-cols-3">
               {mods.data.map((mod) => (
                 <ModCard key={mod.id} mod={mod} />
               ))}
@@ -168,9 +176,9 @@ function ModCard({ mod }: { mod: Mod }) {
   return (
     <Link
       href={`/mod/${mod.slug}`}
-      className="group flex flex-col overflow-hidden rounded-xl border border-border/60 bg-card transition-all duration-200 hover:border-primary/30 hover:shadow-md hover:shadow-primary/5"
+      className="group flex min-h-44 flex-col border-t border-border/70 py-5 transition-colors hover:border-primary"
     >
-      <div className="flex items-center gap-3 border-b border-border/50 px-4 py-3">
+      <div className="flex items-center gap-3">
         {mod.icon_url ? (
           <Avatar className="h-9 w-9 rounded-md">
             <AvatarImage
@@ -197,8 +205,8 @@ function ModCard({ mod }: { mod: Mod }) {
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col px-4 py-3">
-        <p className="line-clamp-2 flex-1 text-sm text-muted-foreground">
+      <div className="flex flex-1 flex-col pt-5">
+        <p className="line-clamp-2 flex-1 text-sm leading-6 text-muted-foreground">
           {mod.description ?? 'No description provided.'}
         </p>
 
@@ -208,7 +216,10 @@ function ModCard({ mod }: { mod: Mod }) {
             {mod.published_pages_count}{' '}
             {mod.published_pages_count === 1 ? 'page' : 'pages'}
           </span>
-          <span>{formatDate(mod.updated_at)}</span>
+          <span className="flex items-center gap-1">
+            View wiki
+            <ArrowUpRight className="h-3 w-3 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+          </span>
         </div>
       </div>
     </Link>
