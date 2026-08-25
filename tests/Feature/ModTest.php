@@ -7,7 +7,6 @@ use App\Models\Page;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Support\Facades\Http;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
@@ -383,65 +382,6 @@ class ModTest extends TestCase
 
         $this->actingAs($owner);
 
-        Http::fake([
-            'https://api.github.com/repos/acme/docs-repo' => Http::response([
-                'default_branch' => 'main',
-            ], 200),
-            'https://api.github.com/repos/acme/docs-repo/contents/docs?ref=main' => Http::response([
-                [
-                    'type' => 'file',
-                    'name' => 'README.md',
-                    'path' => 'docs/README.md',
-                    'sha' => 'sha-root-readme',
-                    'download_url' => 'https://raw.githubusercontent.com/acme/docs-repo/main/docs/README.md',
-                ],
-            ], 200),
-            'https://raw.githubusercontent.com/acme/docs-repo/main/docs/README.md' => Http::response('# Welcome', 200),
-        ]);
-
-        $response = $this->from(route('mods.edit', $mod))
-            ->post(route('mods.github-sync.run', $mod));
-
-        $response->assertRedirect(route('mods.edit', $mod));
-        $response->assertSessionHas('success');
-        $this->assertDatabaseHas('pages', [
-            'mod_id' => $mod->id,
-            'source_type' => 'github',
-            'source_path' => 'README.md',
-        ]);
-    }
-
-    public function test_manual_github_sync_requires_repository_url()
-    {
-        $owner = User::factory()->create();
-        $mod = Mod::factory()->create([
-            'owner_id' => $owner->id,
-            'github_repository_url' => null,
-        ]);
-
-        $this->actingAs($owner);
-
-        $response = $this->from(route('mods.edit', $mod))
-            ->post(route('mods.github-sync.run', $mod));
-
-        $response->assertRedirect(route('mods.edit', $mod));
-        $response->assertSessionHasErrors('github_repository_url');
-    }
-
-    public function test_non_owner_cannot_run_manual_github_sync()
-    {
-        $owner = User::factory()->create();
-        $otherUser = User::factory()->create();
-        $mod = Mod::factory()->create([
-            'owner_id' => $owner->id,
-            'github_repository_url' => 'https://github.com/acme/docs-repo',
-        ]);
-
-        $this->actingAs($otherUser);
-
-        $response = $this->post(route('mods.github-sync.run', $mod));
-
-        $response->assertForbidden();
     }
 
     public function test_owner_can_update_custom_css()

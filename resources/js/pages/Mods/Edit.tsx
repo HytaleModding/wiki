@@ -86,11 +86,6 @@ export default function EditMod({ mod, githubConnected }: Props) {
   const [iconPreview, setIconPreview] = useState<string | null>(
     mod.icon_url || null,
   );
-  const [isSyncing, setIsSyncing] = useState(false);
-  const [syncFeedback, setSyncFeedback] = useState<{
-    type: 'success' | 'error';
-    message: string;
-  } | null>(null);
   const [repositories, setRepositories] = useState<GitHubRepository[]>([]);
   const [repositoriesError, setRepositoriesError] = useState<string | null>(
     null,
@@ -160,10 +155,6 @@ export default function EditMod({ mod, githubConnected }: Props) {
       }
 
       setData('github_repository_url', payload.repository.html_url);
-      setSyncFeedback({
-        type: 'success',
-        message: `${payload.repository.full_name} is now connected.`,
-      });
     } catch (error) {
       setRepositoriesError(
         error instanceof Error ? error.message : 'Unable to select the repository.',
@@ -209,44 +200,6 @@ export default function EditMod({ mod, githubConnected }: Props) {
         window.location.href = `/dashboard/mods/${mod.slug}/css-editor`;
       },
     });
-  };
-
-  const runGithubSync = async () => {
-    setIsSyncing(true);
-    setSyncFeedback(null);
-
-    try {
-      const response = await fetch(`/dashboard/mods/${mod.slug}/github-sync`, {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'X-CSRF-TOKEN':
-            document
-              .querySelector('meta[name="csrf-token"]')
-              ?.getAttribute('content') || '',
-        },
-      });
-
-      const payload = (await response.json().catch(() => null)) as {
-        message?: string;
-      } | null;
-
-      if (!response.ok) {
-        setSyncFeedback({
-          type: 'error',
-          message: payload?.message || 'GitHub sync failed.',
-        });
-
-        return;
-      }
-
-      setSyncFeedback({
-        type: 'success',
-        message: payload?.message || 'GitHub sync completed successfully.',
-      });
-    } finally {
-      setIsSyncing(false);
-    }
   };
 
   const disconnectGithub = async () => {
@@ -557,8 +510,8 @@ export default function EditMod({ mod, githubConnected }: Props) {
                       <div>
                         <CardTitle>GitHub Sync</CardTitle>
                         <CardDescription>
-                          When a GitHub URL is configured, pages are managed by
-                          sync and manual page create/edit is disabled.
+                          Pages are managed from GitHub and update whenever you
+                          push changes to the connected repository.
                         </CardDescription>
                       </div>
                       <HoverCard>
@@ -659,6 +612,23 @@ export default function EditMod({ mod, githubConnected }: Props) {
                                 {repositoriesError}
                               </p>
                             )}
+                            {data.github_repository_url && (
+                              <p className="text-sm text-muted-foreground">
+                                Connected repository:{' '}
+                                <a
+                                  href={data.github_repository_url}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="text-primary hover:underline"
+                                >
+                                  {repositories.find(
+                                    (repository) =>
+                                      repository.html_url ===
+                                      data.github_repository_url,
+                                  )?.full_name || data.github_repository_url}
+                                </a>
+                              </p>
+                            )}
                             <div className="flex gap-2">
                               <Button asChild type="button" variant="outline">
                                 <a
@@ -706,36 +676,6 @@ export default function EditMod({ mod, githubConnected }: Props) {
                           Optional subfolder to sync markdown from (for example:
                           docs/guides). Leave blank to sync the repository root.
                         </p>
-                      </div>
-
-                      <div className="rounded-md border border-border/70 bg-muted/10 p-4">
-                        <div className="mb-3">
-                          <Label>Manual Sync</Label>
-                          <p className="mt-1 text-sm text-muted-foreground">
-                            Pull markdown from your configured GitHub repository
-                            right now.
-                          </p>
-                        </div>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={runGithubSync}
-                          disabled={isSyncing || processing}
-                        >
-                          {isSyncing ? 'Running Sync...' : 'Run Sync'}
-                        </Button>
-                        {syncFeedback && (
-                          <p
-                            className={cn(
-                              'mt-3 text-sm',
-                              syncFeedback.type === 'success'
-                                ? 'text-emerald-600 dark:text-emerald-400'
-                                : 'text-destructive',
-                            )}
-                          >
-                            {syncFeedback.message}
-                          </p>
-                        )}
                       </div>
                     </div>
                   </CardContent>

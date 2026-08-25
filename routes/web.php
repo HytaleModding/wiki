@@ -113,7 +113,6 @@ Route::group(['prefix' => '/dashboard', 'middleware' => ['auth', 'verified']], f
     Route::get('/mods/{mod:slug}', [ModController::class, 'show'])->name('mods.show');
     Route::get('/mods/{mod:slug}/css-editor', [ModController::class, 'cssEditor'])->name('mods.css-editor');
     Route::patch('/mods/{mod:slug}/css', [ModController::class, 'updateCss'])->name('mods.css.update');
-    Route::post('/mods/{mod:slug}/github-sync', [ModController::class, 'runGithubSync'])->name('mods.github-sync.run');
     Route::get('/mods/{mod:slug}/github/connect', [GitHubConnectionController::class, 'redirect'])->name('mods.github.connect');
     Route::delete('/mods/{mod:slug}/github/connect', [GitHubConnectionController::class, 'disconnect'])->name('mods.github.disconnect');
     Route::get('/mods/{mod:slug}/github/repositories', [GitHubConnectionController::class, 'repositories'])->name('mods.github.repositories');
