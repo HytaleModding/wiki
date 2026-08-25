@@ -6,6 +6,7 @@ use App\Models\GitHubConnection;
 use App\Models\Mod;
 use App\Services\GitHubRepositoryService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -73,11 +74,15 @@ class GitHubConnectionController extends Controller
         return redirect()->route('mods.edit', $mod)->with('success', "Connected GitHub account @{$connection->github_login}. Choose a repository below.");
     }
 
-    public function disconnect(Mod $mod): RedirectResponse
+    public function disconnect(Mod $mod): RedirectResponse|Response
     {
         $this->authorizeSettings($mod);
 
         Auth::user()?->githubConnection()?->delete();
+
+        if (request()->expectsJson()) {
+            return response()->noContent();
+        }
 
         return redirect()
             ->route('mods.edit', $mod)
