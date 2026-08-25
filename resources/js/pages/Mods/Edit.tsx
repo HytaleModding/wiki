@@ -511,7 +511,7 @@ export default function EditMod({ mod, githubConnected, customDomainTarget }: Pr
                   <CardHeader className="border-b pb-6">
                     <CardTitle>Custom Domain</CardTitle>
                     <CardDescription>
-                      Connect a domain you own. HTTPS is issued automatically at no extra cost.
+                      Connect your wiki to a domain you own.
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -529,7 +529,7 @@ export default function EditMod({ mod, githubConnected, customDomainTarget }: Pr
                     <div className="rounded-md border border-border/70 bg-muted/10 p-4 text-sm">
                       <p className="font-medium">DNS setup</p>
                       <p className="mt-1 text-muted-foreground">
-                        Create a CNAME record for this domain pointing to <code>{customDomainTarget}</code>, then save these settings. We check it automatically every five minutes and email the owner when HTTPS is ready.
+                        Create a CNAME record for this domain pointing to <code>{customDomainTarget}</code>, then save these settings. We check it automatically every five minutes.
                       </p>
                     </div>
                     {mod.custom_domain && (
