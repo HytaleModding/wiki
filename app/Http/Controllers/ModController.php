@@ -156,6 +156,14 @@ class ModController extends Controller
      */
     public function edit(Mod $mod)
     {
+        return redirect()->route('mods.settings', ['mod' => $mod->slug, 'section' => 'general']);
+    }
+
+    /**
+     * Show a focused settings section for a mod.
+     */
+    public function settings(Mod $mod, string $section)
+    {
         $user = Auth::user();
 
         if (! $mod->userCan($user, 'manage_settings')) {
@@ -166,6 +174,7 @@ class ModController extends Controller
             'mod' => $mod,
             'githubConnected' => $user->githubConnection()->exists(),
             'customDomainTarget' => config('custom-domains.target'),
+            'section' => $section,
         ]);
     }
 
@@ -270,6 +279,16 @@ class ModController extends Controller
 
         if ($mod->wasChanged('custom_domain') && $mod->custom_domain) {
             ProvisionCustomDomain::dispatch($mod->id)->afterCommit();
+        }
+
+        $settingsSection = $request->input('settings_section', 'general');
+
+        if (in_array($settingsSection, ['general', 'github', 'appearance'], true)) {
+            return redirect()->route('mods.settings', [
+                'mod' => $mod->slug,
+                'section' => $settingsSection,
+            ])
+                ->with('success', 'Mod updated successfully!');
         }
 
         return redirect()->route('mods.show', $mod->slug)

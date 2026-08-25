@@ -113,8 +113,12 @@ Route::group(['prefix' => '/dashboard', 'middleware' => ['auth', 'verified']], f
         ]);
     })->name('dashboard');
 
-    Route::resource('/mods', ModController::class)->except(['show']);
+    Route::resource('/mods', ModController::class)->except(['show', 'edit']);
     Route::get('/mods/{mod:slug}', [ModController::class, 'show'])->name('mods.show');
+    Route::get('/mods/{mod:slug}/edit', [ModController::class, 'edit'])->name('mods.edit');
+    Route::get('/mods/{mod:slug}/settings/{section}', [ModController::class, 'settings'])
+        ->whereIn('section', ['general', 'domain', 'github', 'appearance', 'danger'])
+        ->name('mods.settings');
     Route::get('/mods/{mod:slug}/css-editor', [ModController::class, 'cssEditor'])->name('mods.css-editor');
     Route::patch('/mods/{mod:slug}/css', [ModController::class, 'updateCss'])->name('mods.css.update');
     Route::get('/mods/{mod:slug}/github/connect', [GitHubConnectionController::class, 'redirect'])->name('mods.github.connect');

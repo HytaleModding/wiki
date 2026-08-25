@@ -1,35 +1,16 @@
 import { Head, useForm } from '@inertiajs/react';
 import {
-  ChevronRightIcon,
-  ExternalLinkIcon,
-  HelpCircle,
-  PencilIcon,
-  XIcon,
+  ExternalLink,
+  GitBranch,
+  Globe2,
+  Palette,
+  Settings2,
+  Trash2,
+  Upload,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from '@/components/ui/hover-card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -39,13 +20,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
 import { cn } from '@/lib/utils';
-import { getVisibilityColor, visibilityOptions } from '@/utils/commonUtils';
+import { visibilityOptions } from '@/utils/commonUtils';
 
 interface Mod {
   id: string;
@@ -60,41 +39,71 @@ interface Mod {
   github_repository_path?: string | null;
   custom_css?: string | null;
   custom_domain?: string | null;
-  domain_verified: boolean;
   domain_status?: 'not_configured' | 'pending_dns' | 'provisioning' | 'ready';
-  domain_verification_token?: string | null;
 }
-
 interface Props {
   mod: Mod;
   githubConnected: boolean;
   customDomainTarget: string;
+  section: 'general' | 'domain' | 'github' | 'appearance' | 'danger';
 }
-
 interface GitHubRepository {
   id: number;
   full_name: string;
   html_url: string;
   private: boolean;
-  default_branch: string;
 }
 
-export default function EditMod({ mod, githubConnected, customDomainTarget }: Props) {
+const navigation = [
+  {
+    id: 'general',
+    label: 'General',
+    description: 'Identity & access',
+    icon: Settings2,
+  },
+  {
+    id: 'domain',
+    label: 'Custom domain',
+    description: 'DNS & publishing',
+    icon: Globe2,
+  },
+  {
+    id: 'github',
+    label: 'GitHub sync',
+    description: 'Repository source',
+    icon: GitBranch,
+  },
+  {
+    id: 'appearance',
+    label: 'Appearance',
+    description: 'Custom styling',
+    icon: Palette,
+  },
+  {
+    id: 'danger',
+    label: 'Danger zone',
+    description: 'Delete this wiki',
+    icon: Trash2,
+  },
+] as const;
+
+export default function EditMod({
+  mod,
+  githubConnected,
+  customDomainTarget,
+  section,
+}: Props) {
   const [iconPreview, setIconPreview] = useState<string | null>(
     mod.icon_url || null,
   );
   const [repositories, setRepositories] = useState<GitHubRepository[]>([]);
-  // Radix can emit a value update as this controlled select settles after the
-  // async repository request. Keep the latest response synchronously available
-  // to the handler so it never reads a stale render's state.
   const repositoriesRef = useRef<GitHubRepository[]>([]);
   const [repositoriesError, setRepositoriesError] = useState<string | null>(
     null,
   );
   const [isLoadingRepositories, setIsLoadingRepositories] = useState(false);
   const [isSelectingRepository, setIsSelectingRepository] = useState(false);
-
-  const { data, setData, patch, processing, errors } = useForm({
+  const form = useForm({
     name: mod.name,
     description: mod.description || '',
     visibility: mod.visibility,
@@ -103,16 +112,13 @@ export default function EditMod({ mod, githubConnected, customDomainTarget }: Pr
     github_repository_url: mod.github_repository_url || '',
     github_repository_path: mod.github_repository_path || '',
     custom_css: mod.custom_css || '',
+    settings_section: section,
     icon: null as File | null,
   });
-  const domainForm = useForm({
-    custom_domain: mod.custom_domain || '',
-  });
+  const domainForm = useForm({ custom_domain: mod.custom_domain || '' });
 
   useEffect(() => {
-    if (!githubConnected) return;
-
-    setRepositoriesError(null);
+    if (section !== 'github' || !githubConnected) return;
     setIsLoadingRepositories(true);
     fetch(`/dashboard/mods/${mod.slug}/github/repositories`, {
       headers: { Accept: 'application/json' },
@@ -122,35 +128,30 @@ export default function EditMod({ mod, githubConnected, customDomainTarget }: Pr
           repositories?: GitHubRepository[];
           message?: string;
         };
-        if (!response.ok) throw new Error(payload.message || 'Unable to load repositories.');
-        const loadedRepositories = payload.repositories || [];
-        repositoriesRef.current = loadedRepositories;
-        setRepositories(loadedRepositories);
+        if (!response.ok)
+          throw new globalThis.Error(
+            payload.message || 'Unable to load repositories.',
+          );
+        repositoriesRef.current = payload.repositories || [];
+        setRepositories(repositoriesRef.current);
       })
       .catch((error: Error) => setRepositoriesError(error.message))
       .finally(() => setIsLoadingRepositories(false));
-  }, [githubConnected, mod.slug]);
+  }, [githubConnected, mod.slug, section]);
 
-  const selectGithubRepository = async (repositoryId: string) => {
-    const selectedRepository = repositoriesRef.current.find(
-      (repository) => repository.id === Number(repositoryId),
+  const save = (event: React.FormEvent) => {
+    event.preventDefault();
+    form.patch(`/dashboard/mods/${mod.slug}`, { forceFormData: true });
+  };
+  const saveDomain = () =>
+    domainForm.patch(`/dashboard/mods/${mod.slug}/domain`);
+  const selectRepository = async (id: string) => {
+    const repository = repositoriesRef.current.find(
+      (item) => item.id === Number(id),
     );
-
-    if (!selectedRepository) {
-      // Ignore the select's transient initialization value. It is not a user
-      // selection and should never surface as an error.
-      return;
-    }
-
-    const normalizedRepositoryUrl = selectedRepository.html_url.replace(/\/+$/, '');
-    const normalizedCurrentUrl = data.github_repository_url.replace(/\/+$/, '');
-    if (normalizedRepositoryUrl === normalizedCurrentUrl) {
-      return;
-    }
-
+    if (!repository) return;
     setIsSelectingRepository(true);
     setRepositoriesError(null);
-
     try {
       const response = await fetch(
         `/dashboard/mods/${mod.slug}/github/repository`,
@@ -165,8 +166,8 @@ export default function EditMod({ mod, githubConnected, customDomainTarget }: Pr
                 ?.getAttribute('content') || '',
           },
           body: JSON.stringify({
-            repository_id: Number(repositoryId),
-            repository_url: selectedRepository.html_url,
+            repository_id: repository.id,
+            repository_url: repository.html_url,
           }),
         },
       );
@@ -174,73 +175,24 @@ export default function EditMod({ mod, githubConnected, customDomainTarget }: Pr
         repository?: GitHubRepository;
         message?: string;
       };
-      if (!response.ok || !payload.repository) {
-        throw new Error(payload.message || 'Unable to select the repository.');
-      }
-
-      setData('github_repository_url', payload.repository.html_url);
+      if (!response.ok || !payload.repository)
+        throw new globalThis.Error(
+          payload.message || 'Unable to select the repository.',
+        );
+      form.setData('github_repository_url', payload.repository.html_url);
     } catch (error) {
       setRepositoriesError(
-        error instanceof Error ? error.message : 'Unable to select the repository.',
+        error instanceof globalThis.Error
+          ? error.message
+          : 'Unable to select the repository.',
       );
     } finally {
       setIsSelectingRepository(false);
     }
   };
-
-  const handleIconChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setData('icon', file);
-      const reader = new FileReader();
-      reader.onload = (e) => setIconPreview(e.target?.result as string);
-      reader.readAsDataURL(file);
-    } else {
-      setData('icon', null);
-      setIconPreview(mod.icon_url || null);
-    }
-  };
-
-  const removeIcon = () => {
-    setData('icon', null);
-    setIconPreview(null);
-    const fileInput = document.getElementById('icon') as HTMLInputElement;
-    if (fileInput) {
-      fileInput.value = '';
-    }
-  };
-
-  const submit = (e: React.SubmitEvent) => {
-    e.preventDefault();
-    patch(`/dashboard/mods/${mod.slug}`, {
-      forceFormData: true,
-    });
-  };
-
-  const openCssEditor = () => {
-    patch(`/dashboard/mods/${mod.slug}`, {
-      forceFormData: true,
-      onSuccess: () => {
-        window.location.href = `/dashboard/mods/${mod.slug}/css-editor`;
-      },
-    });
-  };
-
-  const submitDomain = () => {
-    domainForm.patch(`/dashboard/mods/${mod.slug}/domain`, {
-      onSuccess: () => window.location.reload(),
-    });
-  };
-
   const disconnectGithub = async () => {
-    setRepositoriesError(null);
-
-    const confirmed = window.confirm(
-      'Disconnect your GitHub account from this wiki?',
-    );
-    if (!confirmed) return;
-
-    const response = await fetch(`/dashboard/mods/${mod.slug}/github/connect`, {
+    if (!window.confirm('Disconnect GitHub from this wiki?')) return;
+    await fetch(`/dashboard/mods/${mod.slug}/github/connect`, {
       method: 'DELETE',
       headers: {
         Accept: 'application/json',
@@ -250,17 +202,14 @@ export default function EditMod({ mod, githubConnected, customDomainTarget }: Pr
             ?.getAttribute('content') || '',
       },
     });
-
-    if (!response.ok) {
-      setRepositoriesError('Unable to unlink GitHub right now.');
-      return;
-    }
-
     window.location.reload();
   };
-
-  const deleteMod = () => {
-    fetch(`/dashboard/mods/${mod.slug}`, {
+  const deleteMod = async () => {
+    if (
+      !window.confirm(`Permanently delete ${mod.name} and all of its content?`)
+    )
+      return;
+    await fetch(`/dashboard/mods/${mod.slug}`, {
       method: 'DELETE',
       headers: {
         'X-CSRF-TOKEN':
@@ -268,613 +217,504 @@ export default function EditMod({ mod, githubConnected, customDomainTarget }: Pr
             .querySelector('meta[name="csrf-token"]')
             ?.getAttribute('content') || '',
       },
-    }).then(() => {
-      window.location.href = '/dashboard/mods';
     });
+    window.location.href = '/dashboard/mods';
   };
+  const status =
+    mod.domain_status === 'ready'
+      ? ['Live', 'bg-emerald-500']
+      : mod.domain_status === 'provisioning'
+        ? ['Provisioning HTTPS', 'bg-amber-500']
+        : ['Awaiting DNS', 'bg-sky-500'];
 
   return (
     <AppLayout>
-      <Head title={`Edit ${mod.name}`} />
-
-      <div className="space-y-6">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <nav className="mb-4 flex items-center text-sm text-primary">
-            <a href={`/dashboard/mods/${mod.slug}`} className="hover:underline">
-              {mod.name}
-            </a>
-            <ChevronRightIcon className="m-1 inline h-4 w-4" />
-            <span>Settings</span>
-          </nav>
-        </div>
-
-        <form onSubmit={submit} className="mt-12 space-y-6">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="mb-2 flex items-center space-x-3">
-                  <div className="group relative flex-1">
-                    <Label htmlFor="name" className="sr-only">
-                      Mod Name
-                    </Label>
-                    <Input
-                      id="name"
-                      name="name"
-                      type="text"
-                      value={data.name}
-                      onChange={(e) => setData('name', e.target.value)}
-                      placeholder="My Awesome Mod"
-                      className={cn(
-                        'h-auto w-full border-2 border-muted-foreground/30 px-3 py-2 text-3xl font-bold tracking-tight hover:border-muted-foreground/50 focus:border-primary',
-                        errors.name ? 'border-destructive' : '',
-                      )}
-                    />
-                    <PencilIcon className="absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-                    {errors.name && (
-                      <p className="mt-1 text-sm text-destructive">
-                        {errors.name}
-                      </p>
-                    )}
-                  </div>
-                </div>
-                <div className="group relative mb-4">
-                  <Label htmlFor="description" className="sr-only">
-                    Description
-                  </Label>
-                  <div className="relative">
-                    <Textarea
-                      id="description"
-                      name="description"
-                      value={data.description}
-                      onChange={(e) => setData('description', e.target.value)}
-                      placeholder="A brief description of what your mod does..."
-                      rows={2}
-                      className={cn(
-                        'w-full resize-none border-2 border-muted-foreground/30 px-3 py-2 text-muted-foreground hover:border-muted-foreground/50 focus:border-primary',
-                        errors.description ? 'border-destructive' : '',
-                      )}
-                    />
-                    <PencilIcon className="absolute top-3 right-3 h-4 w-4 text-muted-foreground" />
-                  </div>
-                  {errors.description && (
-                    <p className="mt-1 text-sm text-destructive">
-                      {errors.description}
-                    </p>
-                  )}
-                </div>
-              </div>
+      <Head
+        title={`${navigation.find((item) => item.id === section)?.label} · ${mod.name}`}
+      />
+      <div className="min-h-[calc(100vh-4rem)] bg-muted/20">
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          <a
+            href={`/dashboard/mods/${mod.slug}`}
+            className="text-sm font-medium text-muted-foreground transition hover:text-foreground"
+          >
+            ← Back to {mod.name}
+          </a>
+          <div className="mt-5 flex flex-col gap-3 border-b border-border pb-7 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-sm font-medium text-primary">Wiki settings</p>
+              <h1 className="mt-1 text-3xl font-semibold tracking-tight">
+                {mod.name}
+              </h1>
+              <p className="mt-1 text-muted-foreground">
+                A calm home for the details behind your documentation.
+              </p>
             </div>
+            <Button asChild variant="outline">
+              <a href={`/mod/${mod.slug}`} target="_blank" rel="noreferrer">
+                View live wiki <ExternalLink className="ml-2 h-4 w-4" />
+              </a>
+            </Button>
           </div>
-
-          <div className="mx-auto max-w-7xl px-4 pb-8 sm:px-6 lg:px-8">
-            <Tabs defaultValue="general">
-              <TabsList className="mb-6">
-                <TabsTrigger value="general">General</TabsTrigger>
-                <TabsTrigger value="github-sync">GitHub Sync</TabsTrigger>
-                <TabsTrigger value="custom-domain">Custom Domain</TabsTrigger>
-                <TabsTrigger value="custom-css">Custom CSS</TabsTrigger>
-              </TabsList>
-
-              {/* General Tab */}
-              <TabsContent value="general">
-                <Card className="bg-transparent">
-                  <CardHeader className="border-b pb-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <CardTitle>General Settings</CardTitle>
-                        <CardDescription>
-                          Configure basic settings like visibility, mod icon,
-                          and external access.
-                        </CardDescription>
-                      </div>
-
-                      <HoverCard>
-                        <HoverCardTrigger asChild>
-                          <HelpCircle className="h-6 w-6 cursor-pointer text-muted-foreground" />
-                        </HoverCardTrigger>
-                        <HoverCardContent className="w-80" side="left">
-                          <div className="flex justify-between space-x-4">
-                            <div className="space-y-1">
-                              <p className="mb-5 text-sm">
-                                Here you can configure general settings for your
-                                mod, including visibility, mod icon, and
-                                external access. These settings control who can
-                                see your mod documentation, how it appears, and
-                                whether external applications can access it via
-                                API.
-                              </p>
-                            </div>
-                          </div>
-                        </HoverCardContent>
-                      </HoverCard>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div>
-                      <Label htmlFor="visibility">Visibility</Label>
-                      <Select
-                        value={data.visibility}
-                        onValueChange={(
-                          value: 'public' | 'unlisted' | 'private',
-                        ) => setData('visibility', value)}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {visibilityOptions.map((option) => (
-                            <SelectItem
-                              key={option.value}
-                              value={option.value}
-                              className="flex w-full"
-                            >
-                              <div className="flex w-full items-center justify-between gap-4">
-                                <Badge
-                                  variant="outline"
-                                  className={getVisibilityColor(option.value)}
-                                >
-                                  {option.label}
-                                </Badge>
-                                <div className="text-sm text-muted-foreground">
-                                  {option.description}
-                                </div>
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {errors.visibility && (
-                        <p className="mt-1 text-sm text-destructive">
-                          {errors.visibility}
-                        </p>
+          <div className="mt-8 grid gap-8 lg:grid-cols-[245px_minmax(0,1fr)]">
+            <aside>
+              <nav className="flex gap-2 overflow-x-auto pb-2 lg:flex-col lg:overflow-visible">
+                {navigation.map((item) => {
+                  const Icon = item.icon;
+                  const active = item.id === section;
+                  return (
+                    <a
+                      key={item.id}
+                      href={`/dashboard/mods/${mod.slug}/settings/${item.id}`}
+                      className={cn(
+                        'group flex min-w-44 items-center gap-3 rounded-xl px-3 py-3 transition',
+                        active
+                          ? 'bg-foreground text-background shadow-sm'
+                          : 'text-muted-foreground hover:bg-background hover:text-foreground',
                       )}
-                      <p className="mt-2 text-sm text-muted-foreground">
-                        Control who can access your mod documentation
-                      </p>
-                    </div>
-
-                    <Separator />
-
-                    <div>
-                      <Label htmlFor="icon">Mod Icon</Label>
-                      <div className="relative mt-2">
-                        <Input
-                          id="icon"
-                          type="file"
-                          accept="image/*"
-                          onChange={handleIconChange}
+                    >
+                      <Icon className="h-4 w-4 shrink-0" />
+                      <span>
+                        <span className="block text-sm font-medium">
+                          {item.label}
+                        </span>
+                        <span
                           className={cn(
-                            'pr-10',
-                            errors.icon ? 'border-destructive' : '',
+                            'block text-xs',
+                            active
+                              ? 'text-background/65'
+                              : 'text-muted-foreground',
                           )}
-                        />
-                        {(iconPreview || data.icon) && (
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="hover:text-destructive-foreground absolute top-1/2 right-1 h-7 w-7 -translate-y-1/2 hover:bg-muted"
-                            onClick={removeIcon}
-                          >
-                            <XIcon className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
-                      {iconPreview && (
-                        <div className="mt-4 flex justify-center">
-                          <img
-                            src={iconPreview}
-                            alt="Icon preview"
-                            className="h-24 w-24 rounded-lg border object-cover"
+                        >
+                          {item.description}
+                        </span>
+                      </span>
+                    </a>
+                  );
+                })}
+              </nav>
+            </aside>
+            <main className="min-w-0">
+              <form onSubmit={save}>
+                {section === 'general' && (
+                  <section className="space-y-6">
+                    <PageIntro
+                      eyebrow="Workspace"
+                      title="General settings"
+                      text="Give your wiki a recognizable identity and decide who can access it."
+                    />
+                    <Card>
+                      <CardContent className="space-y-7 p-6 sm:p-8">
+                        <Field
+                          label="Wiki name"
+                          hint="Changing this also updates the wiki's URL slug."
+                        >
+                          <Input
+                            value={form.data.name}
+                            onChange={(e) =>
+                              form.setData('name', e.target.value)
+                            }
+                            className="max-w-xl"
                           />
-                        </div>
-                      )}
-                      {errors.icon && (
-                        <p className="mt-2 text-sm text-destructive">
-                          {errors.icon}
-                        </p>
-                      )}
-                      <p className="mt-2 text-sm text-muted-foreground">
-                        Optional. Upload a square image (PNG, JPG, GIF, WebP).
-                        Maximum size: 2MB.
-                      </p>
-                    </div>
-
-                    <Separator />
-
-                    <div className="flex items-center space-x-3">
-                      <Switch
-                        id="external_access"
-                        checked={data.external_access}
-                        onCheckedChange={(checked: boolean) =>
-                          setData('external_access', checked)
-                        }
-                      />
-                      <div>
-                        <Label htmlFor="external_access">External Access</Label>
-                        <p className="text-sm text-muted-foreground">
-                          Allow external applications to access this mod via API
-                        </p>
-                      </div>
-                      {errors.external_access && (
-                        <p className="mt-1 text-sm text-destructive">
-                          {errors.external_access}
-                        </p>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="custom-domain">
-                <Card className="bg-transparent">
-                  <CardHeader className="border-b pb-6">
-                    <CardTitle>Custom Domain</CardTitle>
-                    <CardDescription>
-                      Connect your wiki to a domain you own.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <Label htmlFor="custom_domain">Domain</Label>
-                      <Input
-                        id="custom_domain"
-                        value={domainForm.data.custom_domain}
-                        onChange={(e) => domainForm.setData('custom_domain', e.target.value.toLowerCase())}
-                        placeholder="docs.example.com"
-                        className={cn(domainForm.errors.custom_domain ? 'border-destructive' : '')}
-                      />
-                      {domainForm.errors.custom_domain && <p className="mt-1 text-sm text-destructive">{domainForm.errors.custom_domain}</p>}
-                    </div>
-                    <div className="rounded-md border border-border/70 bg-muted/10 p-4 text-sm">
-                      <p className="font-medium">DNS setup</p>
-                      <p className="mt-1 text-muted-foreground">
-                        Create a CNAME record for this domain pointing to <code>{customDomainTarget}</code>, then save these settings. We check it automatically every five minutes.
-                      </p>
-                    </div>
-                    {mod.custom_domain && (
-                      <p className="text-sm text-muted-foreground">
-                        Status: <span className="font-medium text-foreground">{mod.domain_status === 'ready' ? 'Ready' : mod.domain_status === 'provisioning' ? 'Issuing HTTPS certificate' : 'Waiting for CNAME record'}</span>
-                      </p>
-                    )}
-                    <Button type="button" onClick={submitDomain} disabled={domainForm.processing}>
-                      {domainForm.processing ? 'Saving domain...' : 'Save domain'}
-                    </Button>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              {/* GitHub Sync Tab */}
-              <TabsContent value="github-sync">
-                <Card className="bg-transparent">
-                  <CardHeader className="border-b pb-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <CardTitle>GitHub Sync</CardTitle>
-                        <CardDescription>
-                          Pages are managed from GitHub and update whenever you
-                          push changes to the connected repository.
-                        </CardDescription>
-                      </div>
-                      <HoverCard>
-                        <HoverCardTrigger asChild>
-                          <HelpCircle className="h-6 w-6 cursor-pointer text-muted-foreground" />
-                        </HoverCardTrigger>
-                        <HoverCardContent className="w-80" side="left">
-                          <div className="flex justify-between space-x-4">
-                            <div className="space-y-1">
-                              <p className="mb-5 text-sm">
-                                If your documentation already lives on GitHub,
-                                you can sync it directly with your mod wiki.
-                                Changes pushed to your repository will
-                                automatically appear on the site — no manual
-                                updates needed.
-                              </p>
-                              <p className="text-sm">
-                                If you want to read more about the feature,
-                                check out the documentation:
-                              </p>
-                              <div className="mt-2">
-                                <a
-                                  href="https://hytalemodding.dev/en/docs/wiki/6-github"
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="flex items-center text-sm text-secondary-foreground hover:underline"
-                                >
-                                  GitHub Sync Documentation
-                                  <ExternalLinkIcon className="ml-1 h-4 w-4" />
-                                </a>
-                              </div>
-                            </div>
-                          </div>
-                        </HoverCardContent>
-                      </HoverCard>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="space-y-4">
-                      <div className="rounded-md border border-border/70 bg-muted/10 p-4">
-                        <Label>GitHub account</Label>
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          {githubConnected
-                            ? 'Choose from repositories your connected GitHub App can access.'
-                            : 'Install the GitHub App and authorize your account to choose a repository.'}
-                        </p>
-                        {!githubConnected ? (
-                          <Button asChild className="mt-3" type="button">
-                            <a href={`/dashboard/mods/${mod.slug}/github/connect`}>
-                              Connect GitHub
-                            </a>
-                          </Button>
-                        ) : (
-                          <div className="mt-3 space-y-2">
+                          {form.errors.name && (
+                            <Error>{form.errors.name}</Error>
+                          )}
+                        </Field>
+                        <Field
+                          label="Description"
+                          hint="A short explanation for people browsing your wiki."
+                        >
+                          <Textarea
+                            value={form.data.description}
+                            onChange={(e) =>
+                              form.setData('description', e.target.value)
+                            }
+                            rows={4}
+                            className="max-w-xl resize-y"
+                          />
+                        </Field>
+                        <div className="grid gap-6 border-t pt-7 sm:grid-cols-2">
+                          <Field
+                            label="Visibility"
+                            hint="Who can discover and visit this wiki."
+                          >
                             <Select
-                              value={
-                                repositories.find(
-                                  (repository) =>
-                                    repository.html_url === data.github_repository_url,
-                                )?.id.toString() || ''
-                              }
-                              onValueChange={selectGithubRepository}
-                              disabled={isLoadingRepositories || isSelectingRepository}
+                              value={form.data.visibility}
+                              onValueChange={(
+                                value: 'public' | 'private' | 'unlisted',
+                              ) => form.setData('visibility', value)}
                             >
                               <SelectTrigger>
-                                <SelectValue
-                                  placeholder={
-                                    isLoadingRepositories
-                                      ? 'Loading repositories...'
-                                      : 'Select a repository'
-                                  }
-                                />
+                                <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                {repositories.map((repository) => (
+                                {visibilityOptions.map((option) => (
                                   <SelectItem
-                                    key={repository.id}
-                                    value={repository.id.toString()}
+                                    key={option.value}
+                                    value={option.value}
                                   >
-                                    {repository.full_name}
-                                    {repository.private ? ' (private)' : ''}
+                                    {option.label} — {option.description}
                                   </SelectItem>
                                 ))}
                               </SelectContent>
                             </Select>
-                            {!isLoadingRepositories &&
-                              repositories.length === 0 &&
-                              !repositoriesError && (
-                                <p className="text-sm text-muted-foreground">
-                                  No repositories are available yet. Install the
-                                  GitHub App on a personal account or
-                                  organization, grant it access to at least one
-                                  repository, then reconnect.
-                                </p>
+                          </Field>
+                          <Field
+                            label="Wiki icon"
+                            hint="PNG, JPG, GIF, or WebP, up to 2 MB."
+                          >
+                            <div className="flex items-center gap-4">
+                              <label className="flex h-11 cursor-pointer items-center gap-2 rounded-md border bg-background px-3 text-sm font-medium hover:bg-muted">
+                                <Upload className="h-4 w-4" /> Choose image
+                                <input
+                                  type="file"
+                                  className="sr-only"
+                                  accept="image/*"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                      form.setData('icon', file);
+                                      setIconPreview(URL.createObjectURL(file));
+                                    }
+                                  }}
+                                />
+                              </label>
+                              {iconPreview && (
+                                <img
+                                  src={iconPreview}
+                                  alt="Wiki icon preview"
+                                  className="h-11 w-11 rounded-lg border object-cover"
+                                />
                               )}
-                            {repositoriesError && (
-                              <p className="text-sm text-destructive">
-                                {repositoriesError}
-                              </p>
-                            )}
-                            {data.github_repository_url && (
-                              <p className="text-sm text-muted-foreground">
-                                Connected repository:{' '}
-                                <a
-                                  href={data.github_repository_url}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="text-primary hover:underline"
-                                >
-                                  {repositories.find(
-                                    (repository) =>
-                                      repository.html_url ===
-                                      data.github_repository_url,
-                                  )?.full_name || data.github_repository_url}
-                                </a>
-                              </p>
-                            )}
-                            <div className="flex gap-2">
-                              <Button asChild type="button" variant="outline">
-                                <a
-                                  href={`/dashboard/mods/${mod.slug}/github/connect`}
-                                >
-                                  Reconnect GitHub
-                                </a>
-                              </Button>
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                onClick={disconnectGithub}
-                              >
-                                Unlink GitHub
-                              </Button>
                             </div>
+                          </Field>
+                        </div>
+                        <div className="flex items-center justify-between gap-6 rounded-xl bg-muted/50 p-4">
+                          <div>
+                            <Label htmlFor="external_access">
+                              External API access
+                            </Label>
+                            <p className="mt-1 text-sm text-muted-foreground">
+                              Let approved external applications access this
+                              wiki.
+                            </p>
                           </div>
-                        )}
-                      </div>
-
-                      <div>
-                        <Label htmlFor="github_repository_path">
-                          Repository Path
-                        </Label>
-                        <Input
-                          id="github_repository_path"
-                          type="text"
-                          value={data.github_repository_path}
-                          onChange={(e) =>
-                            setData('github_repository_path', e.target.value)
+                          <Switch
+                            id="external_access"
+                            checked={form.data.external_access}
+                            onCheckedChange={(checked) =>
+                              form.setData('external_access', checked)
+                            }
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <SaveBar processing={form.processing} />
+                  </section>
+                )}
+                {section === 'github' && (
+                  <section className="space-y-6">
+                    <PageIntro
+                      eyebrow="Source control"
+                      title="GitHub sync"
+                      text="Keep your documentation in GitHub and publish changes from a single source."
+                    />
+                    <Card>
+                      <CardContent className="space-y-7 p-6 sm:p-8">
+                        <Field
+                          label="GitHub connection"
+                          hint={
+                            githubConnected
+                              ? 'Choose a repository your connected GitHub App can access.'
+                              : 'Connect GitHub to select a repository.'
                           }
-                          placeholder="docs"
-                          className={cn(
-                            errors.github_repository_path
-                              ? 'border-destructive'
-                              : '',
-                          )}
-                        />
-                        {errors.github_repository_path && (
-                          <p className="mt-1 text-sm text-destructive">
-                            {errors.github_repository_path}
-                          </p>
-                        )}
-                        <p className="mt-2 text-sm text-muted-foreground">
-                          Optional subfolder to sync markdown from (for example:
-                          docs/guides). Leave blank to sync the repository root.
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              {/* Custom CSS Tab */}
-              <TabsContent value="custom-css">
-                <Card className="bg-transparent">
-                  <CardHeader className="border-b pb-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <CardTitle>Custom CSS</CardTitle>
-                        <CardDescription>
-                          Write CSS that will be injected into all public-facing
-                          pages of this mod. Use with care — this affects all
-                          visitors.
-                        </CardDescription>
-                      </div>
-
-                      <HoverCard>
-                        <HoverCardTrigger asChild>
-                          <HelpCircle className="h-6 w-6 cursor-pointer text-muted-foreground" />
-                        </HoverCardTrigger>
-                        <HoverCardContent className="w-80" side="left">
-                          <div className="flex justify-between space-x-4">
-                            <div className="space-y-1">
-                              <p className="mb-5 text-sm">
-                                The wiki supports custom CSS, letting you change
-                                colors, typography, spacing, and more. To make
-                                the most of it, a basic understanding of CSS is
-                                recommended.
-                              </p>
-                              <p className="text-sm">
-                                If you want to read more about this feature,
-                                check out the documentation:
-                              </p>
-                              <div className="mt-2">
-                                <a
-                                  href="https://hytalemodding.dev/en/docs/wiki/5-styling/5-3-custom-css"
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="flex items-center text-sm text-secondary-foreground hover:underline"
+                        >
+                          {!githubConnected ? (
+                            <Button asChild>
+                              <a
+                                href={`/dashboard/mods/${mod.slug}/github/connect`}
+                              >
+                                Connect GitHub
+                              </a>
+                            </Button>
+                          ) : (
+                            <div className="space-y-3">
+                              <Select
+                                value={
+                                  repositories
+                                    .find(
+                                      (item) =>
+                                        item.html_url ===
+                                        form.data.github_repository_url,
+                                    )
+                                    ?.id.toString() || ''
+                                }
+                                onValueChange={selectRepository}
+                                disabled={
+                                  isLoadingRepositories || isSelectingRepository
+                                }
+                              >
+                                <SelectTrigger>
+                                  <SelectValue
+                                    placeholder={
+                                      isLoadingRepositories
+                                        ? 'Loading repositories…'
+                                        : 'Select a repository'
+                                    }
+                                  />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {repositories.map((repo) => (
+                                    <SelectItem
+                                      key={repo.id}
+                                      value={repo.id.toString()}
+                                    >
+                                      {repo.full_name}
+                                      {repo.private ? ' · private' : ''}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <div className="flex gap-2">
+                                <Button asChild type="button" variant="outline">
+                                  <a
+                                    href={`/dashboard/mods/${mod.slug}/github/connect`}
+                                  >
+                                    Reconnect
+                                  </a>
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  onClick={disconnectGithub}
                                 >
-                                  Custom CSS Documentation
-                                  <ExternalLinkIcon className="ml-1 h-4 w-4" />
-                                </a>
+                                  Disconnect
+                                </Button>
                               </div>
                             </div>
+                          )}
+                          {repositoriesError && (
+                            <Error>{repositoriesError}</Error>
+                          )}
+                        </Field>
+                        <Field
+                          label="Repository path"
+                          hint="Optional. Use a subfolder such as docs/guides, or leave empty for the root."
+                        >
+                          <Input
+                            value={form.data.github_repository_path}
+                            onChange={(e) =>
+                              form.setData(
+                                'github_repository_path',
+                                e.target.value,
+                              )
+                            }
+                            placeholder="docs"
+                          />
+                          {form.errors.github_repository_path && (
+                            <Error>{form.errors.github_repository_path}</Error>
+                          )}
+                        </Field>
+                      </CardContent>
+                    </Card>
+                    <SaveBar processing={form.processing} />
+                  </section>
+                )}
+                {section === 'appearance' && (
+                  <section className="space-y-6">
+                    <PageIntro
+                      eyebrow="Look & feel"
+                      title="Appearance"
+                      text="Add the finishing touches to every public page in your wiki."
+                    />
+                    <Card>
+                      <CardContent className="space-y-6 p-6 sm:p-8">
+                        <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl bg-violet-500/10 p-5">
+                          <div>
+                            <h3 className="font-medium">
+                              Need a larger canvas?
+                            </h3>
+                            <p className="mt-1 text-sm text-muted-foreground">
+                              Use the dedicated CSS editor with a live preview.
+                            </p>
                           </div>
-                        </HoverCardContent>
-                      </HoverCard>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div>
-                      <Label>CSS Editor</Label>
-                      <p className="mt-1 mb-3 text-sm text-muted-foreground">
-                        Open the full-screen CSS editor with live preview for
-                        easier editing.
-                      </p>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={openCssEditor}
-                        disabled={processing}
-                        className="border-violet-500/40 bg-violet-500/10 text-violet-600 hover:bg-violet-500/20 hover:text-violet-600 dark:text-violet-400"
-                      >
-                        <span>✨</span>
-                        {processing ? 'Saving...' : 'Open CSS Editor'}
-                      </Button>
-                    </div>
-
-                    <Separator />
-                    <div className="relative overflow-hidden rounded-md border border-border/70 bg-muted/10 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/30">
-                      <div className="flex items-center justify-between border-b border-border/60 bg-muted/30 px-3 py-1.5">
-                        <span className="text-xs font-medium text-muted-foreground">
-                          CSS
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          Applied to all public pages
-                        </span>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() =>
+                              form.patch(`/dashboard/mods/${mod.slug}`, {
+                                forceFormData: true,
+                                onSuccess: () =>
+                                  (window.location.href = `/dashboard/mods/${mod.slug}/css-editor`),
+                              })
+                            }
+                          >
+                            Open CSS editor
+                          </Button>
+                        </div>
+                        <Field
+                          label="Custom CSS"
+                          hint="Applied to all public-facing pages of this wiki."
+                        >
+                          <Textarea
+                            value={form.data.custom_css}
+                            onChange={(e) =>
+                              form.setData('custom_css', e.target.value)
+                            }
+                            rows={18}
+                            spellCheck={false}
+                            className="resize-y bg-zinc-950 font-mono text-sm text-zinc-100"
+                            placeholder={
+                              '/* Make it yours */\n\n.prose h1 {\n  color: #7c3aed;\n}'
+                            }
+                          />
+                          {form.errors.custom_css && (
+                            <Error>{form.errors.custom_css}</Error>
+                          )}
+                        </Field>
+                      </CardContent>
+                    </Card>
+                    <SaveBar processing={form.processing} />
+                  </section>
+                )}
+              </form>
+              {section === 'domain' && (
+                <section className="space-y-6">
+                  <PageIntro
+                    eyebrow="Publishing"
+                    title="Custom domain"
+                    text="Point a domain you own at this wiki. This page has its own URL, so refreshing always keeps you here."
+                  />
+                  <Card>
+                    <CardContent className="space-y-7 p-6 sm:p-8">
+                      <div className="flex items-center gap-3 rounded-xl border bg-muted/30 p-4">
+                        <span
+                          className={cn('h-2.5 w-2.5 rounded-full', status[1])}
+                        />
+                        <div>
+                          <p className="text-sm font-medium">{status[0]}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {mod.custom_domain || 'No domain configured yet'}
+                          </p>
+                        </div>
                       </div>
-                      <textarea
-                        id="custom_css"
-                        value={data.custom_css}
-                        onChange={(e) => setData('custom_css', e.target.value)}
-                        placeholder={`/* Custom styles for your mod's public pages */\n\n.prose h1 {\n  color: #your-color;\n}\n\nbody {\n  --background: your-value;\n}`}
-                        rows={14}
-                        spellCheck={false}
-                        className="w-full resize-y bg-transparent p-4 font-mono text-sm leading-relaxed text-foreground outline-none placeholder:text-muted-foreground/50"
-                      />
-                    </div>
-                    {errors.custom_css && (
-                      <p className="text-sm text-destructive">
-                        {errors.custom_css}
-                      </p>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
-          </div>
-
-          <div className="mx-auto mt-8 max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-end space-x-3 border-t pt-6">
-              <Button type="button" variant="outline" asChild>
-                <a href={`/dashboard/mods/${mod.slug}`}>Cancel</a>
-              </Button>
-              <Button type="submit" disabled={processing}>
-                {processing ? 'Saving...' : 'Save Changes'}
-              </Button>
-            </div>
-          </div>
-        </form>
-
-        <div className="mx-auto mt-16 max-w-7xl px-4 pb-8 sm:px-6 lg:px-8">
-          <Card className="border-destructive">
-            <CardHeader>
-              <CardTitle className="text-destructive">Danger Zone</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between space-x-4">
-                <div>
-                  <h3 className="text-lg font-medium">Delete Mod</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Permanently delete this mod and all its content. This action
-                    cannot be undone.
-                  </p>
-                </div>
-                <Dialog>
-                  <DialogTrigger>
-                    <Button variant="destructive">
-                      Delete Mod Permanently
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Are you absolutely sure?</DialogTitle>
-                      <DialogDescription>
-                        Are you sure you want to delete this mod? This will
-                        permanently delete all pages, files, and collaborator
-                        access. This action cannot be undone.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <DialogFooter>
-                      <Button variant="destructive" onClick={deleteMod}>
-                        Confirm deletion
+                      <Field
+                        label="Domain"
+                        hint="Use a subdomain such as docs.example.com."
+                      >
+                        <Input
+                          value={domainForm.data.custom_domain}
+                          onChange={(e) =>
+                            domainForm.setData(
+                              'custom_domain',
+                              e.target.value.toLowerCase(),
+                            )
+                          }
+                          placeholder="docs.example.com"
+                        />
+                        {domainForm.errors.custom_domain && (
+                          <Error>{domainForm.errors.custom_domain}</Error>
+                        )}
+                      </Field>
+                      <div className="rounded-xl bg-sky-500/10 p-5">
+                        <h3 className="font-medium">Set up your DNS</h3>
+                        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                          Create a CNAME record for your domain that points to{' '}
+                          <code className="rounded bg-background px-1.5 py-0.5 text-foreground">
+                            {customDomainTarget}
+                          </code>
+                          . We automatically check the record every five minutes
+                          and issue HTTPS when it is ready.
+                        </p>
+                      </div>
+                      <Button
+                        onClick={saveDomain}
+                        disabled={domainForm.processing}
+                      >
+                        {domainForm.processing
+                          ? 'Saving domain…'
+                          : 'Save domain'}
                       </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </CardContent>
-          </Card>
+                    </CardContent>
+                  </Card>
+                </section>
+              )}
+              {section === 'danger' && (
+                <section className="space-y-6">
+                  <PageIntro
+                    eyebrow="Irreversible"
+                    title="Danger zone"
+                    text="Deleting a wiki permanently removes its pages, files, and collaborator access."
+                  />
+                  <Card className="border-destructive/50">
+                    <CardContent className="flex flex-col gap-5 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
+                      <div>
+                        <h3 className="font-medium text-destructive">
+                          Delete this wiki
+                        </h3>
+                        <p className="mt-1 max-w-xl text-sm leading-6 text-muted-foreground">
+                          This cannot be undone. Export anything you need before
+                          deleting {mod.name}.
+                        </p>
+                      </div>
+                      <Button variant="destructive" onClick={deleteMod}>
+                        Delete permanently
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </section>
+              )}
+            </main>
+          </div>
         </div>
       </div>
     </AppLayout>
+  );
+}
+function PageIntro({
+  eyebrow,
+  title,
+  text,
+}: {
+  eyebrow: string;
+  title: string;
+  text: string;
+}) {
+  return (
+    <div>
+      <p className="text-sm font-medium text-primary">{eyebrow}</p>
+      <h2 className="mt-1 text-2xl font-semibold tracking-tight">{title}</h2>
+      <p className="mt-2 max-w-2xl text-muted-foreground">{text}</p>
+    </div>
+  );
+}
+function Field({
+  label,
+  hint,
+  children,
+}: {
+  label: string;
+  hint: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-2">
+      <Label>{label}</Label>
+      <p className="text-sm text-muted-foreground">{hint}</p>
+      {children}
+    </div>
+  );
+}
+function FormError({ children }: { children: React.ReactNode }) {
+  return <p className="text-sm text-destructive">{children}</p>;
+}
+const Error = FormError;
+function SaveBar({ processing }: { processing: boolean }) {
+  return (
+    <div className="flex justify-end border-t pt-5">
+      <Button type="submit" disabled={processing}>
+        {processing ? 'Saving changes…' : 'Save changes'}
+      </Button>
+    </div>
   );
 }
