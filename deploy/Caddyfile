@@ -8,6 +8,12 @@
 	}
 }
 
+{$APP_DOMAIN} {
+	root * /var/www/wiki/public
+	php_fastcgi unix//run/php/php8.3-fpm.sock
+	file_server
+}
+
 # This single catch-all listener replaces per-domain NGINX server blocks.
 :443 {
 	tls {

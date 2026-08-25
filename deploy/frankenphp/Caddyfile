@@ -9,6 +9,11 @@
 	}
 }
 
+https://{$APP_DOMAIN}:8443 {
+	root * /app/public
+	php_server
+}
+
 https://:8443 {
 	tls {
 		on_demand
