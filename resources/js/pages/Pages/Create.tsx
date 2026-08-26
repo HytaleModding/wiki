@@ -20,6 +20,7 @@ interface Mod {
   id: string;
   name: string;
   slug: string;
+  custom_css?: string | null;
 }
 
 interface Page {
@@ -225,6 +226,8 @@ export default function CreatePage({
               onContentChange={(content) => setData('content', content)}
               lineCount={lineCount}
               error={errors.content}
+              uploadUrl={`/dashboard/mods/${mod.slug}/files/quick-upload`}
+              customCss={mod.custom_css}
             />
           ) : (
             <Card className="border-border/40 bg-card/50">

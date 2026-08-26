@@ -63,7 +63,7 @@ class PageController extends Controller
             ->get();
 
         return Inertia::render('Pages/Create', [
-            'mod' => $mod,
+            'mod' => $this->serializeMod($mod->load('owner')),
             'parent' => $parent,
             'potentialParents' => $potentialParents,
             'initialKind' => $initialKind,
@@ -245,7 +245,7 @@ class PageController extends Controller
             ->get();
 
         return Inertia::render('Pages/Edit', [
-            'mod' => $mod,
+            'mod' => $this->serializeMod($mod->load('owner')),
             'page' => $page,
             'potentialParents' => $potentialParents,
         ]);

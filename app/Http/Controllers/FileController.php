@@ -214,9 +214,18 @@ class FileController extends Controller
 
         $request->validate([
             'file' => 'required|file|max:10240', // 10MB max
+            'page_id' => 'nullable|uuid|exists:pages,id',
         ]);
 
         $uploadedFile = $request->file('file');
+        $pageId = $request->input('page_id');
+
+        if ($pageId) {
+            $page = Page::findOrFail($pageId);
+            if ($page->mod_id !== $mod->id) {
+                abort(422, 'Page must belong to the same mod.');
+            }
+        }
 
         $allowedMimes = [
             'image/jpeg', 'image/png', 'image/gif', 'image/webp',
@@ -238,6 +247,7 @@ class FileController extends Controller
 
         $file = File::create([
             'mod_id' => $mod->id,
+            'page_id' => $pageId,
             'original_name' => $originalName,
             'filename' => $filename,
             'path' => $path,
