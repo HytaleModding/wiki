@@ -113,11 +113,7 @@ export default function PublicPage({ mod, page, navigation }: Props) {
             <header className="mb-5">
               <h2 className="text-base font-semibold">Related pages</h2>
             </header>
-            <PageLinkGrid
-              pages={relatedPages}
-              modSlug={mod.slug}
-              columns={2}
-            />
+            <PageLinkGrid pages={relatedPages} modSlug={mod.slug} columns={2} />
           </section>
         )}
       </DocsShell>

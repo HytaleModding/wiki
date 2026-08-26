@@ -24,9 +24,7 @@ interface ModNavbarProps {
   modSlug: string;
 }
 
-export default function ModNavbar({
-  modSlug,
-}: ModNavbarProps) {
+export default function ModNavbar({ modSlug }: ModNavbarProps) {
   const { isCurrentUrl } = useCurrentUrl();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { auth } = usePage<SharedData>().props;
@@ -78,9 +76,7 @@ export default function ModNavbar({
             </SheetTrigger>
             <SheetContent side="right" className="w-80">
               <SheetHeader>
-                <SheetTitle className="text-left">
-                  Documentation
-                </SheetTitle>
+                <SheetTitle className="text-left">Documentation</SheetTitle>
               </SheetHeader>
               <div className="mt-6 flex flex-col space-y-6">
                 <div className="flex flex-col space-y-3">

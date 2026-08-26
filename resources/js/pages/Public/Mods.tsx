@@ -84,7 +84,10 @@ export default function PublicMods({ mods, query }: Props) {
                 out of their mods.
               </p>
 
-              <form onSubmit={handleSearch} className="flex max-w-xl gap-2 pt-2">
+              <form
+                onSubmit={handleSearch}
+                className="flex max-w-xl gap-2 pt-2"
+              >
                 <div className="relative flex-1">
                   <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
@@ -218,7 +221,7 @@ function ModCard({ mod }: { mod: Mod }) {
           </span>
           <span className="flex items-center gap-1">
             View wiki
-            <ArrowUpRight className="h-3 w-3 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+            <ArrowUpRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </span>
         </div>
       </div>

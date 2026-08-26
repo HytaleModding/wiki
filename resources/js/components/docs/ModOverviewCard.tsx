@@ -30,8 +30,10 @@ export default function ModOverviewCard({
           )}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3 px-4 pb-4 pt-0">
-        <p className="text-sm leading-6 text-muted-foreground">{mod.description}</p>
+      <CardContent className="space-y-3 px-4 pt-0 pb-4">
+        <p className="text-sm leading-6 text-muted-foreground">
+          {mod.description}
+        </p>
         <div className="flex items-center space-x-2">
           {showAvatar && (
             <Avatar className="h-6 w-6">

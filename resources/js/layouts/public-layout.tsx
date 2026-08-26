@@ -1,6 +1,6 @@
+import { BookOpen } from 'lucide-react';
 import { useEffect } from 'react';
 import { Toaster } from 'sileo';
-import { BookOpen } from 'lucide-react';
 
 import AppNavbar from '@/components/app-navbar';
 import ModNavbar from '@/components/mod-navbar';
@@ -55,9 +55,7 @@ export default function PublicLayout({
   return (
     <div className="public-docs flex min-h-screen flex-col bg-background">
       {modName && modSlug ? (
-        <ModNavbar
-          modSlug={modSlug}
-        />
+        <ModNavbar modSlug={modSlug} />
       ) : (
         <AppNavbar brandHref="/" publicMode />
       )}
@@ -67,16 +65,33 @@ export default function PublicLayout({
           <div className="mx-auto max-w-[90rem] px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
             <div className="flex max-w-3xl items-start gap-5">
               {modIconUrl ? (
-                <img src={modIconUrl} alt="" className="h-14 w-14 rounded-2xl border border-border/70 object-cover shadow-sm sm:h-16 sm:w-16" />
+                <img
+                  src={modIconUrl}
+                  alt=""
+                  className="h-14 w-14 rounded-2xl border border-border/70 object-cover shadow-sm sm:h-16 sm:w-16"
+                />
               ) : (
                 <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm sm:h-16 sm:w-16">
                   <BookOpen className="h-7 w-7" />
                 </div>
               )}
               <div className="min-w-0">
-                <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{modName}</h1>
-                {modDescription && <p className="mt-3 max-w-2xl text-base leading-7 text-muted-foreground">{modDescription}</p>}
-                {ownerName && <p className="mt-4 text-sm text-muted-foreground">Maintained by <span className="font-medium text-foreground">{ownerName}</span></p>}
+                <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+                  {modName}
+                </h1>
+                {modDescription && (
+                  <p className="mt-3 max-w-2xl text-base leading-7 text-muted-foreground">
+                    {modDescription}
+                  </p>
+                )}
+                {ownerName && (
+                  <p className="mt-4 text-sm text-muted-foreground">
+                    Maintained by{' '}
+                    <span className="font-medium text-foreground">
+                      {ownerName}
+                    </span>
+                  </p>
+                )}
               </div>
             </div>
           </div>
