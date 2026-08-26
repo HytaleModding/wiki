@@ -56,6 +56,7 @@ class GitHubWebhookTest extends TestCase
 
     public function test_connected_user_can_list_and_select_an_accessible_github_repository(): void
     {
+        Bus::fake();
         $owner = User::factory()->create();
         $mod = Mod::factory()->create(['owner_id' => $owner->id]);
         GitHubConnection::create([
@@ -89,6 +90,7 @@ class GitHubWebhookTest extends TestCase
             'id' => $mod->id,
             'github_repository_url' => 'https://github.com/octocat/docs',
         ]);
+        Bus::assertDispatched(SyncGithubMod::class, fn (SyncGithubMod $job) => $job->modId === $mod->id);
     }
 
     public function test_disconnect_removes_the_repository_without_unlinking_the_github_account(): void

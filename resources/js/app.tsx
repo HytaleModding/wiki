@@ -7,7 +7,7 @@ import '../css/font.css';
 import SeoMeta from './components/SeoMeta';
 import { initializeTheme } from './hooks/use-appearance';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName = import.meta.env.VITE_APP_NAME || 'HytaleModding Wiki';
 
 type ResolvedPageModule = {
   default: {

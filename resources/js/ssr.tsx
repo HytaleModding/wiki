@@ -6,7 +6,7 @@ import ReactDOMServer from 'react-dom/server';
 
 import SeoMeta from './components/SeoMeta';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName = import.meta.env.VITE_APP_NAME || 'HytaleModding Wiki';
 
 type ResolvedPageModule = {
   default: {

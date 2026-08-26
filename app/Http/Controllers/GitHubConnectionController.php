@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\SyncGithubMod;
 use App\Models\GitHubConnection;
 use App\Models\Mod;
 use App\Services\GitHubRepositoryService;
@@ -127,6 +128,10 @@ class GitHubConnectionController extends Controller
         }
 
         $mod->update(['github_repository_url' => $repository['html_url']]);
+
+        if ($mod->wasChanged('github_repository_url')) {
+            SyncGithubMod::dispatch($mod->id);
+        }
 
         return response()->json(['repository' => $repository]);
     }
