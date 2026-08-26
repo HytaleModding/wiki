@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\PublicAssetStorage;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -66,7 +67,7 @@ class File extends Model
         }
 
         if ($this->storage_driver === 's3') {
-            return Storage::disk('s3')->url($this->path);
+            return PublicAssetStorage::url($this->path);
         }
 
         return Storage::disk('public')->url($this->path);
@@ -119,7 +120,7 @@ class File extends Model
 
         static::deleting(function ($file) {
             if ($file->storage_driver === 's3') {
-                Storage::disk('s3')->delete($file->path);
+                PublicAssetStorage::disk()->delete($file->path);
             } else {
                 Storage::disk('public')->delete($file->path);
             }

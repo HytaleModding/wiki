@@ -10,11 +10,11 @@ use App\Models\Page;
 use App\Models\User;
 use App\Support\CustomCssSanitizer;
 use App\Services\CustomDomainService;
+use App\Services\PublicAssetStorage;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -86,8 +86,8 @@ class ModController extends Controller
             $iconFilename = Str::uuid().'.'.$iconFile->getClientOriginalExtension();
             $iconPath = "mods/icons/{$iconFilename}";
 
-            $iconFile->storeAs('mods/icons', $iconFilename, 'public');
-            $iconUrl = Storage::disk('public')->url($iconPath);
+            $iconFile->storeAs('mods/icons', $iconFilename, PublicAssetStorage::DISK);
+            $iconUrl = PublicAssetStorage::url($iconPath);
         }
 
         $mod = Mod::create([
@@ -263,16 +263,15 @@ class ModController extends Controller
 
         if ($request->hasFile('icon')) {
             if ($mod->icon_url) {
-                $oldPath = str_replace('/storage/', '', parse_url($mod->icon_url, PHP_URL_PATH));
-                Storage::disk('public')->delete($oldPath);
+                PublicAssetStorage::deleteUrl($mod->icon_url);
             }
 
             $iconFile = $request->file('icon');
             $iconFilename = Str::uuid().'.'.$iconFile->getClientOriginalExtension();
             $iconPath = "mods/icons/{$iconFilename}";
 
-            $iconFile->storeAs('mods/icons', $iconFilename, 'public');
-            $validated['icon_url'] = Storage::disk('public')->url($iconPath);
+            $iconFile->storeAs('mods/icons', $iconFilename, PublicAssetStorage::DISK);
+            $validated['icon_url'] = PublicAssetStorage::url($iconPath);
         }
 
         $mod->update($validated);

@@ -7,8 +7,9 @@ import {
   ChevronRightIcon,
   CopyIcon,
   CheckIcon,
+  XIcon,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -56,6 +57,20 @@ export default function FilesIndex({ mod, files, canEdit }: Props) {
   });
 
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const addFiles = (newFiles: globalThis.File[]) => {
+    setData('files', [...data.files, ...newFiles]);
+  };
+
+  const removeFile = (index: number) => {
+    setData(
+      'files',
+      data.files.filter((_, fileIndex) => fileIndex !== index),
+    );
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
 
   const handleFileUpload = (e: React.SubmitEvent) => {
     e.preventDefault();
@@ -65,10 +80,7 @@ export default function FilesIndex({ mod, files, canEdit }: Props) {
       forceFormData: true,
       onSuccess: () => {
         setData('files', []);
-        const input = document.getElementById(
-          'file-upload',
-        ) as HTMLInputElement;
-        if (input) input.value = '';
+        if (fileInputRef.current) fileInputRef.current.value = '';
       },
     });
   };
@@ -151,20 +163,71 @@ export default function FilesIndex({ mod, files, canEdit }: Props) {
             <CardContent>
               <form onSubmit={handleFileUpload} className="space-y-4">
                 <div>
-                  <Label htmlFor="file-upload">Select Files</Label>
+                  <Label htmlFor="file-upload">Files</Label>
                   <Input
                     id="file-upload"
+                    ref={fileInputRef}
                     type="file"
                     multiple
-                    onChange={(e) =>
-                      setData('files', Array.from(e.target.files ?? []))
-                    }
-                    className="mt-1"
+                    accept="image/jpeg,image/png,image/gif,image/webp,application/pdf,text/plain,text/markdown,.md,.doc,.docx,.zip,.rar"
+                    onChange={(e) => addFiles(Array.from(e.target.files ?? []))}
+                    className="sr-only"
                   />
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Maximum file size: 10MB. Supported formats: Images, PDFs,
-                    Archives, Documents
-                  </p>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    onDragEnter={(event) => {
+                      event.preventDefault();
+                      setIsDragging(true);
+                    }}
+                    onDragOver={(event) => event.preventDefault()}
+                    onDragLeave={() => setIsDragging(false)}
+                    onDrop={(event) => {
+                      event.preventDefault();
+                      setIsDragging(false);
+                      addFiles(Array.from(event.dataTransfer.files));
+                    }}
+                    className={`flex w-full flex-col items-center rounded-lg border-2 border-dashed px-6 py-8 text-center transition-colors ${
+                      isDragging
+                        ? 'border-primary bg-primary/5'
+                        : 'border-muted-foreground/25 hover:border-primary/50'
+                    }`}
+                  >
+                    <UploadIcon className="mb-2 h-7 w-7 text-muted-foreground" />
+                    <span className="font-medium text-primary">
+                      Drop files here, or choose files
+                    </span>
+                    <span className="mt-1 text-sm text-muted-foreground">
+                      Up to 10MB each · images, PDFs, documents, and archives
+                    </span>
+                  </button>
+                  {data.files.length > 0 && (
+                    <div className="mt-3 space-y-2">
+                      {data.files.map((file, index) => (
+                        <div
+                          key={`${file.name}-${file.lastModified}-${index}`}
+                          className="flex items-center justify-between gap-3 rounded-md bg-muted px-3 py-2 text-sm"
+                        >
+                          <span className="min-w-0 truncate text-primary">
+                            {file.name}
+                          </span>
+                          <div className="flex shrink-0 items-center gap-2 text-muted-foreground">
+                            <span>{formatFileSize(file.size)}</span>
+                            <Button
+                              type="button"
+                              size="icon"
+                              variant="ghost"
+                              className="h-7 w-7"
+                              onClick={() => removeFile(index)}
+                              aria-label={`Remove ${file.name}`}
+                            >
+                              <XIcon className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <Button
                   type="submit"

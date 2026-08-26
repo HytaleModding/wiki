@@ -5,11 +5,11 @@ namespace App\Http\Controllers\Settings;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\ProfileDeleteRequest;
 use App\Http\Requests\Settings\ProfileUpdateRequest;
+use App\Services\PublicAssetStorage;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -37,14 +37,13 @@ class ProfileController extends Controller
 
         if ($request->hasFile('avatar')) {
             if ($user->avatar_url && ! str_contains($user->avatar_url, 'ui-avatars.com')) {
-                $oldPath = str_replace('/storage/', '', parse_url($user->avatar_url, PHP_URL_PATH));
-                Storage::disk('public')->delete($oldPath);
+                PublicAssetStorage::deleteUrl($user->avatar_url);
             }
 
             $avatarFile = $request->file('avatar');
             $filename = 'avatars/'.Str::uuid().'.'.$avatarFile->getClientOriginalExtension();
-            $path = $avatarFile->storeAs('', $filename, 'public');
-            $validated['avatar_url'] = asset('storage/'.$path);
+            $path = $avatarFile->storeAs('', $filename, PublicAssetStorage::DISK);
+            $validated['avatar_url'] = PublicAssetStorage::url($path);
         }
 
         unset($validated['avatar']);
@@ -68,8 +67,7 @@ class ProfileController extends Controller
         $user = $request->user();
 
         if ($user->avatar_url && ! str_contains($user->avatar_url, 'ui-avatars.com')) {
-            $oldPath = str_replace('/storage/', '', parse_url($user->avatar_url, PHP_URL_PATH));
-            Storage::disk('public')->delete($oldPath);
+            PublicAssetStorage::deleteUrl($user->avatar_url);
         }
 
         $user->avatar_url = null;

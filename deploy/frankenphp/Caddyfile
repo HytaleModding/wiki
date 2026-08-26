@@ -11,6 +11,8 @@
 
 https://{$APP_DOMAIN}:8443 {
 	root * /app/public
+	@legacy_storage path_regexp legacy_storage ^/storage/(.*)$
+	redir @legacy_storage {$R2_PUBLIC_URL}/{re.legacy_storage.1} permanent
 	php_server
 }
 
@@ -20,6 +22,8 @@ https://:8443 {
 	}
 
 	root * /app/public
+	@legacy_storage path_regexp legacy_storage ^/storage/(.*)$
+	redir @legacy_storage {$R2_PUBLIC_URL}/{re.legacy_storage.1} permanent
 	php_server
 }
 

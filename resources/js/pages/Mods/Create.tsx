@@ -27,7 +27,7 @@ export default function CreateMod() {
     name: '',
     description: '',
     visibility: 'private',
-    storage_driver: 'local',
+    storage_driver: 's3',
     icon: null as File | null,
   });
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\File;
 use App\Models\Mod;
 use App\Models\Page;
+use App\Services\PublicAssetStorage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -90,7 +91,7 @@ class FileController extends Controller
 
             $path = "mods/{$mod->id}/files/{$filename}";
 
-            $disk = 'public';
+            $disk = PublicAssetStorage::DISK;
             $uploadedFile->storeAs("mods/{$mod->id}/files", $filename, $disk);
 
             $file = File::create([
@@ -101,10 +102,11 @@ class FileController extends Controller
                 'path' => $path,
                 'mime_type' => $uploadedFile->getMimeType(),
                 'size' => $uploadedFile->getSize(),
-                'storage_driver' => 'local', // hard coded local for now
+                // "s3" is the legacy database value for S3-compatible object storage.
+                'storage_driver' => 's3',
                 'uploaded_by' => $user->id,
             ]);
-            $url = Storage::disk('public')->url($path);
+            $url = PublicAssetStorage::url($path);
 
             $file->update(['url' => $url]);
 
@@ -166,7 +168,7 @@ class FileController extends Controller
             abort(403);
         }
 
-        $disk = 'public';
+        $disk = $file->storage_driver === 's3' ? PublicAssetStorage::DISK : 'public';
 
         if (! Storage::disk($disk)->exists($file->path)) {
             abort(404, 'File not found on storage.');
@@ -231,7 +233,7 @@ class FileController extends Controller
         $filename = Str::uuid().'.'.$extension;
 
         $path = "mods/{$mod->id}/files/{$filename}";
-        $disk = 'public';
+        $disk = PublicAssetStorage::DISK;
         $uploadedFile->storeAs("mods/{$mod->id}/files", $filename, $disk);
 
         $file = File::create([
@@ -241,11 +243,11 @@ class FileController extends Controller
             'path' => $path,
             'mime_type' => $uploadedFile->getMimeType(),
             'size' => $uploadedFile->getSize(),
-            'storage_driver' => $mod->storage_driver,
+            'storage_driver' => 's3',
             'uploaded_by' => $user->id,
         ]);
 
-        $url = Storage::disk('public')->url($path);
+        $url = PublicAssetStorage::url($path);
         $file->update(['url' => $url]);
 
         return response()->json([

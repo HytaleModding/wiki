@@ -10,6 +10,8 @@
 
 {$APP_DOMAIN} {
 	root * /var/www/wiki/public
+	@legacy_storage path_regexp legacy_storage ^/storage/(.*)$
+	redir @legacy_storage {$R2_PUBLIC_URL}/{re.legacy_storage.1} permanent
 	php_fastcgi unix//run/php/php8.3-fpm.sock
 	file_server
 }
@@ -21,6 +23,8 @@
 	}
 
 	root * /var/www/wiki/public
+	@legacy_storage path_regexp legacy_storage ^/storage/(.*)$
+	redir @legacy_storage {$R2_PUBLIC_URL}/{re.legacy_storage.1} permanent
 	php_fastcgi unix//run/php/php8.3-fpm.sock
 	file_server
 }
@@ -29,6 +33,8 @@
 # endpoint locally. Caddy handles ACME challenge paths before PHP receives them.
 :80 {
 	root * /var/www/wiki/public
+	@legacy_storage path_regexp legacy_storage ^/storage/(.*)$
+	redir @legacy_storage {$R2_PUBLIC_URL}/{re.legacy_storage.1} permanent
 	php_fastcgi unix//run/php/php8.3-fpm.sock
 	file_server
 }

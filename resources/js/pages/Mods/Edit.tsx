@@ -33,7 +33,7 @@ interface Mod {
   description: string;
   icon_url?: string;
   visibility: 'public' | 'private' | 'unlisted';
-  storage_driver: 'local';
+  storage_driver: 'local' | 's3';
   external_access: boolean;
   github_repository_url?: string | null;
   github_repository_path?: string | null;
