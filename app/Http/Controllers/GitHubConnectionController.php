@@ -78,6 +78,11 @@ class GitHubConnectionController extends Controller
     {
         $this->authorizeSettings($mod);
 
+        $mod->update([
+            'github_repository_url' => null,
+            'github_repository_path' => null,
+        ]);
+
         Auth::user()?->githubConnection()?->delete();
 
         if (request()->expectsJson()) {

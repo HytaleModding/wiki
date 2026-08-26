@@ -90,4 +90,31 @@ class GitHubWebhookTest extends TestCase
             'github_repository_url' => 'https://github.com/octocat/docs',
         ]);
     }
+
+    public function test_disconnect_removes_github_management_from_the_mod(): void
+    {
+        $owner = User::factory()->create();
+        $mod = Mod::factory()->create([
+            'owner_id' => $owner->id,
+            'github_repository_url' => 'https://github.com/octocat/docs',
+            'github_repository_path' => 'docs',
+        ]);
+        $connection = GitHubConnection::create([
+            'user_id' => $owner->id,
+            'github_user_id' => 123,
+            'github_login' => 'octocat',
+            'access_token' => 'user-token',
+        ]);
+
+        $this->actingAs($owner)
+            ->deleteJson(route('mods.github.disconnect', $mod))
+            ->assertNoContent();
+
+        $this->assertDatabaseHas('mods', [
+            'id' => $mod->id,
+            'github_repository_url' => null,
+            'github_repository_path' => null,
+        ]);
+        $this->assertDatabaseMissing('github_connections', ['id' => $connection->id]);
+    }
 }
