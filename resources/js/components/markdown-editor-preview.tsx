@@ -35,7 +35,7 @@ function htmlToMarkdown(html: string) {
       case 'P': case 'DIV': return `${text.trim()}\n\n`;
       case 'BR': return '\n';
       case 'STRONG': case 'B': return `**${text}**`;
-      case 'EM': case 'I': return `*${text}*`;
+      case 'EM': case 'I': return `_${text}_`;
       case 'CODE': return `\`${text}\``;
       case 'A': return `[${text}](${node.getAttribute('href') ?? ''})`;
       case 'IMG': return `![${node.getAttribute('alt') ?? ''}](${node.getAttribute('src') ?? ''})\n\n`;
@@ -53,6 +53,7 @@ export default function MarkdownEditorPreview({ content, onContentChange, lineCo
   const [activeFormats, setActiveFormats] = useState({ bold: false, italic: false, block: 'P' });
   const [linkDialogOpen, setLinkDialogOpen] = useState(false);
   const [linkUrl, setLinkUrl] = useState('');
+  const [linkError, setLinkError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -119,7 +120,27 @@ export default function MarkdownEditorPreview({ content, onContentChange, lineCo
     requestAnimationFrame(updateActiveFormats);
   };
 
+  const validateLink = (value: string): string | null => {
+    const url = value.trim();
+    if (!url) return 'Enter a link URL.';
+    if (url.startsWith('/') || url.startsWith('#')) return null;
+    if (/^mailto:[^\s@]+@[^\s@]+\.[^\s@]+$/i.test(url)) return null;
+    try {
+      const parsed = new URL(url);
+      return ['http:', 'https:'].includes(parsed.protocol)
+        ? null
+        : 'Use an https:// or http:// link, a relative path, or an email link.';
+    } catch {
+      return 'Enter a complete URL, such as https://example.com.';
+    }
+  };
+
   const createLink = () => {
+    const validationError = validateLink(linkUrl);
+    if (validationError) {
+      setLinkError(validationError);
+      return;
+    }
     const selection = window.getSelection();
     if (visualSelectionRef.current && selection) {
       selection.removeAllRanges();
@@ -130,6 +151,7 @@ export default function MarkdownEditorPreview({ content, onContentChange, lineCo
     onContentChange(htmlToMarkdown(visualEditorRef.current?.innerHTML ?? ''));
     setLinkDialogOpen(false);
     setLinkUrl('');
+    setLinkError(null);
   };
 
   const handleVisualKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -213,7 +235,7 @@ export default function MarkdownEditorPreview({ content, onContentChange, lineCo
         {showEditor && <div className="flex min-w-0 flex-col border-border/70 xl:border-r">
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/70 px-4 py-2.5 text-xs text-muted-foreground"><div className="flex rounded-md border bg-background p-0.5"><Button type="button" size="sm" variant={editorMode === 'markdown' ? 'secondary' : 'ghost'} onClick={() => setEditorMode('markdown')}>Markdown</Button><Button type="button" size="sm" variant={editorMode === 'visual' ? 'secondary' : 'ghost'} onClick={() => void activateVisualEditor()}>Visual</Button></div><span>{content.length.toLocaleString()} characters</span></div>
           <div className="relative flex flex-1">
-            {editorMode === 'markdown' ? <Textarea ref={textareaRef} id="content" value={content} rows={lineCount} onChange={(event) => onContentChange(event.target.value)} onPaste={handlePaste} onDragOver={(event) => { event.preventDefault(); setIsDragging(true); }} onDragLeave={() => setIsDragging(false)} onDrop={handleDrop} placeholder="# Welcome\n\nStart writing your documentation..." className="min-h-[560px] flex-1 resize-none rounded-none border-0 bg-background px-5 py-4 font-mono text-sm leading-6 focus-visible:ring-0" /> : <div className="flex min-h-[560px] flex-1 flex-col"><div className="flex flex-wrap items-center gap-1 border-b border-border/70 bg-muted/20 p-2"><Button type="button" size="icon" variant={activeFormats.bold ? 'secondary' : 'ghost'} title="Bold" onMouseDown={(event) => event.preventDefault()} onClick={() => formatVisual('bold')}><BoldIcon className="h-4 w-4" /></Button><Button type="button" size="icon" variant={activeFormats.italic ? 'secondary' : 'ghost'} title="Italic" onMouseDown={(event) => event.preventDefault()} onClick={() => formatVisual('italic')}><ItalicIcon className="h-4 w-4" /></Button><Button type="button" size="icon" variant="ghost" title="Add link" onMouseDown={(event) => event.preventDefault()} onClick={() => setLinkDialogOpen(true)}><LinkIcon className="h-4 w-4" /></Button><Button type="button" size="icon" variant={activeFormats.block === 'LI' ? 'secondary' : 'ghost'} title="Bulleted list" onMouseDown={(event) => event.preventDefault()} onClick={() => formatVisual('insertUnorderedList')}><ListIcon className="h-4 w-4" /></Button><span className="mx-1 h-5 border-l border-border" /><Button type="button" size="sm" variant={activeFormats.block === 'H1' ? 'secondary' : 'ghost'} onMouseDown={(event) => event.preventDefault()} onClick={() => formatVisual('formatBlock', 'h1')}>H1</Button><Button type="button" size="sm" variant={activeFormats.block === 'H2' ? 'secondary' : 'ghost'} onMouseDown={(event) => event.preventDefault()} onClick={() => formatVisual('formatBlock', 'h2')}>H2</Button><Button type="button" size="sm" variant={activeFormats.block === 'H3' ? 'secondary' : 'ghost'} onMouseDown={(event) => event.preventDefault()} onClick={() => formatVisual('formatBlock', 'h3')}>H3</Button><Button type="button" size="sm" variant={activeFormats.block === 'P' ? 'secondary' : 'ghost'} onMouseDown={(event) => event.preventDefault()} onClick={() => formatVisual('formatBlock', 'p')}>Text</Button></div><div ref={visualEditorRef} contentEditable suppressContentEditableWarning onInput={() => onContentChange(htmlToMarkdown(visualEditorRef.current?.innerHTML ?? ''))} onKeyDown={handleVisualKeyDown} onKeyUp={updateActiveFormats} onMouseUp={updateActiveFormats} onFocus={updateActiveFormats} onPaste={handlePaste} onDragOver={(event) => { event.preventDefault(); setIsDragging(true); }} onDragLeave={() => setIsDragging(false)} onDrop={handleDrop} className="prose max-w-none flex-1 overflow-y-auto px-5 py-4 outline-none dark:prose-invert" /></div>}
+            {editorMode === 'markdown' ? <Textarea ref={textareaRef} id="content" value={content} rows={lineCount} onChange={(event) => onContentChange(event.target.value)} onPaste={handlePaste} onDragOver={(event) => { event.preventDefault(); setIsDragging(true); }} onDragLeave={() => setIsDragging(false)} onDrop={handleDrop} placeholder="# Welcome\n\nStart writing your documentation..." className="min-h-[560px] flex-1 resize-none rounded-none border-0 bg-background px-5 py-4 font-mono text-sm leading-6 focus-visible:ring-0" /> : <div className="flex min-h-[560px] flex-1 flex-col"><div className="flex flex-wrap items-center gap-1 border-b border-border/70 bg-muted/20 p-2"><Button type="button" size="icon" variant={activeFormats.bold ? 'secondary' : 'ghost'} title="Bold" onMouseDown={(event) => event.preventDefault()} onClick={() => formatVisual('bold')}><BoldIcon className="h-4 w-4" /></Button><Button type="button" size="icon" variant={activeFormats.italic ? 'secondary' : 'ghost'} title="Italic" onMouseDown={(event) => event.preventDefault()} onClick={() => formatVisual('italic')}><ItalicIcon className="h-4 w-4" /></Button><Button type="button" size="icon" variant="ghost" title="Add link" onMouseDown={(event) => event.preventDefault()} onClick={() => { setLinkError(null); setLinkDialogOpen(true); }}><LinkIcon className="h-4 w-4" /></Button><Button type="button" size="icon" variant={activeFormats.block === 'LI' ? 'secondary' : 'ghost'} title="Bulleted list" onMouseDown={(event) => event.preventDefault()} onClick={() => formatVisual('insertUnorderedList')}><ListIcon className="h-4 w-4" /></Button><span className="mx-1 h-5 border-l border-border" /><Button type="button" size="sm" variant={activeFormats.block === 'H1' ? 'secondary' : 'ghost'} onMouseDown={(event) => event.preventDefault()} onClick={() => formatVisual('formatBlock', 'h1')}>H1</Button><Button type="button" size="sm" variant={activeFormats.block === 'H2' ? 'secondary' : 'ghost'} onMouseDown={(event) => event.preventDefault()} onClick={() => formatVisual('formatBlock', 'h2')}>H2</Button><Button type="button" size="sm" variant={activeFormats.block === 'H3' ? 'secondary' : 'ghost'} onMouseDown={(event) => event.preventDefault()} onClick={() => formatVisual('formatBlock', 'h3')}>H3</Button><Button type="button" size="sm" variant={activeFormats.block === 'P' ? 'secondary' : 'ghost'} onMouseDown={(event) => event.preventDefault()} onClick={() => formatVisual('formatBlock', 'p')}>Text</Button></div><div ref={visualEditorRef} contentEditable suppressContentEditableWarning onInput={() => onContentChange(htmlToMarkdown(visualEditorRef.current?.innerHTML ?? ''))} onKeyDown={handleVisualKeyDown} onKeyUp={updateActiveFormats} onMouseUp={updateActiveFormats} onFocus={updateActiveFormats} onPaste={handlePaste} onDragOver={(event) => { event.preventDefault(); setIsDragging(true); }} onDragLeave={() => setIsDragging(false)} onDrop={handleDrop} className="prose max-w-none flex-1 overflow-y-auto px-5 py-4 outline-none dark:prose-invert" /></div>}
             {isDragging && <div className="pointer-events-none absolute inset-2 flex items-center justify-center rounded-lg border-2 border-dashed border-primary bg-primary/10 font-medium text-primary">Drop image to insert it here</div>}
           </div>
           <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border/70 bg-muted/20 px-4 py-2.5 text-xs text-muted-foreground"><span>{error ? <span className="text-destructive">{error}</span> : 'Drop or paste an image anywhere in your text.'}</span><Button type="button" variant="ghost" size="sm" disabled={isUploading} onClick={() => fileInputRef.current?.click()}>{isUploading ? <Loader2Icon className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <ImagePlusIcon className="mr-1.5 h-3.5 w-3.5" />}{isUploading ? 'Uploading image' : 'Insert image'}</Button><input ref={fileInputRef} type="file" accept="image/png,image/jpeg,image/gif,image/webp" className="hidden" onChange={(event: ChangeEvent<HTMLInputElement>) => { void uploadImage(event.target.files?.[0]); event.target.value = ''; }} /></div>
@@ -230,7 +252,8 @@ export default function MarkdownEditorPreview({ content, onContentChange, lineCo
         </DialogHeader>
         <div className="grid gap-2">
           <Label htmlFor="visual-link-url">Link URL</Label>
-          <Input id="visual-link-url" autoFocus value={linkUrl} onChange={(event) => setLinkUrl(event.target.value)} placeholder="https://example.com" onKeyDown={(event) => { if (event.key === 'Enter' && linkUrl.trim()) createLink(); }} />
+          <Input id="visual-link-url" autoFocus value={linkUrl} onChange={(event) => { setLinkUrl(event.target.value); setLinkError(null); }} placeholder="https://example.com" aria-invalid={Boolean(linkError)} onKeyDown={(event) => { if (event.key === 'Enter' && linkUrl.trim()) createLink(); }} />
+          {linkError && <p className="text-sm text-destructive">{linkError}</p>}
         </div>
         <DialogFooter>
           <Button type="button" variant="outline" onClick={() => setLinkDialogOpen(false)}>Cancel</Button>
