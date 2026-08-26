@@ -91,7 +91,7 @@ class GitHubWebhookTest extends TestCase
         ]);
     }
 
-    public function test_disconnect_removes_github_management_from_the_mod(): void
+    public function test_disconnect_removes_the_repository_without_unlinking_the_github_account(): void
     {
         $owner = User::factory()->create();
         $mod = Mod::factory()->create([
@@ -115,6 +115,6 @@ class GitHubWebhookTest extends TestCase
             'github_repository_url' => null,
             'github_repository_path' => null,
         ]);
-        $this->assertDatabaseMissing('github_connections', ['id' => $connection->id]);
+        $this->assertDatabaseHas('github_connections', ['id' => $connection->id]);
     }
 }

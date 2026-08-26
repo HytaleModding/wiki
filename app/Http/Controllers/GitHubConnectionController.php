@@ -83,15 +83,13 @@ class GitHubConnectionController extends Controller
             'github_repository_path' => null,
         ]);
 
-        Auth::user()?->githubConnection()?->delete();
-
         if (request()->expectsJson()) {
             return response()->noContent();
         }
 
         return redirect()
             ->route('mods.edit', $mod)
-            ->with('success', 'GitHub has been unlinked from your account.');
+            ->with('success', 'The GitHub repository has been disconnected from this wiki.');
     }
 
     public function repositories(Mod $mod, GitHubRepositoryService $repositories)

@@ -190,8 +190,9 @@ export default function EditMod({
       setIsSelectingRepository(false);
     }
   };
-  const disconnectGithub = async () => {
-    if (!window.confirm('Disconnect GitHub from this wiki?')) return;
+  const disconnectRepository = async () => {
+    if (!window.confirm('Disconnect this GitHub repository from the wiki?'))
+      return;
     await fetch(`/dashboard/mods/${mod.slug}/github/connect`, {
       method: 'DELETE',
       headers: {
@@ -482,9 +483,9 @@ export default function EditMod({
                                 <Button
                                   type="button"
                                   variant="ghost"
-                                  onClick={disconnectGithub}
+                                  onClick={disconnectRepository}
                                 >
-                                  Disconnect
+                                  Disconnect repository
                                 </Button>
                               </div>
                             </div>
