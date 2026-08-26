@@ -82,7 +82,7 @@ export default function MarkdownEditorPreview({ content, onContentChange, lineCo
   return (
     <section className="overflow-hidden rounded-xl border border-border/70 bg-card shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/70 bg-muted/30 px-4 py-3">
-        <div><h2 className="font-semibold">Page content</h2><p className="text-xs text-muted-foreground">Write Markdown, then see it as visitors will.</p></div>
+        <div><h2 className="font-semibold">Page content</h2></div>
         <div className="flex items-center gap-1 rounded-md border bg-background p-1">
           <Button type="button" variant={viewMode === 'write' ? 'secondary' : 'ghost'} size="sm" onClick={() => setViewMode('write')}><PanelLeftIcon className="mr-1.5 h-3.5 w-3.5" />Write</Button>
           <Button type="button" variant={viewMode === 'split' ? 'secondary' : 'ghost'} size="sm" onClick={() => setViewMode('split')}>Split</Button>
