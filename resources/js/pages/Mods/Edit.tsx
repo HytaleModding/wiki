@@ -96,6 +96,7 @@ export default function EditMod({
   const [iconPreview, setIconPreview] = useState<string | null>(
     mod.icon_url || null,
   );
+  const iconObjectUrlRef = useRef<string | null>(null);
   const [repositories, setRepositories] = useState<GitHubRepository[]>([]);
   const repositoriesRef = useRef<GitHubRepository[]>([]);
   const [repositoriesError, setRepositoriesError] = useState<string | null>(
@@ -138,6 +139,14 @@ export default function EditMod({
       .catch((error: Error) => setRepositoriesError(error.message))
       .finally(() => setIsLoadingRepositories(false));
   }, [githubConnected, mod.slug, section]);
+
+  useEffect(() => {
+    return () => {
+      if (iconObjectUrlRef.current) {
+        URL.revokeObjectURL(iconObjectUrlRef.current);
+      }
+    };
+  }, []);
 
   const save = (event: React.FormEvent) => {
     event.preventDefault();
@@ -333,6 +342,7 @@ export default function EditMod({
                         <div className="grid gap-6 border-t pt-7 sm:grid-cols-2">
                           <Field
                             label="Visibility"
+                            id="visibility"
                             hint="Who can discover and visit this wiki."
                           >
                             <Select
@@ -341,7 +351,10 @@ export default function EditMod({
                                 value: 'public' | 'private' | 'unlisted',
                               ) => form.setData('visibility', value)}
                             >
-                              <SelectTrigger>
+                              <SelectTrigger
+                                id="visibility"
+                                aria-invalid={Boolean(form.errors.visibility)}
+                              >
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
@@ -355,23 +368,36 @@ export default function EditMod({
                                 ))}
                               </SelectContent>
                             </Select>
+                            {form.errors.visibility && (
+                              <Error>{form.errors.visibility}</Error>
+                            )}
                           </Field>
                           <Field
                             label="Wiki icon"
+                            id="icon"
                             hint="PNG, JPG, GIF, or WebP, up to 2 MB."
                           >
                             <div className="flex items-center gap-4">
                               <label className="flex h-11 cursor-pointer items-center gap-2 rounded-md border bg-background px-3 text-sm font-medium hover:bg-muted">
                                 <Upload className="h-4 w-4" /> Choose image
                                 <input
+                                  id="icon"
                                   type="file"
                                   className="sr-only"
                                   accept="image/*"
                                   onChange={(e) => {
                                     const file = e.target.files?.[0];
                                     if (file) {
+                                      if (iconObjectUrlRef.current) {
+                                        URL.revokeObjectURL(
+                                          iconObjectUrlRef.current,
+                                        );
+                                      }
+                                      const previewUrl =
+                                        URL.createObjectURL(file);
+                                      iconObjectUrlRef.current = previewUrl;
                                       form.setData('icon', file);
-                                      setIconPreview(URL.createObjectURL(file));
+                                      setIconPreview(previewUrl);
                                     }
                                   }}
                                 />
@@ -384,6 +410,9 @@ export default function EditMod({
                                 />
                               )}
                             </div>
+                            {form.errors.icon && (
+                              <Error>{form.errors.icon}</Error>
+                            )}
                           </Field>
                         </div>
                         <div className="flex items-center justify-between gap-6 rounded-xl bg-muted/50 p-4">
@@ -686,16 +715,18 @@ function PageIntro({
 }
 function Field({
   label,
+  id,
   hint,
   children,
 }: {
   label: string;
+  id?: string;
   hint: string;
   children: React.ReactNode;
 }) {
   return (
     <div className="space-y-2">
-      <Label>{label}</Label>
+      <Label htmlFor={id}>{label}</Label>
       <p className="text-sm text-muted-foreground">{hint}</p>
       {children}
     </div>
