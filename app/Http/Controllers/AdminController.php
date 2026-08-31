@@ -75,7 +75,16 @@ class AdminController extends Controller
             ->latest()->paginate(18)->withQueryString()
             ->through(fn (Mod $mod) => $this->modSummary($mod));
 
-        return Inertia::render('Admin/Mods', ['mods' => $mods, 'filters' => ['q' => $query, 'status' => $status]]);
+        return Inertia::render('Admin/Mods', [
+            'mods' => $mods,
+            'filters' => ['q' => $query, 'status' => $status],
+            'metrics' => [
+                'total' => Mod::count(),
+                'active' => Mod::where('is_suspended', false)->count(),
+                'suspended' => Mod::where('is_suspended', true)->count(),
+                'github' => Mod::whereNotNull('github_repository_url')->count(),
+            ],
+        ]);
     }
 
     public function showMod(Mod $mod)

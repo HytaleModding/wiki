@@ -57,9 +57,9 @@ Route::group(['prefix' => '/dashboard', 'middleware' => ['auth', 'verified', 'ac
         Route::patch('/users/{user}/suspension', [AdminController::class, 'toggleUser'])->name('users.suspension');
         Route::patch('/users/{user}/admin', [AdminController::class, 'toggleAdmin'])->name('users.admin');
         Route::get('/mods', [AdminController::class, 'mods'])->name('mods.index');
-        Route::get('/mods/{mod}', [AdminController::class, 'showMod'])->name('mods.show');
-        Route::patch('/mods/{mod}/suspension', [AdminController::class, 'toggleMod'])->name('mods.suspension');
-        Route::post('/mods/{mod}/sync', [AdminController::class, 'syncMod'])->name('mods.sync');
+        Route::get('/mods/{mod:slug}', [AdminController::class, 'showMod'])->name('mods.show');
+        Route::patch('/mods/{mod:slug}/suspension', [AdminController::class, 'toggleMod'])->name('mods.suspension');
+        Route::post('/mods/{mod:slug}/sync', [AdminController::class, 'syncMod'])->name('mods.sync');
         Route::get('/api-keys', [AdminController::class, 'apiKeys'])->name('api-keys.index');
         Route::delete('/api-keys/{apiKey}', [AdminController::class, 'revokeKey'])->name('api-keys.revoke');
         Route::get('/audit-log', [AdminController::class, 'auditLog'])->name('audit.index');

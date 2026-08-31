@@ -44,6 +44,23 @@ class AdminDashboardTest extends TestCase
         $this->assertDatabaseHas('admin_audit_logs', ['actor_id' => $admin->id, 'subject_id' => $mod->id, 'action' => 'mod.suspended']);
     }
 
+    public function test_admin_mod_routes_bind_by_slug(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $mod = Mod::factory()->create();
+
+        $this->actingAs($admin)
+            ->get("/dashboard/admin/mods/{$mod->slug}")
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Admin/ModShow')
+                ->where('mod.slug', $mod->slug));
+
+        $this->actingAs($admin)
+            ->patch("/dashboard/admin/mods/{$mod->slug}/suspension")
+            ->assertRedirect();
+    }
+
     public function test_admin_can_queue_a_manual_github_sync(): void
     {
         Queue::fake();

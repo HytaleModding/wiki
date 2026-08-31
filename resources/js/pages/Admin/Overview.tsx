@@ -86,7 +86,7 @@ export default function Overview({
             {recentMods.map((mod) => (
               <Link
                 key={mod.id}
-                href={`/dashboard/admin/mods/${mod.id}`}
+                href={`/dashboard/admin/mods/${mod.slug}`}
                 className="flex items-center gap-4 px-6 py-4 transition-colors hover:bg-muted/30"
               >
                 <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 font-semibold text-primary">
