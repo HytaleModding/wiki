@@ -1,5 +1,6 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Activity, ArrowUpRight, Ban, CheckCircle2, ChevronRight, Copy, ExternalLink, Github, KeyRound, LayoutDashboard, MoreHorizontal, Search, ShieldCheck, SlidersHorizontal, Users, type LucideIcon } from 'lucide-react';
+import { SiGithub as Github } from '@icons-pack/react-simple-icons';
+import { Activity, ArrowUpRight, Ban, CheckCircle2, ChevronRight, Copy, ExternalLink, KeyRound, LayoutDashboard, MoreHorizontal, Search, ShieldCheck, SlidersHorizontal, Users, type LucideIcon } from 'lucide-react';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
