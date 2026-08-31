@@ -20,6 +20,7 @@ class Mod extends Model
         'icon_url',
         'owner_id',
         'visibility',
+        'is_suspended',
         'storage_driver',
         'external_access',
         'github_repository_url',
@@ -37,6 +38,7 @@ class Mod extends Model
     protected $casts = [
         'id' => 'string',
         'external_access' => 'boolean',
+        'is_suspended' => 'boolean',
         'domain_verified' => 'boolean',
         'domain_checked_at' => 'datetime',
         'domain_ready_at' => 'datetime',

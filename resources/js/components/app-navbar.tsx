@@ -1,6 +1,13 @@
 import { SiGithub } from '@icons-pack/react-simple-icons';
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Menu, Search, Settings, ExternalLink } from 'lucide-react';
+import {
+  BookOpen,
+  Menu,
+  Search,
+  Settings,
+  ExternalLink,
+  ShieldCheck,
+} from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -81,7 +88,21 @@ export default function AppNavbar({
 
         <div className="ml-8 flex items-center gap-2 md:gap-4">
           {auth.user ? (
-            <UserMenuContent />
+            <div className="flex items-center gap-1">
+              {auth.user.is_admin && (
+                <Button
+                  asChild
+                  variant="ghost"
+                  size="sm"
+                  className="hidden gap-2 sm:flex"
+                >
+                  <Link href="/dashboard/admin">
+                    <ShieldCheck className="size-4" /> Admin
+                  </Link>
+                </Button>
+              )}
+              <UserMenuContent />
+            </div>
           ) : (
             <>
               <Button asChild variant="ghost" size="sm">

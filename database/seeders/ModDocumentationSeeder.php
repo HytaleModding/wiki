@@ -18,6 +18,7 @@ class ModDocumentationSeeder extends Seeder
             'name' => 'Admin User',
             'username' => 'admin',
             'email' => 'admin@example.com',
+            'is_admin' => true,
         ]);
 
         $regularUser = User::factory()->create([

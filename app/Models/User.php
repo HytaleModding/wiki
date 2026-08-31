@@ -24,6 +24,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'password',
         'avatar_url',
+        'is_admin',
+        'is_suspended',
     ];
 
     /**
@@ -58,7 +60,14 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
+            'is_admin' => 'boolean',
+            'is_suspended' => 'boolean',
         ];
+    }
+
+    public function isPlatformAdmin(): bool
+    {
+        return (bool) $this->is_admin;
     }
 
     /**

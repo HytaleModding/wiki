@@ -548,7 +548,7 @@ class ModController extends Controller
     {
         $query = $request->string('q')->toString();
 
-        $mods = Mod::where('visibility', 'public')
+        $mods = Mod::where('visibility', 'public')->where('is_suspended', false)
             ->when($query, function ($q) use ($query) {
                 $q->where(function ($inner) use ($query) {
                     $inner->where('name', 'like', '%'.$query.'%')
@@ -585,7 +585,7 @@ class ModController extends Controller
         $mod = $request->attributes->get('resolved_mod');
         $user = Auth::user();
 
-        if (! $mod instanceof Mod) {
+        if (! $mod instanceof Mod || $mod->is_suspended) {
             abort(404, 'Documentation not found');
         }
 
@@ -704,6 +704,10 @@ class ModController extends Controller
 
     private function canViewPublicDocumentation(Mod $mod, ?User $user): bool
     {
+        if ($mod->is_suspended) {
+            return false;
+        }
+
         if (in_array($mod->visibility, ['public', 'unlisted'], true)) {
             return true;
         }

@@ -5,6 +5,7 @@ use App\Http\Controllers\GitHubWebhookController;
 use App\Http\Controllers\GitHubConnectionController;
 use App\Http\Controllers\ModController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\AdminController;
 use App\Http\Middleware\ResolveModByDomain;
 use App\Services\PageViewService;
 use Illuminate\Http\Request;
@@ -49,6 +50,13 @@ Route::get('/terms', function () {
 })->name('legal.terms');
 
 Route::group(['prefix' => '/dashboard', 'middleware' => ['auth', 'verified']], function () {
+
+    Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
+    Route::patch('/admin/users/{user}/suspension', [AdminController::class, 'toggleUser'])->name('admin.users.suspension');
+    Route::patch('/admin/users/{user}/admin', [AdminController::class, 'toggleAdmin'])->name('admin.users.admin');
+    Route::delete('/admin/api-keys/{apiKey}', [AdminController::class, 'revokeKey'])->name('admin.api-keys.revoke');
+    Route::patch('/admin/mods/{mod}/suspension', [AdminController::class, 'toggleMod'])->name('admin.mods.suspension');
+    Route::post('/admin/mods/{mod}/sync', [AdminController::class, 'syncMod'])->name('admin.mods.sync');
 
     Route::get('/', function () {
         $user = Auth::user();
