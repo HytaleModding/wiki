@@ -19,6 +19,7 @@ function shouldNoIndex(componentName: string): boolean {
   return (
     componentName.startsWith('auth/') ||
     componentName.startsWith('dashboard') ||
+    componentName.startsWith('Admin/') ||
     componentName.startsWith('Invitations/') ||
     componentName.startsWith('Mods/') ||
     componentName.startsWith('Pages/') ||

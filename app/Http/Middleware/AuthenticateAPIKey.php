@@ -35,6 +35,10 @@ class AuthenticateAPIKey
             return $this->unauthorized('This API key has expired.');
         }
 
+        if (! $apiKey->user || $apiKey->user->is_suspended) {
+            return $this->unauthorized('The account for this API key is suspended.');
+        }
+
         if ($this->isRateLimited($apiKey)) {
             return response()->json([
                 'error' => 'Rate limit exceeded.',

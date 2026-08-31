@@ -3,6 +3,8 @@
 use App\Http\Middleware\AuthenticateAPIKey;
 use App\Http\Middleware\EnsureAPIScope;
 use App\Http\Middleware\EnsureEmailIsVerified;
+use App\Http\Middleware\EnsurePlatformAdmin;
+use App\Http\Middleware\EnsureAccountActive;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\ResolveModByDomain;
@@ -27,6 +29,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'api.scope' => EnsureAPIScope::class,
             'api.key' => AuthenticateAPIKey::class,
             'mod.domain' => ResolveModByDomain::class,
+            'platform.admin' => EnsurePlatformAdmin::class,
+            'account.active' => EnsureAccountActive::class,
         ]);
 
         $middleware->web(

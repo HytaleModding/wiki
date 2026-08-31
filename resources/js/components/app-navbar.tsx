@@ -164,20 +164,38 @@ export default function AppNavbar({
                 <div className="border-t pt-6">
                   <div className="flex flex-col space-y-2">
                     {auth.user ? (
-                      <Button
-                        asChild
-                        variant="ghost"
-                        size="sm"
-                        className="justify-start"
-                      >
-                        <Link
-                          href="/settings/profile"
-                          onClick={() => setIsMobileMenuOpen(false)}
+                      <>
+                        {auth.user.is_admin && (
+                          <Button
+                            asChild
+                            variant="ghost"
+                            size="sm"
+                            className="justify-start"
+                          >
+                            <Link
+                              href="/dashboard/admin"
+                              onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                              <ShieldCheck className="mr-2 h-4 w-4" />
+                              Administration
+                            </Link>
+                          </Button>
+                        )}
+                        <Button
+                          asChild
+                          variant="ghost"
+                          size="sm"
+                          className="justify-start"
                         >
-                          <Settings className="mr-2 h-4 w-4" />
-                          Settings
-                        </Link>
-                      </Button>
+                          <Link
+                            href="/settings/profile"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                          >
+                            <Settings className="mr-2 h-4 w-4" />
+                            Settings
+                          </Link>
+                        </Button>
+                      </>
                     ) : (
                       <>
                         <Button

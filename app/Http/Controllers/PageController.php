@@ -577,6 +577,10 @@ class PageController extends Controller
 
     private function canViewPublicDocumentation(Mod $mod, ?User $user): bool
     {
+        if ($mod->is_suspended) {
+            return false;
+        }
+
         if (in_array($mod->visibility, ['public', 'unlisted'], true)) {
             return true;
         }

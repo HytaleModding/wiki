@@ -16,6 +16,7 @@ class ModController extends ClientController
     public function index()
     {
         $mods = Mod::where('visibility', 'public')
+            ->where('is_suspended', false)
             ->where('external_access', true)
             ->with('owner')
             ->latest()
@@ -49,6 +50,7 @@ class ModController extends ClientController
         $modIdentifier = $request->route('mod');
 
         $mod = Mod::where('visibility', 'public')
+            ->where('is_suspended', false)
             ->where(function ($query) use ($modIdentifier) {
                 $query->where('id', $modIdentifier)
                     ->orWhere('slug', $modIdentifier);
@@ -112,6 +114,7 @@ class ModController extends ClientController
 
         $mod = Mod::where('id', $mod_id)
             ->where('visibility', 'public')
+            ->where('is_suspended', false)
             ->where('external_access', true)
             ->with('owner')
             ->firstOrFail();
@@ -147,6 +150,7 @@ class ModController extends ClientController
         $limit = (int) ($validated['limit'] ?? 10);
 
         $mod = Mod::where('visibility', 'public')
+            ->where('is_suspended', false)
             ->where(function ($query) use ($modIdentifier) {
                 $query->where('id', $modIdentifier)
                     ->orWhere('slug', $modIdentifier);

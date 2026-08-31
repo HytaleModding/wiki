@@ -49,14 +49,21 @@ Route::get('/terms', function () {
     return Inertia::render('Legal/Terms');
 })->name('legal.terms');
 
-Route::group(['prefix' => '/dashboard', 'middleware' => ['auth', 'verified']], function () {
+Route::group(['prefix' => '/dashboard', 'middleware' => ['auth', 'verified', 'account.active']], function () {
 
-    Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
-    Route::patch('/admin/users/{user}/suspension', [AdminController::class, 'toggleUser'])->name('admin.users.suspension');
-    Route::patch('/admin/users/{user}/admin', [AdminController::class, 'toggleAdmin'])->name('admin.users.admin');
-    Route::delete('/admin/api-keys/{apiKey}', [AdminController::class, 'revokeKey'])->name('admin.api-keys.revoke');
-    Route::patch('/admin/mods/{mod}/suspension', [AdminController::class, 'toggleMod'])->name('admin.mods.suspension');
-    Route::post('/admin/mods/{mod}/sync', [AdminController::class, 'syncMod'])->name('admin.mods.sync');
+    Route::prefix('admin')->middleware('platform.admin')->name('admin.')->group(function () {
+        Route::get('/', [AdminController::class, 'index'])->name('index');
+        Route::get('/users', [AdminController::class, 'users'])->name('users.index');
+        Route::patch('/users/{user}/suspension', [AdminController::class, 'toggleUser'])->name('users.suspension');
+        Route::patch('/users/{user}/admin', [AdminController::class, 'toggleAdmin'])->name('users.admin');
+        Route::get('/mods', [AdminController::class, 'mods'])->name('mods.index');
+        Route::get('/mods/{mod}', [AdminController::class, 'showMod'])->name('mods.show');
+        Route::patch('/mods/{mod}/suspension', [AdminController::class, 'toggleMod'])->name('mods.suspension');
+        Route::post('/mods/{mod}/sync', [AdminController::class, 'syncMod'])->name('mods.sync');
+        Route::get('/api-keys', [AdminController::class, 'apiKeys'])->name('api-keys.index');
+        Route::delete('/api-keys/{apiKey}', [AdminController::class, 'revokeKey'])->name('api-keys.revoke');
+        Route::get('/audit-log', [AdminController::class, 'auditLog'])->name('audit.index');
+    });
 
     Route::get('/', function () {
         $user = Auth::user();
