@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Jobs\SyncGithubMod;
 use App\Models\AdminAuditLog;
+use App\Models\ApiKey;
 use App\Models\Mod;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -79,5 +80,36 @@ class AdminDashboardTest extends TestCase
 
         $this->actingAs($admin)->patch(route('admin.users.suspension', $admin))->assertStatus(422);
         $this->actingAs($admin)->patch(route('admin.users.admin', $admin))->assertStatus(422);
+    }
+
+    public function test_admin_can_create_update_and_rotate_an_api_key(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $owner = User::factory()->create();
+
+        $this->actingAs($admin)->post(route('admin.api-keys.store'), [
+            'user_id' => $owner->id,
+            'name' => 'Production client',
+            'scopes' => ['read:mods', 'read:mods:*'],
+            'rate_limit' => 120,
+            'expires_at' => null,
+        ])->assertRedirect()->assertSessionHas('new_api_key');
+
+        $apiKey = ApiKey::where('name', 'Production client')->firstOrFail();
+        $originalSecret = $apiKey->key;
+        $this->assertSame(120, $apiKey->rate_limit);
+
+        $this->actingAs($admin)->patch(route('admin.api-keys.update', $apiKey), [
+            'name' => 'Production client v2',
+            'scopes' => ['read:mods', 'read:mods:index'],
+            'rate_limit' => 240,
+            'expires_at' => null,
+        ])->assertRedirect();
+
+        $this->assertDatabaseHas('api_keys', ['id' => $apiKey->id, 'name' => 'Production client v2', 'rate_limit' => 240]);
+
+        $this->actingAs($admin)->post(route('admin.api-keys.rotate', $apiKey))->assertRedirect()->assertSessionHas('new_api_key');
+        $this->assertNotSame($originalSecret, $apiKey->fresh()->key);
+        $this->assertDatabaseHas('admin_audit_logs', ['subject_id' => (string) $apiKey->id, 'action' => 'api_key.rotated']);
     }
 }

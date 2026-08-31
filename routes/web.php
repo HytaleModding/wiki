@@ -61,6 +61,9 @@ Route::group(['prefix' => '/dashboard', 'middleware' => ['auth', 'verified', 'ac
         Route::patch('/mods/{mod:slug}/suspension', [AdminController::class, 'toggleMod'])->name('mods.suspension');
         Route::post('/mods/{mod:slug}/sync', [AdminController::class, 'syncMod'])->name('mods.sync');
         Route::get('/api-keys', [AdminController::class, 'apiKeys'])->name('api-keys.index');
+        Route::post('/api-keys', [AdminController::class, 'storeApiKey'])->name('api-keys.store');
+        Route::patch('/api-keys/{apiKey}', [AdminController::class, 'updateApiKey'])->name('api-keys.update');
+        Route::post('/api-keys/{apiKey}/rotate', [AdminController::class, 'rotateApiKey'])->name('api-keys.rotate');
         Route::delete('/api-keys/{apiKey}', [AdminController::class, 'revokeKey'])->name('api-keys.revoke');
         Route::get('/audit-log', [AdminController::class, 'auditLog'])->name('audit.index');
     });

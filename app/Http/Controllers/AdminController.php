@@ -14,6 +14,16 @@ use Inertia\Inertia;
 
 class AdminController extends Controller
 {
+    private const API_SCOPES = [
+        '*',
+        'read:mods',
+        'read:mods:*',
+        'read:mods:index',
+        'read:mods:show',
+        'read:mods:search',
+        'read:mods:getPageContent',
+    ];
+
     public function index()
     {
         return Inertia::render('Admin/Overview', [
@@ -153,7 +163,74 @@ class AdminController extends Controller
                 'created_at' => $key->created_at->toISOString(),
             ]);
 
-        return Inertia::render('Admin/ApiKeys', ['keys' => $keys, 'filters' => ['q' => $query]]);
+        return Inertia::render('Admin/ApiKeys', [
+            'keys' => $keys,
+            'filters' => ['q' => $query],
+            'availableScopes' => self::API_SCOPES,
+            'users' => User::query()->orderBy('name')->limit(500)->get(['id', 'name', 'email']),
+            'newKey' => $request->session()->get('new_api_key'),
+        ]);
+    }
+
+    public function storeApiKey(Request $request)
+    {
+        $validated = $request->validate([
+            'user_id' => ['required', 'integer', 'exists:users,id'],
+            'name' => ['required', 'string', 'max:100'],
+            'scopes' => ['required', 'array', 'min:1'],
+            'scopes.*' => ['required', 'string', 'max:100', 'regex:/^[A-Za-z0-9*:_-]+$/'],
+            'rate_limit' => ['required', 'integer', 'min:1', 'max:100000'],
+            'expires_at' => ['nullable', 'date'],
+        ]);
+
+        $plaintext = ApiKey::generate();
+        $apiKey = ApiKey::create([
+            ...$validated,
+            'key' => $plaintext,
+            'expires_at' => filled($validated['expires_at'] ?? null) ? $validated['expires_at'] : null,
+        ]);
+
+        $this->record($request, 'api_key', (string) $apiKey->id, 'api_key.created', "API key {$apiKey->name} was created.", [
+            'user_id' => $apiKey->user_id,
+            'scopes' => $apiKey->scopes,
+            'rate_limit' => $apiKey->rate_limit,
+        ]);
+        $request->session()->flash('new_api_key', ['name' => $apiKey->name, 'key' => $plaintext, 'rotated' => false]);
+
+        return back()->with('success', 'API key created. Copy the secret now.');
+    }
+
+    public function updateApiKey(Request $request, ApiKey $apiKey)
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:100'],
+            'scopes' => ['required', 'array', 'min:1'],
+            'scopes.*' => ['required', 'string', 'max:100', 'regex:/^[A-Za-z0-9*:_-]+$/'],
+            'rate_limit' => ['required', 'integer', 'min:1', 'max:100000'],
+            'expires_at' => ['nullable', 'date'],
+        ]);
+
+        $apiKey->update([
+            ...$validated,
+            'expires_at' => filled($validated['expires_at'] ?? null) ? $validated['expires_at'] : null,
+        ]);
+        $this->record($request, 'api_key', (string) $apiKey->id, 'api_key.updated', "API key {$apiKey->name} was updated.", [
+            'scopes' => $apiKey->scopes,
+            'rate_limit' => $apiKey->rate_limit,
+            'expires_at' => $apiKey->expires_at?->toISOString(),
+        ]);
+
+        return back()->with('success', 'API key settings updated.');
+    }
+
+    public function rotateApiKey(Request $request, ApiKey $apiKey)
+    {
+        $plaintext = ApiKey::generate();
+        $apiKey->update(['key' => $plaintext, 'last_used_at' => null]);
+        $this->record($request, 'api_key', (string) $apiKey->id, 'api_key.rotated', "API key {$apiKey->name} was rotated.");
+        $request->session()->flash('new_api_key', ['name' => $apiKey->name, 'key' => $plaintext, 'rotated' => true]);
+
+        return back()->with('success', 'API key rotated. Copy the new secret now.');
     }
 
     public function auditLog(Request $request)

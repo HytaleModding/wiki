@@ -42,6 +42,9 @@ export default function AuditLog({
             <option value="mod.github_sync_completed">Sync completed</option>
             <option value="mod.github_sync_failed">Sync failed</option>
             <option value="api_key.revoked">API key revoked</option>
+            <option value="api_key.created">API key created</option>
+            <option value="api_key.updated">API key updated</option>
+            <option value="api_key.rotated">API key rotated</option>
           </select>
         </div>
         <CardContent className="p-0">
