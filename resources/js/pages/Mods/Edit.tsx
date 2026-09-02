@@ -316,6 +316,7 @@ export default function EditMod({
                           hint="Changing this also updates the wiki's URL slug."
                         >
                           <Input
+                            name="name"
                             value={form.data.name}
                             onChange={(e) =>
                               form.setData('name', e.target.value)
@@ -331,6 +332,7 @@ export default function EditMod({
                           hint="A short explanation for people browsing your wiki."
                         >
                           <Textarea
+                            name="description"
                             value={form.data.description}
                             onChange={(e) =>
                               form.setData('description', e.target.value)
@@ -353,6 +355,7 @@ export default function EditMod({
                             >
                               <SelectTrigger
                                 id="visibility"
+                                name="visibility"
                                 aria-invalid={Boolean(form.errors.visibility)}
                               >
                                 <SelectValue />
@@ -382,6 +385,7 @@ export default function EditMod({
                                 <Upload className="h-4 w-4" /> Choose image
                                 <input
                                   id="icon"
+                                  name="icon"
                                   type="file"
                                   className="sr-only"
                                   accept="image/*"
