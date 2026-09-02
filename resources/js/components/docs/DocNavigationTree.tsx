@@ -108,10 +108,13 @@ function DocNavigationItem({
           type="button"
           onClick={() => hasChildren && setCollapsed((prev) => !prev)}
           disabled={!hasChildren}
-          className="flex w-full items-start gap-2 rounded-md border border-transparent px-2.5 py-2 text-left text-sm text-muted-foreground/90 transition-colors hover:bg-accent/50 disabled:cursor-default"
+          aria-expanded={hasChildren ? !collapsed : undefined}
+          className="flex w-full items-start gap-2 rounded-lg border border-transparent px-2.5 py-2 text-left text-sm text-muted-foreground/90 transition-colors hover:bg-accent/50 focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:outline-none disabled:cursor-default"
         >
           {leadingIcon}
-          <span className="min-w-0 flex-1 break-words">{page.title}</span>
+          <span className="min-w-0 flex-1 [overflow-wrap:anywhere]">
+            {page.title}
+          </span>
           {draftBadge}
         </button>
         {!collapsed && childTree}
@@ -123,14 +126,17 @@ function DocNavigationItem({
     <div>
       <a
         href={`/mod/${modSlug}/${page.slug}`}
-        className={`group flex items-start gap-2 rounded-md border px-2.5 py-2 text-sm transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:outline-none ${
+        aria-current={isActive ? 'page' : undefined}
+        className={`group flex items-start gap-2 rounded-lg border px-2.5 py-2 text-sm transition-colors focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:outline-none ${
           isActive
             ? 'border-primary/15 bg-primary/10 font-medium text-primary'
             : 'border-transparent text-muted-foreground hover:bg-accent/60 hover:text-foreground'
         }`}
       >
         {leadingIcon}
-        <span className="min-w-0 flex-1 break-words">{page.title}</span>
+        <span className="min-w-0 flex-1 [overflow-wrap:anywhere]">
+          {page.title}
+        </span>
         {draftBadge}
       </a>
       {childTree}
