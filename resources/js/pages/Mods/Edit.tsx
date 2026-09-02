@@ -150,7 +150,8 @@ export default function EditMod({
 
   const save = (event: React.FormEvent) => {
     event.preventDefault();
-    form.patch(`/dashboard/mods/${mod.slug}`, { forceFormData: true });
+    form.transform((data) => ({ ...data, _method: 'patch' }));
+    form.post(`/dashboard/mods/${mod.slug}`, { forceFormData: true });
   };
   const saveDomain = () =>
     domainForm.patch(`/dashboard/mods/${mod.slug}/domain`);
@@ -348,6 +349,7 @@ export default function EditMod({
                             hint="Who can discover and visit this wiki."
                           >
                             <Select
+                              name="visibility"
                               value={form.data.visibility}
                               onValueChange={(
                                 value: 'public' | 'private' | 'unlisted',
@@ -355,7 +357,6 @@ export default function EditMod({
                             >
                               <SelectTrigger
                                 id="visibility"
-                                name="visibility"
                                 aria-invalid={Boolean(form.errors.visibility)}
                               >
                                 <SelectValue />
