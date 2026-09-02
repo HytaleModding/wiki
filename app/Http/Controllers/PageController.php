@@ -478,6 +478,12 @@ class PageController extends Controller
         $page = $mod->pages()
             ->where('is_index', true)
             ->where('published', true)
+            ->first();
+
+        $page ??= $mod->pages()
+            ->where('published', true)
+            ->orderBy('order_index')
+            ->orderBy('created_at')
             ->firstOrFail();
 
         return $this->publicShow($mod, $page, $request);

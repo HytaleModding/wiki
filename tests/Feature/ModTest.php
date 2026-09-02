@@ -224,6 +224,32 @@ class ModTest extends TestCase
         );
     }
 
+    public function test_public_mod_uses_first_published_page_when_no_index_page_exists()
+    {
+        $owner = User::factory()->create();
+        $mod = Mod::factory()->public()->create(['owner_id' => $owner->id]);
+        Page::factory()->published()->create([
+            'mod_id' => $mod->id,
+            'title' => 'Later page',
+            'order_index' => 2,
+            'is_index' => false,
+        ]);
+        $firstPage = Page::factory()->published()->create([
+            'mod_id' => $mod->id,
+            'title' => 'Fallback homepage',
+            'order_index' => 1,
+            'is_index' => false,
+        ]);
+
+        $response = $this->get(route('public.mod', $mod));
+
+        $response->assertOk();
+        $response->assertInertia(fn (Assert $page) => $page
+            ->component('Public/Page')
+            ->where('page.id', $firstPage->id)
+        );
+    }
+
     public function test_public_mod_page_does_not_expose_unsafe_custom_css()
     {
         $owner = User::factory()->create();
