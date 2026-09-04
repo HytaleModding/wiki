@@ -5,6 +5,7 @@ export type AppLayoutProps = {
   children: ReactNode;
   breadcrumbs?: BreadcrumbItem[];
   contentWidth?: 'default' | 'full';
+  editorial?: boolean;
 };
 
 export type AuthLayoutProps = {

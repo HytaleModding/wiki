@@ -9,9 +9,15 @@ export default function AppNavbarLayout({
   children,
   breadcrumbs = [],
   contentWidth = 'default',
+  editorial = false,
 }: AppLayoutProps) {
   return (
-    <div className="flex min-h-screen flex-col bg-background font-sans">
+    <div
+      className={cn(
+        'flex min-h-screen flex-col bg-background font-sans',
+        editorial && 'dashboard-shell',
+      )}
+    >
       <AppNavbar />
       <main
         className={cn(

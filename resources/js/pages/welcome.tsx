@@ -1,25 +1,20 @@
-import { SiGithub } from '@icons-pack/react-simple-icons';
 import { Link, usePage } from '@inertiajs/react';
 import {
   ArrowRight,
-  ArrowUpRight,
   BookOpen,
   Braces,
   Check,
   FileText,
   GitBranch,
   Globe2,
-  Moon,
   Palette,
-  Sun,
   UsersRound,
 } from 'lucide-react';
+import AppNavbar from '@/components/app-navbar';
 import HytaleModdingLogo from '@/components/hytale-modding-logo';
 import SeoMeta from '@/components/SeoMeta';
 import { Button } from '@/components/ui/button';
-import { UserMenuContent } from '@/components/user-menu-content';
-import { useAppearance } from '@/hooks/use-appearance';
-import { dashboard, home, login, register } from '@/routes';
+import { dashboard, login, register } from '@/routes';
 import mods from '@/routes/mods';
 import publicRoutes from '@/routes/public';
 import type { SharedData } from '@/types';
@@ -62,22 +57,6 @@ const features = [
     icon: Braces,
   },
 ];
-
-function ThemeToggle() {
-  const { resolvedAppearance, updateAppearance } = useAppearance();
-  const isDark = resolvedAppearance === 'dark';
-
-  return (
-    <button
-      type="button"
-      onClick={() => updateAppearance(isDark ? 'light' : 'dark')}
-      className="inline-flex size-9 items-center justify-center rounded-full border border-border/80 text-muted-foreground transition-colors hover:border-foreground/20 hover:bg-accent hover:text-foreground"
-      aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
-    >
-      {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
-    </button>
-  );
-}
 
 function WikiPreview() {
   return (
@@ -204,62 +183,7 @@ export default function Welcome({
       />
 
       <div className="wiki-home min-h-screen overflow-hidden bg-background text-foreground">
-        <header className="sticky top-0 z-40 border-b border-border/80 bg-background/85 backdrop-blur-xl">
-          <nav className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-5 sm:px-8">
-            <div className="flex items-center gap-8">
-              <Link
-                href={home()}
-                className="flex items-center gap-2.5 transition-opacity hover:opacity-80"
-              >
-                <HytaleModdingLogo variant="icon" size="md" />
-                <span className="text-[15px] font-semibold tracking-tight">
-                  HytaleModding{' '}
-                  <span className="text-muted-foreground">Wiki</span>
-                </span>
-              </Link>
-
-              <div className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
-                <Link
-                  href={publicRoutes.mods()}
-                  className="transition-colors hover:text-foreground"
-                >
-                  Browse wikis
-                </Link>
-                <a
-                  href="https://hytalemodding.dev"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1 transition-colors hover:text-foreground"
-                >
-                  HytaleModding <ArrowUpRight className="size-3.5" />
-                </a>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <ThemeToggle />
-              {auth.user ? (
-                <>
-                  <Button asChild size="sm" className="hidden sm:inline-flex">
-                    <Link href={dashboard()}>Dashboard</Link>
-                  </Button>
-                  <UserMenuContent />
-                </>
-              ) : (
-                <>
-                  <Button asChild variant="ghost" size="sm">
-                    <Link href={login()}>Log in</Link>
-                  </Button>
-                  {canRegister && (
-                    <Button asChild size="sm" className="hidden sm:inline-flex">
-                      <Link href={register()}>Create a wiki</Link>
-                    </Button>
-                  )}
-                </>
-              )}
-            </div>
-          </nav>
-        </header>
+        <AppNavbar canRegister={canRegister} />
 
         <main>
           <section className="wiki-hero relative px-5 pt-24 pb-12 text-center sm:px-8 sm:pt-32 lg:pt-40">

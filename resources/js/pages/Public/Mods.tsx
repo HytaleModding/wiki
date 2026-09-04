@@ -67,7 +67,7 @@ export default function PublicMods({ mods, query }: Props) {
       <SeoMeta title="Browse Mods" description={description} />
 
       <div className="public-docs flex min-h-screen flex-col bg-background text-foreground">
-        <AppNavbar brandHref="/" publicMode />
+        <AppNavbar brandHref="/" />
 
         <main className="mx-auto w-full max-w-[90rem] flex-1 px-5 py-10 sm:px-8 sm:py-16">
           <div className="relative mb-14 border-b border-border/70 pb-12 sm:pb-16">

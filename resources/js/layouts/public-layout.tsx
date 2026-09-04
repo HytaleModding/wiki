@@ -3,7 +3,6 @@ import { useEffect } from 'react';
 import { Toaster } from 'sileo';
 
 import AppNavbar from '@/components/app-navbar';
-import ModNavbar from '@/components/mod-navbar';
 import PublicFooter from '@/components/public-footer';
 
 interface PublicLayoutProps {
@@ -54,11 +53,7 @@ export default function PublicLayout({
 
   return (
     <div className="public-docs flex min-h-screen flex-col bg-background">
-      {modName && modSlug ? (
-        <ModNavbar modSlug={modSlug} />
-      ) : (
-        <AppNavbar brandHref="/" publicMode />
-      )}
+      <AppNavbar brandHref="/" />
 
       {modName && modSlug && (
         <section className="border-b border-border/70 bg-[radial-gradient(circle_at_85%_0%,color-mix(in_oklab,var(--color-primary)_15%,transparent),transparent_28rem)]">
