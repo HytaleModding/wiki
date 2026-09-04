@@ -23,6 +23,7 @@ class CreateNewUser implements CreatesNewUsers
             ...$this->profileRules(),
             'password' => $this->passwordRules(),
             'username' => 'required|string|max:255|unique:users|alpha_dash',
+            'terms' => ['required', 'accepted'],
         ])->validate();
 
         return User::create([

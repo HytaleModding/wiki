@@ -19,6 +19,15 @@ class AuthenticationTest extends TestCase
         $response->assertOk();
     }
 
+    public function test_passkey_login_options_are_available_to_guests()
+    {
+        $response = $this->getJson(route('passkey.login-options'));
+
+        $response
+            ->assertOk()
+            ->assertJsonStructure(['options' => ['challenge', 'rpId']]);
+    }
+
     public function test_users_can_authenticate_using_the_login_screen()
     {
         $user = User::factory()->create();

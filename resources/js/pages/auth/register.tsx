@@ -2,11 +2,13 @@ import { Form, Head } from '@inertiajs/react';
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import AuthLayout from '@/layouts/auth-layout';
 import { login } from '@/routes';
+import { privacy, terms } from '@/routes/legal';
 import { store } from '@/routes/register';
 
 export default function Register() {
@@ -96,10 +98,28 @@ export default function Register() {
                 <InputError message={errors.password_confirmation} />
               </div>
 
+              <div className="flex items-start gap-3">
+                <Checkbox id="terms" name="terms" required tabIndex={6} />
+                <div className="grid gap-1">
+                  <Label htmlFor="terms" className="leading-5">
+                    I agree to the{' '}
+                    <TextLink href={terms()} target="_blank">
+                      Terms of Service
+                    </TextLink>{' '}
+                    and{' '}
+                    <TextLink href={privacy()} target="_blank">
+                      Privacy Policy
+                    </TextLink>
+                    .
+                  </Label>
+                  <InputError message={errors.terms} />
+                </div>
+              </div>
+
               <Button
                 type="submit"
                 className="mt-2 w-full"
-                tabIndex={5}
+                tabIndex={7}
                 data-test="register-user-button"
               >
                 {processing && <Spinner />}
@@ -109,7 +129,7 @@ export default function Register() {
 
             <div className="text-center text-sm text-muted-foreground">
               Already have an account?{' '}
-              <TextLink href={login()} tabIndex={6}>
+              <TextLink href={login()} tabIndex={8}>
                 Log in
               </TextLink>
             </div>

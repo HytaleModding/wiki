@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Settings\PasskeyController;
 use App\Http\Controllers\Settings\PasswordController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\TwoFactorAuthenticationController;
@@ -29,4 +30,8 @@ Route::middleware(['auth', 'verified', 'account.active'])->group(function () {
 
     Route::get('settings/two-factor', [TwoFactorAuthenticationController::class, 'show'])
         ->name('two-factor.show');
+
+    Route::get('settings/passkeys', [PasskeyController::class, 'show'])
+        ->middleware('password.confirm')
+        ->name('passkeys.show');
 });
